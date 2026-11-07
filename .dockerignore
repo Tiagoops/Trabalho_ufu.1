@@ -1,0 +1,10 @@
+.git
+.vscode
+__pycache__
+*.py[cod]
+.venv
+venv
+ativos_db.txt*
+*.csv
+test_*.py
+RESULTADO_TESTES*.txt

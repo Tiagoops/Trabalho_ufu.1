@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+/ativos_db.txt
+/ativos_db.txt.tmp
+/ativos_db.txt.*.tmp
+/ativos_db.txt.*.bak
+/relatorio_vulnerabilidades.csv

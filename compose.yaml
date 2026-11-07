@@ -1,0 +1,10 @@
+services:
+  inventario:
+    build: .
+    image: trabalho-ufu:local
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: .
+        target: /app

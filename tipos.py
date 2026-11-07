@@ -65,4 +65,3 @@ def rotulo_severidade(severidade: Severidade) -> str:
 def rotulo_status(status: StatusVulnerabilidade) -> str:
     """Retorna o texto amigável correspondente a um StatusVulnerabilidade."""
     return _ROTULOS_STATUS[status]
-

@@ -8,9 +8,18 @@ Requisito 3) e se reconstruir a partir de um dict (para leitura da base).
 from __future__ import annotations  # garante compatibilidade com Python 3.8+
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from tipos import TipoAtivo, Severidade, StatusVulnerabilidade, rotulo_severidade, rotulo_status
+from cores import colorir_severidade, colorir_status
+
+
+def _validar_textos(d: dict, campos) -> None:
+    if not isinstance(d, dict):
+        raise ValueError("o registro deve ser um objeto JSON")
+    for campo in campos:
+        if not isinstance(d[campo], str) or not d[campo].strip():
+            raise ValueError(f"campo '{campo}' deve ser texto não vazio")
 
 
 @dataclass
@@ -34,6 +43,7 @@ class Vulnerabilidade:
 
     @staticmethod
     def from_dict(d: dict) -> "Vulnerabilidade":
+        _validar_textos(d, ("descricao", "categoria", "severidade", "status"))
         return Vulnerabilidade(
             descricao=d["descricao"],
             categoria=d["categoria"],
@@ -41,11 +51,24 @@ class Vulnerabilidade:
             status=StatusVulnerabilidade[d["status"]],
         )
 
-    def __str__(self) -> str:
-        return (
-            f"  - [{rotulo_severidade(self.severidade)}] {self.descricao} "
-            f"(Categoria: {self.categoria} | Status: {rotulo_status(self.status)})"
+    def formatar(self, numero: Optional[int] = None) -> str:
+        """
+        Texto de exibição. Se 'numero' for informado, a linha começa com
+        '[n]' (usado nas telas em que o usuário precisa escolher uma
+        vulnerabilidade da lista); caso contrário, começa com um '-'.
+        """
+        prefixo = f"  [{numero}] " if numero is not None else "  - "
+        severidade_txt = colorir_severidade(
+            self.severidade.name, f"[{rotulo_severidade(self.severidade)}]"
         )
+        status_txt = colorir_status(self.status.name, rotulo_status(self.status))
+        return (
+            f"{prefixo}{severidade_txt} {self.descricao} "
+            f"(Categoria: {self.categoria} | Status: {status_txt})"
+        )
+
+    def __str__(self) -> str:
+        return self.formatar()
 
 
 @dataclass
@@ -74,6 +97,11 @@ class Ativo:
 
     @staticmethod
     def from_dict(d: dict) -> "Ativo":
+        _validar_textos(d, ("hostname", "responsavel", "setor", "tipo"))
+        if type(d["id_ativo"]) is not int or d["id_ativo"] < 1:
+            raise ValueError("id_ativo deve ser um inteiro positivo")
+        if not isinstance(d.get("vulnerabilidades", []), list):
+            raise ValueError("vulnerabilidades deve ser uma lista")
         return Ativo(
             id_ativo=d["id_ativo"],
             hostname=d["hostname"],
