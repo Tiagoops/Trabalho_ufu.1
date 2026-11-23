@@ -18,10 +18,10 @@ import main
 from banco_dados import BancoDeDados
 from modelos import Ativo, Vulnerabilidade
 from tipos import TipoAtivo
-from test_banco_dados import novo_ativo
+from tests.test_banco_dados import novo_ativo
 
 
-RAIZ = Path(__file__).resolve().parent
+RAIZ = Path(__file__).resolve().parents[1]
 VETOR_ALTO = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
 VETOR_MENOR = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
 
@@ -383,7 +383,7 @@ class TestExecucaoIsolada(unittest.TestCase):
         return resultado
 
     def test_sintaxe_compilacao_e_gramatica_python311(self):
-        for arquivo in RAIZ.glob("*.py"):
+        for arquivo in (*RAIZ.glob("*.py"), *(RAIZ / "tests").glob("*.py")):
             with self.subTest(arquivo=arquivo.name):
                 texto = arquivo.read_text(encoding="utf-8")
                 arvore = ast.parse(texto, filename=arquivo.name, feature_version=(3, 11))

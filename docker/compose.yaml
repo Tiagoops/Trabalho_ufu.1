@@ -1,10 +1,12 @@
 services:
   inventario:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     image: trabalho-ufu:local
     stdin_open: true
     tty: true
     volumes:
       - type: bind
-        source: .
+        source: ..
         target: /app

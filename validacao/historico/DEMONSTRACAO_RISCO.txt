@@ -1,0 +1,254 @@
+DEMONSTRACAO REAL DO TERMINAL — 16/11/2026
+Dados ficticios em pasta temporaria; nenhuma base real utilizada.
+
+Cenario: ativos 10,40,99 com severidades 4,6,8; 10 depende de 40 (0.2), 40 depende de 99 (0.5).
+Esperado: b=[4,6,8], x=[6,10,8]; ranking 40,99,10.
+
+Bem-vindo ao Sistema de Inventário de Segurança!
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+--- Cadastro de novo ativo de TI ---
+ID único do ativo (número inteiro): Nome/Hostname do ativo: Responsável: Setor/Localização: Tipo de ativo:
+  1 - NOTEBOOK
+  2 - SERVIDOR
+  3 - ROTEADOR
+  4 - SOFTWARE_LICENCIADO
+  5 - APLICACAO_WEB
+  6 - BANCO_DE_DADOS
+  7 - IMPRESSORA_REDE
+  8 - ESTACAO_TRABALHO
+Escolha o código da opção: Deseja cadastrar vulnerabilidades iniciais já conhecidas? (s/n):   Descrição da vulnerabilidade:   Categoria (ex.: senha fraca, software desatualizado, exposição de serviço):   Severidade (0 a 10):   Adicionar outra vulnerabilidade a este ativo? (s/n): 
+Ativo 'Aplicacao' cadastrado com sucesso (ID 10).
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+--- Cadastro de novo ativo de TI ---
+ID único do ativo (número inteiro): Nome/Hostname do ativo: Responsável: Setor/Localização: Tipo de ativo:
+  1 - NOTEBOOK
+  2 - SERVIDOR
+  3 - ROTEADOR
+  4 - SOFTWARE_LICENCIADO
+  5 - APLICACAO_WEB
+  6 - BANCO_DE_DADOS
+  7 - IMPRESSORA_REDE
+  8 - ESTACAO_TRABALHO
+Escolha o código da opção: Deseja cadastrar vulnerabilidades iniciais já conhecidas? (s/n):   Descrição da vulnerabilidade:   Categoria (ex.: senha fraca, software desatualizado, exposição de serviço):   Severidade (0 a 10):   Adicionar outra vulnerabilidade a este ativo? (s/n): 
+Ativo 'Servidor' cadastrado com sucesso (ID 40).
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+--- Cadastro de novo ativo de TI ---
+ID único do ativo (número inteiro): Nome/Hostname do ativo: Responsável: Setor/Localização: Tipo de ativo:
+  1 - NOTEBOOK
+  2 - SERVIDOR
+  3 - ROTEADOR
+  4 - SOFTWARE_LICENCIADO
+  5 - APLICACAO_WEB
+  6 - BANCO_DE_DADOS
+  7 - IMPRESSORA_REDE
+  8 - ESTACAO_TRABALHO
+Escolha o código da opção: Deseja cadastrar vulnerabilidades iniciais já conhecidas? (s/n):   Descrição da vulnerabilidade:   Categoria (ex.: senha fraca, software desatualizado, exposição de serviço):   Severidade (0 a 10):   Adicionar outra vulnerabilidade a este ativo? (s/n): 
+Ativo 'Banco' cadastrado com sucesso (ID 99).
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Cadastrar | 2 - Editar peso | 3 - Remover | 4 - Listar dependências
+Escolha: ID do ativo dependente: ID do ativo do qual ele depende: Peso (0 inclusive a 1 exclusivo): Dependência gravada com sucesso.
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Cadastrar | 2 - Editar peso | 3 - Remover | 4 - Listar dependências
+Escolha: ID do ativo dependente: ID do ativo do qual ele depende: Peso (0 inclusive a 1 exclusivo): Dependência gravada com sucesso.
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.7089256; resíduo relativo=2.41e-17
+Ordem dos ativos (linhas de M, linhas/colunas de A, b e x): (10, 40, 99)
+Ordem das ocorrências (colunas de M e vetor v): ('68eafe6d-7ae8-4a6a-a6a5-69dc52e3d228', '699b5668-f911-4bd9-b5b9-2867c34653e9', 'd2f444e3-e8e3-4695-a065-273c24fc3c66')
+M (forma (3, 3)): [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+v (forma (3,)): [4.0, 6.0, 8.0]
+A (forma (3, 3)): [[0.0, 0.2, 0.0], [0.0, 0.0, 0.5], [0.0, 0.0, 0.0]]
+b (forma (3,)): [4.0, 6.0, 8.0]
+x (forma (3,)): [6.0, 10.0, 8.0]
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.7089256; resíduo relativo=2.41e-17
+Ativo 40: risco direto=6; propagado=10
+Ativo 99: risco direto=8; propagado=8
+Ativo 10: risco direto=4; propagado=6
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.7089256; resíduo relativo=2.41e-17
+ID do ativo: Ativo 10: risco direto=4; propagado=6
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: Encerrando o programa. Até logo!
+
+--- NOVA EXECUCAO LENDO O JSON PERSISTIDO ---
+Bem-vindo ao Sistema de Inventário de Segurança!
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.7089256; resíduo relativo=2.41e-17
+Ativo 40: risco direto=6; propagado=10
+Ativo 99: risco direto=8; propagado=8
+Ativo 10: risco direto=4; propagado=6
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: Encerrando o programa. Até logo!
+
+VERIFICACAO: resultado preservado apos reiniciar; consultas nao modificaram o JSON.

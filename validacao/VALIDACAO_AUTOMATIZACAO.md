@@ -1,3 +1,5 @@
+> Documento histórico. Para os comandos atuais, consulte o [README](../README.md). As evidências originais estão em `historico/`.
+
 # Validação da automatização e exemplos CVE — 18/11/2026
 
 ## Resultado
@@ -88,10 +90,10 @@ ID: `sha256:8d27420b631cfcb7d6f9c2d8c70e97adba884503c12651c6b68072ddd7977222`.
 
 ## Evidências e preservação
 
-- `RESULTADO_TESTES_AUTOMATIZACAO.txt`: suíte Windows completa.
-- `RESULTADO_TESTES_DOCKER_AUTOMATIZACAO.txt`: suíte Docker completa.
-- `DEMONSTRACAO_AUTOMATIZACAO.txt`: execução real pelo menu.
-- `DEMONSTRACAO_DOCKER_AUTOMATIZACAO.txt`: imagem sem pasta montada.
+- `historico/RESULTADO_TESTES_AUTOMATIZACAO.txt`: suíte Windows completa.
+- `historico/RESULTADO_TESTES_DOCKER_AUTOMATIZACAO.txt`: suíte Docker completa.
+- `historico/DEMONSTRACAO_AUTOMATIZACAO.txt`: execução real pelo menu.
+- `historico/DEMONSTRACAO_DOCKER_AUTOMATIZACAO.txt`: imagem sem pasta montada.
 - `exemplos/ativos_teste.json`: biblioteca de exemplo.
 - `exemplos/referencias_cve.json`: fontes e vetores verificados.
 

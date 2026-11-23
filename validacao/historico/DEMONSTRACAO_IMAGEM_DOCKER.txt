@@ -1,0 +1,37 @@
+Bem-vindo ao Sistema de Inventário de Segurança!
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1; resíduo relativo=0
+Nenhum ativo cadastrado.
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Gerenciar dependências e pesos
+12 - Matrizes, riscos e ranking
+0 - Sair
+Escolha uma opção: Encerrando o programa. Até logo!

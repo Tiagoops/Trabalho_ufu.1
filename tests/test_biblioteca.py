@@ -18,7 +18,7 @@ from servico_risco import analisar_inventario
 from tipos import TipoAtivo
 
 
-RAIZ = Path(__file__).resolve().parent
+RAIZ = Path(__file__).resolve().parents[1]
 EXEMPLO = RAIZ / "exemplos" / "ativos_teste.json"
 
 

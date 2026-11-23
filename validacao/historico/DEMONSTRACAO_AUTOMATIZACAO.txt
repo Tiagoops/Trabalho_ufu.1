@@ -1,0 +1,173 @@
+EXECUCAO REAL --demo — 18/11/2026
+Ativos e falhas ficticios; CVEs reais consultados na NVD.
+
+DEMONSTRAÇÃO TEMPORÁRIA: ativos e falhas fictícios; referências CVE reais.
+As alterações nesta demonstração são descartadas ao sair; a base real não é usada.
+Bem-vindo ao Sistema de Inventário de Segurança!
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+--- Lista de todos os ativos cadastrados ---
+ID 10   | demo-aplicacao       | APLICACAO_WEB        | 1 vulnerabilidade(s)
+ID 20   | demo-servidor-tls    | SERVIDOR             | 1 vulnerabilidade(s)
+ID 30   | demo-transferencia   | APLICACAO_WEB        | 1 vulnerabilidade(s)
+ID 40   | demo-estacao         | ESTACAO_TRABALHO     | 0 vulnerabilidade(s)
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+--- Visualização de vulnerabilidades ---
+ID do ativo: 
+Ativo: demo-aplicacao (ID 10)
+  [1] [Severidade: 10] CVE-2021-44228 - Log4Shell (Apache Log4j Core 2.14.1 no cenario ficticio) (Categoria: Vulnerabilidade conhecida de software | ID: demo-CVE-2021-44228 | Origem: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H)
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+1 - Cadastrar | 2 - Editar peso | 3 - Remover | 4 - Listar dependências
+Escolha: 10 depende de 20; peso=0.4
+  Serviços: 2/5
+  Indisponibilidade observada: 30 min / 120 min = 25% (Simulacao ficticia para demonstracao)
+10 depende de 30; peso=0.2
+  Serviços: 1/5
+  Indisponibilidade observada: não medida
+20 depende de 30; peso=0.5
+  Serviços: 1/2
+  Indisponibilidade observada: não medida
+40 depende de 10; peso=0.25
+  Serviços: 1/4
+  Indisponibilidade observada: não medida
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Risco próprio = direto (b); risco efetivo = propagado (x).
+Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.9765568; resíduo relativo=0
+Ordem dos ativos (linhas de M, linhas/colunas de A, b e x): (10, 20, 30, 40)
+Ordem das ocorrências (colunas de M e vetor v): ('demo-CVE-2014-0160', 'demo-CVE-2021-44228', 'demo-CVE-2023-34362')
+M (forma (4, 3)): [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]
+v (forma (3,)): [7.5, 10.0, 9.8]
+A (forma (4, 4)): [[0.0, 0.4, 0.2, 0.0], [0.0, 0.0, 0.5, 0.0], [0.0, 0.0, 0.0, 0.0], [0.25, 0.0, 0.0, 0.0]]
+b (forma (4,)): [10.0, 7.5, 9.8, 0.0]
+x (forma (4,)): [16.92, 12.4, 9.8, 4.23]
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Risco próprio = direto (b); risco efetivo = propagado (x).
+Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.9765568; resíduo relativo=0
+Ativo 10: risco direto=10; propagado=16.92
+Ativo 20: risco direto=7.5; propagado=12.4
+Ativo 30: risco direto=9.8; propagado=9.8
+Ativo 40: risco direto=0; propagado=4.23
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Risco próprio = direto (b); risco efetivo = propagado (x).
+Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.9765568; resíduo relativo=0
+ID do ativo: Ativo 40: risco direto=0; propagado=4.23
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: Encerrando o programa. Até logo!
+
+Base real e arquivo de exemplos preservados byte a byte.

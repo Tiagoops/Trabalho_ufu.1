@@ -41,7 +41,7 @@ A base padrão é `ativos_db.txt`, ao lado de `banco_dados.py`, independentement
 É necessário ter o engine Docker em execução. Na raiz do projeto, construa e execute a imagem independente, sem bind mount ou volume:
 
 ```bash
-docker build -t trabalho-ufu:demo-check .
+docker build -f docker/Dockerfile -t trabalho-ufu:demo-check .
 docker run --rm -it trabalho-ufu:demo-check python main.py --demo
 ```
 
@@ -50,7 +50,7 @@ O menu aparece no terminal; `0` encerra. A imagem instala as dependências fixad
 Valide o Compose separadamente, também com dados fictícios:
 
 ```bash
-docker compose run --build --rm inventario python main.py --demo
+docker compose -f docker/compose.yaml run --build --rm inventario python main.py --demo
 ```
 
 O Compose monta a pasta do projeto em `/app`, sobrepondo o conteúdo da imagem. Esse teste não comprova que a imagem independente está completa. Com `--demo`, a base fica em um diretório temporário do contêiner e é descartada ao sair. Exportações CSV para `/app` persistem na pasta montada, inclusive no modo de demonstração.
@@ -58,7 +58,7 @@ O Compose monta a pasta do projeto em `/app`, sobrepondo o conteúdo da imagem. 
 Para usar a base persistente pelo Compose:
 
 ```bash
-docker compose run --build --rm inventario
+docker compose -f docker/compose.yaml run --build --rm inventario
 ```
 
 Nesse modo, `/app/ativos_db.txt`, seus backups e os CSV exportados para `/app` ficam na pasta do projeto no computador. Use **um escritor por base**, incluindo execuções locais e contêineres. Não foram alterados os volumes nem o modo de operação do Compose.
@@ -98,7 +98,9 @@ banco_dados.py          CRUD, índices, integridade e escrita atômica
 migracao.py             prévia, backup, confirmação e retomada
 servico_risco.py         correspondência entre IDs e posições das matrizes
 matematica/risco.py      validação matemática e solução do sistema
-test_*.py               unittest: regressão, matemática, CLI e falhas
+tests/                  unittest: regressão, matemática, CLI e falhas
+docker/                 Dockerfile e configuração Compose
+validacao/              relatórios e evidências históricas
 ```
 
 O JSON continua sendo uma **lista de ativos**. Cada ativo guarda `id_ativo`, `hostname`, `responsavel`, `setor`, `tipo`, `vulnerabilidades` e `dependencias`. Outros campos existentes no ativo são preservados.
@@ -148,7 +150,7 @@ No cadastro/edição, escolha responder as onze métricas Base CVSS 4.0 ou colar
 
 O questionário mostra **CAMPO** e **O QUE INFORMAR** para cada métrica, com o significado das letras aceitas. `N` significa nenhum, não desconhecido. As explicações seguem a [especificação CVSS 4.0 da FIRST](https://www.first.org/cvss/v4.0/specification-document). Ao concluir, mostra o vetor, a severidade calculada e sua relação com `v`. A opção **11** explica os critérios de serviços/indisponibilidade; em **12 → 1**, cada matriz/vetor traz **CAMPO**, **O QUE INFORMAR** e **O QUE CALCULAR**, junto dos valores obtidos. As fórmulas e os dados existentes permanecem iguais.
 
-A captura local `DEMONSTRACAO_GUIA_CVSS.txt` (não rastreada no Git) mostra o questionário preenchido com um cenário técnico fictício e a consulta das matrizes da demonstração temporária. Registro histórico da verificação desta apresentação em 18/11/2026: **134 testes locais aprovados**, severidade de referência **9,9** e risco efetivo dos exemplos **[16,92; 12,4; 9,8; 4,23]**, sem alteração da base real. A imagem Docker não foi reconstruída nem testada novamente nesta alteração; o serviço estava desligado.
+A captura [DEMONSTRACAO_GUIA_CVSS.txt](validacao/historico/DEMONSTRACAO_GUIA_CVSS.txt) mostra o questionário preenchido com um cenário técnico fictício e a consulta das matrizes da demonstração temporária. Registro histórico da verificação desta apresentação em 18/11/2026: **134 testes locais aprovados**, severidade de referência **9,9** e risco efetivo dos exemplos **[16,92; 12,4; 9,8; 4,23]**, sem alteração da base real. A imagem Docker não foi reconstruída nem testada novamente nesta alteração; o serviço estava desligado.
 
 O valor é uma avaliação Base derivada das características fornecidas, não certificação do equipamento nem detecção automática de vulnerabilidades. CVSS Base mede severidade; o risco do inventário continua sendo calculado pelas matrizes. A CLI informa quando existem cadastros anteriores sem vetor/fonte. Eles são preservados, e sua reavaliação exige dados técnicos; não são apagados nem convertidos automaticamente.
 
@@ -203,7 +205,7 @@ Conferência manual: x30=9,8; x20=7,5+0,5×9,8=12,4; x10=10+0,4×12,4+0,2×9,8=1
 Os IDs das ocorrências são ordenados; Heartbleed vem antes de Log4Shell nas colunas. Por isso M não é necessariamente uma identidade: a correspondência dos IDs é exibida no menu **12**, junto às matrizes. A demonstração abre também no Docker:
 
 ```bash
-docker compose run --build --rm inventario python main.py --demo
+docker compose -f docker/compose.yaml run --build --rm inventario python main.py --demo
 ```
 
 ## Modelo matemático
@@ -294,10 +296,12 @@ Linux ou contêiner com os testes montados pelo Compose (a imagem independente n
 
 ```bash
 python -B -m unittest discover -v
-docker compose run --rm -T inventario python -B -m unittest discover -v
+docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -v
 ```
 
-A suíte usa arquivos temporários e dados fictícios. Os 65 testes anteriores foram mantidos e adaptados às mudanças intencionais: severidade numérica, retirada de status, coluna CSV e Python mínimo. Os testes adicionais cobrem validação matemática, ciclos, mapeamento de IDs, CRUD de dependências, rollback, confirmação, backups e retomada da migração. `VALIDACAO_RISCO.md` preserva os resultados de 16/11. `VALIDACAO_AUTOMATIZACAO.md` também contém registros históricos e exemplos CVE; esses documentos não substituem uma nova execução da suíte nem validam a imagem atual.
+A suíte usa arquivos temporários e dados fictícios. Os 65 testes anteriores foram mantidos e adaptados às mudanças intencionais: severidade numérica, retirada de status, coluna CSV e Python mínimo. Os testes adicionais cobrem validação matemática, ciclos, mapeamento de IDs, CRUD de dependências, rollback, confirmação, backups e retomada da migração. [VALIDACAO_RISCO.md](validacao/VALIDACAO_RISCO.md) preserva os resultados de 16/11. [VALIDACAO_AUTOMATIZACAO.md](validacao/VALIDACAO_AUTOMATIZACAO.md) também contém registros históricos e exemplos CVE; esses documentos não substituem uma nova execução da suíte nem validam a imagem atual.
+
+Os arquivos em `validacao/historico/` preservam saídas e manifestos das versões anteriores. Os caminhos e hashes desses manifestos descrevem o estado original; não são prova de integridade da organização atual.
 
 ## Referências
 

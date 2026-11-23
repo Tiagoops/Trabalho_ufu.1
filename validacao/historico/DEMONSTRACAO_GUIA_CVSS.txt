@@ -1,0 +1,167 @@
+QUESTIONARIO: CENARIO TECNICO FICTICIO
+
+1 - Responder critérios técnicos CVSS 4.0 | 2 - Colar vetor Base CVSS 3.1/4.0
+Escolha: 1
+
+Descreva a vulnerabilidade com base em evidências técnicas, não apenas no tipo do ativo.
+Informe uma das letras; a severidade será calculada, sem pedir uma nota manual.
+N significa nenhum, nunca desconhecido. Se faltarem dados, cancele com Ctrl+C.
+Se houver vetor publicado, use a opção 2 ao iniciar novamente o cadastro.
+SC/SI/SA descrevem impactos fora do sistema vulnerável; não são os pesos de dependência de A.
+
+CAMPO: AV — Vetor de ataque: por onde a falha pode ser explorada
+O QUE INFORMAR:
+  N = rede remota
+  A = rede adjacente (ex.: mesma rede local)
+  L = acesso local ao ambiente
+  P = contato físico com o equipamento
+AV: N
+
+CAMPO: AC — Complexidade: necessidade de contornar proteções contra o ataque
+O QUE INFORMAR:
+  L = baixa, sem contornar essas proteções
+  H = alta, exige contorná-las
+AC: L
+
+CAMPO: AT — Pré-condições: condições específicas de execução ou implantação
+O QUE INFORMAR:
+  N = nenhuma condição especial
+  P = depende dessas condições
+AT: N
+
+CAMPO: PR — Privilégios: permissões que o atacante precisa ter antes do ataque
+O QUE INFORMAR:
+  N = nenhuma
+  L = permissões básicas
+  H = permissões elevadas/administrativas
+PR: N
+
+CAMPO: UI — Interação: participação de outra pessoa para explorar a falha
+O QUE INFORMAR:
+  N = dispensa interação
+  P = passiva, interação limitada/involuntária
+  A = ativa, ação específica consciente ou quebra de proteção
+UI: N
+
+CAMPO: VC — Confidencialidade do sistema vulnerável: exposição de informações
+O QUE INFORMAR:
+  N = sem exposição
+  L = exposição limitada
+  H = exposição total ou de dados críticos
+VC: H
+
+CAMPO: VI — Integridade do sistema vulnerável: alteração indevida de dados
+O QUE INFORMAR:
+  N = sem alteração
+  L = alteração limitada
+  H = alteração total ou com efeito grave
+VI: H
+
+CAMPO: VA — Disponibilidade do sistema vulnerável: interrupção do funcionamento
+O QUE INFORMAR:
+  N = sem interrupção
+  L = redução/interrupção parcial
+  H = interrupção total ou grave
+VA: H
+
+CAMPO: SC — Confidencialidade de outros sistemas: exposição fora do sistema vulnerável
+O QUE INFORMAR:
+  N = sem exposição
+  L = exposição limitada
+  H = exposição total ou de dados críticos
+SC: H
+
+CAMPO: SI — Integridade de outros sistemas: alteração fora do sistema vulnerável
+O QUE INFORMAR:
+  N = sem alteração
+  L = alteração limitada
+  H = alteração total ou com efeito grave
+SI: H
+
+CAMPO: SA — Disponibilidade de outros sistemas: interrupção fora do sistema vulnerável
+O QUE INFORMAR:
+  N = sem interrupção
+  L = redução/interrupção parcial
+  H = interrupção total ou grave
+SA: N
+
+Vetor Base utilizado: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:N
+Severidade calculada pelo vetor Base: 9.9 (não é o risco do ativo).
+NA MATRIZ: essa severidade entra em v; M associa a ocorrência ao ativo.
+O sistema calcula b = M @ v (risco próprio) e resolve (I - A) @ x = b (risco efetivo).
+
+MATRIZES: DEMONSTRACAO TEMPORARIA
+
+DEMONSTRAÇÃO TEMPORÁRIA: ativos e falhas fictícios; referências CVE reais.
+As alterações nesta demonstração são descartadas ao sair; a base real não é usada.
+Bem-vindo ao Sistema de Inventário de Segurança!
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: 
+1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo
+Escolha: Risco próprio = direto (b); risco efetivo = propagado (x).
+Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.
+rho(A)=0; condição=1.9765568; resíduo relativo=0
+Ordem dos ativos (linhas de M, linhas/colunas de A, b e x): (10, 20, 30, 40)
+Ordem das ocorrências (colunas de M e vetor v): ('demo-CVE-2014-0160', 'demo-CVE-2021-44228', 'demo-CVE-2023-34362')
+I é a matriz identidade: 1 na diagonal e 0 nas demais posições.
+rho(A) deve ser menor que 1 para a propagação convergir; o sistema valida essa condição.
+
+CAMPO: M
+O QUE INFORMAR: cadastre as ocorrências de vulnerabilidade em cada ativo.
+O QUE CALCULAR: M[i,j] = 1 quando o ativo i tem a ocorrência j; caso contrário, 0.
+M (forma (4, 3)): [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]
+
+CAMPO: v
+O QUE INFORMAR: responda os critérios CVSS ou forneça um vetor Base publicado.
+O QUE CALCULAR: severidade de cada ocorrência, na mesma ordem das colunas de M.
+v (forma (3,)): [7.5, 10.0, 9.8]
+
+CAMPO: A
+O QUE INFORMAR: registre os serviços necessários e fornecidos na opção 11.
+O QUE CALCULAR: A[i,j] = serviços fornecidos por j / total necessário a i; 0 sem vínculo cadastrado.
+A (forma (4, 4)): [[0.0, 0.4, 0.2, 0.0], [0.0, 0.0, 0.5, 0.0], [0.0, 0.0, 0.0, 0.0], [0.25, 0.0, 0.0, 0.0]]
+
+CAMPO: b
+O QUE INFORMAR: nenhuma nota adicional; usa M e v.
+O QUE CALCULAR: b = M @ v: soma das severidades de cada ativo, seu risco próprio/direto.
+b (forma (4,)): [10.0, 7.5, 9.8, 0.0]
+
+CAMPO: x
+O QUE INFORMAR: nenhuma nota adicional; usa A e b.
+O QUE CALCULAR: resolver (I - A) @ x = b: risco efetivo, com propagação pelas dependências.
+x (forma (4,)): [16.92, 12.4, 9.8, 4.23]
+
+@ representa multiplicação matricial; o sistema monta as matrizes e resolve a equação.
+Cadastros antigos podem conter severidades/pesos numéricos sem os critérios de origem.
+
+===== Inventário de Segurança - Ativos de TI =====
+1 - Cadastrar novo ativo
+2 - Consultar ativo (por ID ou hostname)
+3 - Atualizar ativo
+4 - Remover ativo
+5 - Cadastrar vulnerabilidade em ativo existente
+6 - Visualizar vulnerabilidades de um ativo
+7 - Listar todos os ativos
+8 - Atualizar vulnerabilidade
+9 - Remover vulnerabilidade
+10 - Exportar relatório de vulnerabilidades (CSV)
+11 - Dependências: serviços e indisponibilidade
+12 - Matrizes, riscos e ranking
+13 - Importar biblioteca JSON de ativos
+0 - Sair
+Escolha uma opção: Encerrando o programa. Até logo!

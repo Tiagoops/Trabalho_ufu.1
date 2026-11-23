@@ -1,3 +1,5 @@
+> Documento histórico. Para os comandos atuais, consulte o [README](../README.md). As evidências originais estão em `historico/`.
+
 > Registro histórico da validação de16/11/2026. A automatização posterior está documentada em [VALIDACAO_AUTOMATIZACAO.md](VALIDACAO_AUTOMATIZACAO.md).
 
 # Validação da refatoração matemática — 16/11/2026
@@ -66,10 +68,10 @@ As durações são observações destas execuções, não um benchmark comparáv
 
 Arquivos de evidência:
 
-- `RESULTADO_TESTES_RISCO.txt`: saída completa dos testes Windows.
-- `RESULTADO_TESTES_DOCKER_RISCO.txt`: saída completa dos testes Docker.
-- `DEMONSTRACAO_RISCO.txt`: execução real da CLI e nova leitura após reinício.
-- `DEMONSTRACAO_IMAGEM_DOCKER.txt`: inicialização da imagem isolada.
+- `historico/RESULTADO_TESTES_RISCO.txt`: saída completa dos testes Windows.
+- `historico/RESULTADO_TESTES_DOCKER_RISCO.txt`: saída completa dos testes Docker.
+- `historico/DEMONSTRACAO_RISCO.txt`: execução real da CLI e nova leitura após reinício.
+- `historico/DEMONSTRACAO_IMAGEM_DOCKER.txt`: inicialização da imagem isolada.
 
 Imagem construída: `trabalho-ufu:local`.
 Identificador: `sha256:3ea5f19e5a2ff7a262240b39f0c7e9a3d6bb506028bf9c4d7c7dc017ea7a5a10`.
@@ -99,4 +101,4 @@ Nenhuma dessas bases foi modificada, migrada ou excluída. Não há base real no
 
 ## Como apresentar
 
-Abra o projeto local, instale as dependências conforme o README e execute `main.py`, ou use `docker compose run --build --rm inventario` nesta pasta. As opções novas são **11** (dependências) e **12** (matrizes e riscos). Para conferir o exemplo sem cadastrar dados, leia `DEMONSTRACAO_RISCO.txt`.
+Abra o projeto local, instale as dependências conforme o README e execute `main.py`, ou use `docker compose -f docker/compose.yaml run --build --rm inventario` nesta pasta. As opções novas são **11** (dependências) e **12** (matrizes e riscos). Para conferir o exemplo sem cadastrar dados, leia `historico/DEMONSTRACAO_RISCO.txt`.

@@ -1,0 +1,23 @@
+{
+  "banco_dados.py": "9a313d9d50191e992c33ff4037a234c4ae890daf21f3ff68407d167a27768970",
+  "compose.yaml": "9f351bd14a37d3443d465deca47abb28efe5708a2ab39dbb735477cbcf3f734d",
+  "cores.py": "635441bad7fc939deab06fcdd6b35564136dde0c37310480314ea20c0595b17a",
+  "Dockerfile": "d1085ca2fd9286cb30cf5dc6c96604470ead66b85ef0eff0165f5a677753e1d1",
+  "main.py": "ed49685ba778174c693907a1b9f9235a387b6ab0b26e86868821eec96e3102ad",
+  "matematica/__init__.py": "3acd39f87f00587787a50c752a53cb240ba94874088ce90aeb5a2e1da3d14d86",
+  "matematica/risco.py": "abeacb6f59dd3dac4520f1703a4037d3c9bf9c7d805aaec99d2164269c77be30",
+  "migracao.py": "92648cad0d3fb5b88cb6328842a0ddd6841f20fccbf6a03f1c678a1812b4d89e",
+  "modelos.py": "ffff9568dcfda81caf1bad91dbf83c2c6f65af4f2259182eeac1bcef117be9a0",
+  "README.md": "3d5fd2aa79541d871ef0290340107823fd440474a8a81bda6c0cbdd7bddbb88a",
+  "requirements.txt": "b278f1339f69781eefd2f8fc58f11e4c07a5fbd9134324562c8c0f65599b34c5",
+  "servico_risco.py": "bf27714711d9def4b7c1154489d4015c797ba62f3d116430cc99b04b21c434e7",
+  "test_aplicacao.py": "15553829e5b01cdf5973701e36ec73cd48270921905c2ee899eb8e46bb3e8afe",
+  "test_banco_dados.py": "50d417a2dafbbc1b00678ff49bf4695a960694567dc1413f55876a13e33e0c3b",
+  "test_dependencias.py": "721d254bd97b32ac75394d82f98a2204c6b8d6a48f0b76a83a4a5fe889d66d02",
+  "test_matematica.py": "2b1f0388965ab205054868ddcd1e174d54d3fc2e98a593c217aad14c0c7e4916",
+  "test_migracao.py": "319e9d890744c814a7b2e476edc9b31615a685001f86599d3aa87039cf43745c",
+  "test_risco_cli.py": "4ad74b4ab9577f6467998e7bf5311b2c31106067e9b3ce108bbff24913d03aae",
+  "test_servico_risco.py": "ef0b31a315b22675fa25115db7533e73cf08af979aba1fb59da08fd6edf53fc2",
+  "tipos.py": "95eb9775f98f353b664aef0281d70d230c07a48f79046fa3a45d20f9163e4445",
+  "VALIDACAO_RISCO.md": "69cb6e837ef8bc23eb7f13f5b65b3511ba4bcae10bce0865f85563d5e20a89c5"
+}
