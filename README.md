@@ -2,13 +2,13 @@
 
 Aplicação acadêmica de terminal para cadastrar ativos, ocorrências de vulnerabilidades e dependências direcionadas. Calcula risco direto e propagado, com persistência JSON e recuperação após falhas de gravação.
 
-**Esta revisão está somente na cópia local.** O GitHub permanece na versão anterior até uma publicação explicitamente autorizada. Não há interface das formigas nesta versão: a base escolhida foi o repositório publicado com Docker.
+A implementação com CVSS, catálogo CVE local e análise matemática de riscos foi publicada na branch `main`, commit `0ef166b`, em 22/11/2026. Esta versão inclui a correção do empacotamento Docker e as instruções de execução local, demonstração e Compose. Não há interface das formigas nesta versão.
 
 ## Instalação e execução
 
 Requisitos locais: Python **3.11 ou superior** e NumPy **2.3.5** e cvss **3.6**, fixados em `requirements.txt`. O contêiner usa Python 3.12.12.
 
-Na pasta deste projeto, no PowerShell:
+Execute os comandos a partir da raiz do projeto. No PowerShell:
 
 ```powershell
 python -m venv .venv
@@ -27,9 +27,10 @@ python3 -m venv .venv
 Para abrir quatro ativos de teste sem usar sua base real:
 
 ```powershell
-cd "C:\Users\Nitro\OneDrive\Documentos\ChatGPT\trabalho ufu\outputs\publicacao_docker\Trabalho_ufu.1"
 .\.venv\Scripts\python.exe main.py --demo
 ```
+
+No Linux/macOS, use `.venv/bin/python main.py --demo`.
 
 O modo `--demo` usa uma base temporária e descarta suas alterações ao sair. Ativos, dependências e medições são fictícios; os três CVEs e seus vetores têm fontes públicas verificadas. Não instala versões vulneráveis nem realiza varredura ou exploração.
 
@@ -37,22 +38,32 @@ A base padrão é `ativos_db.txt`, ao lado de `banco_dados.py`, independentement
 
 ### Docker
 
-Com o serviço Docker em execução, dentro desta pasta atualizada:
+É necessário ter o engine Docker em execução. Na raiz do projeto, construa e execute a imagem independente, sem bind mount ou volume:
+
+```bash
+docker build -t trabalho-ufu:demo-check .
+docker run --rm -it trabalho-ufu:demo-check python main.py --demo
+```
+
+O menu aparece no terminal; `0` encerra. A imagem instala as dependências fixadas, inclui `catalogo_cvss.py`, `matematica/` e `exemplos/`, e não inclui a base real. A base de `--demo` é temporária. Sem `--demo`, a base padrão fica em `/app/ativos_db.txt`; sem volume, os dados do contêiner são perdidos quando ele é removido por `--rm`.
+
+Valide o Compose separadamente, também com dados fictícios:
+
+```bash
+docker compose run --build --rm inventario python main.py --demo
+```
+
+O Compose monta a pasta do projeto em `/app`, sobrepondo o conteúdo da imagem. Esse teste não comprova que a imagem independente está completa. Com `--demo`, a base fica em um diretório temporário do contêiner e é descartada ao sair. Exportações CSV para `/app` persistem na pasta montada, inclusive no modo de demonstração.
+
+Para usar a base persistente pelo Compose:
 
 ```bash
 docker compose run --build --rm inventario
 ```
 
-O menu aparece no terminal; `0` encerra. A pasta atual é montada em `/app`: dados, backups e CSV persistem no computador. Use **uma instância por vez**. O Dockerfile instala NumPy e inclui os novos módulos matemáticos e de migração. A imagem não inclui bases reais.
+Nesse modo, `/app/ativos_db.txt`, seus backups e os CSV exportados para `/app` ficam na pasta do projeto no computador. Use **um escritor por base**, incluindo execuções locais e contêineres. Não foram alterados os volumes nem o modo de operação do Compose.
 
-Para verificar a imagem sem montar uma base existente:
-
-```bash
-docker build -t trabalho-ufu:local .
-docker run --rm -i trabalho-ufu:local
-```
-
-O endereço original é https://github.com/Tiagoops/Trabalho_ufu.1. Clonar esse endereço **ainda não obtém esta refatoração local**.
+Repositório: https://github.com/Tiagoops/Trabalho_ufu.1. Clonar a branch `main` obtém a versão publicada; alterações locais posteriores só estarão disponíveis após publicação autorizada. Estes comandos são instruções de execução, não evidência de build, implantação ou funcionamento por 24 horas.
 
 ## Menu
 
@@ -79,6 +90,7 @@ main.py                 menu, validação da entrada e apresentação
 modelos.py              Ativo e Vulnerabilidade; critérios e validação numérica
 avaliacao.py            cálculo CVSS, participação de serviços e indisponibilidade
 biblioteca.py           prévia, validação e importação atômica
+catalogo_cvss.py         leitura, busca e validação do catálogo CVE local
 exemplos/               ativos fictícios com CVEs reais e fontes verificadas
 tipos.py                somente o Enum TipoAtivo
 cores.py                utilitário ANSI genérico
@@ -124,7 +136,7 @@ Exemplo de registro persistido de um ativo que depende do ativo 40 (o destino ta
 
 Os IDs das dependências são inteiros na memória e chaves textuais canônicas no JSON. Não há autodependências ou destinos inexistentes. Peso zero é permitido e não transmite risco.
 
-Cada vulnerabilidade cadastrada é uma **ocorrência em um ativo**, com ID próprio e estável. Duas ocorrências com a mesma descrição continuam distintas. Não foi adicionado um catálogo global de CVEs: o número `m` representa ocorrências. O motor matemático também aceita incidência compartilhada em matrizes fornecidas diretamente.
+Cada vulnerabilidade cadastrada é uma **ocorrência em um ativo**, com ID próprio e estável. Duas ocorrências com a mesma descrição continuam distintas. O catálogo CVE local é uma referência para consulta e seleção de vetores; o número `m` continua representando ocorrências cadastradas nos ativos. O motor matemático também aceita incidência compartilhada em matrizes fornecidas diretamente.
 
 Os status de tratamento foram removidos do modelo, do menu e do CSV. O inventário passa a representar as ocorrências atualmente cadastradas. Uma ocorrência deixa de contribuir ao ser removida; a remoção exige confirmação e não conserva um histórico de correção. Nenhum status filtra o cálculo.
 
@@ -136,7 +148,7 @@ No cadastro/edição, escolha responder as onze métricas Base CVSS 4.0 ou colar
 
 O questionário mostra **CAMPO** e **O QUE INFORMAR** para cada métrica, com o significado das letras aceitas. `N` significa nenhum, não desconhecido. As explicações seguem a [especificação CVSS 4.0 da FIRST](https://www.first.org/cvss/v4.0/specification-document). Ao concluir, mostra o vetor, a severidade calculada e sua relação com `v`. A opção **11** explica os critérios de serviços/indisponibilidade; em **12 → 1**, cada matriz/vetor traz **CAMPO**, **O QUE INFORMAR** e **O QUE CALCULAR**, junto dos valores obtidos. As fórmulas e os dados existentes permanecem iguais.
 
-A captura [DEMONSTRACAO_GUIA_CVSS.txt](DEMONSTRACAO_GUIA_CVSS.txt) mostra o questionário preenchido com um cenário técnico fictício e a consulta das matrizes da demonstração temporária. Verificação desta apresentação em 18/11/2026: **134 testes locais aprovados**, severidade de referência **9,9** e risco efetivo dos exemplos **[16,92; 12,4; 9,8; 4,23]**, sem alteração da base real. A imagem Docker não foi reconstruída nem testada novamente nesta alteração; o serviço estava desligado.
+A captura local `DEMONSTRACAO_GUIA_CVSS.txt` (não rastreada no Git) mostra o questionário preenchido com um cenário técnico fictício e a consulta das matrizes da demonstração temporária. Registro histórico da verificação desta apresentação em 18/11/2026: **134 testes locais aprovados**, severidade de referência **9,9** e risco efetivo dos exemplos **[16,92; 12,4; 9,8; 4,23]**, sem alteração da base real. A imagem Docker não foi reconstruída nem testada novamente nesta alteração; o serviço estava desligado.
 
 O valor é uma avaliação Base derivada das características fornecidas, não certificação do equipamento nem detecção automática de vulnerabilidades. CVSS Base mede severidade; o risco do inventário continua sendo calculado pelas matrizes. A CLI informa quando existem cadastros anteriores sem vetor/fonte. Eles são preservados, e sua reavaliação exige dados técnicos; não são apagados nem convertidos automaticamente.
 
@@ -278,18 +290,16 @@ No PowerShell:
 .\.venv\Scripts\python.exe -B -m unittest discover -v
 ```
 
-Linux ou contêiner com os testes montados:
+Linux ou contêiner com os testes montados pelo Compose (a imagem independente não inclui a suíte):
 
 ```bash
 python -B -m unittest discover -v
 docker compose run --rm -T inventario python -B -m unittest discover -v
 ```
 
-A suíte usa arquivos temporários e dados fictícios. Os 65 testes anteriores foram mantidos e adaptados às mudanças intencionais: severidade numérica, retirada de status, coluna CSV e Python mínimo. Os testes adicionais cobrem validação matemática, ciclos, mapeamento de IDs, CRUD de dependências, rollback, confirmação, backups e retomada da migração. `VALIDACAO_RISCO.md` preserva os resultados de 16/11. Consulte `VALIDACAO_AUTOMATIZACAO.md` para a execução atual e os exemplos CVE.
+A suíte usa arquivos temporários e dados fictícios. Os 65 testes anteriores foram mantidos e adaptados às mudanças intencionais: severidade numérica, retirada de status, coluna CSV e Python mínimo. Os testes adicionais cobrem validação matemática, ciclos, mapeamento de IDs, CRUD de dependências, rollback, confirmação, backups e retomada da migração. `VALIDACAO_RISCO.md` preserva os resultados de 16/11. `VALIDACAO_AUTOMATIZACAO.md` também contém registros históricos e exemplos CVE; esses documentos não substituem uma nova execução da suíte nem validam a imagem atual.
 
 ## Referências
-
-Sauron foi consultado como referência conceitual no commit `1850e8465fba43c49ae19e074eeea05775f7f6ba`: https://github.com/Luiz-Corticioni/testes_sauron_rede_neural. Seu motor utiliza status ao montar incidência e possui recursos operacionais que não foram incorporados. A implementação aqui é própria, limitada a M, v, A e à solução linear; não adiciona Django ou SciPy.
 
 Documentação oficial: [numpy.linalg.solve](https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html) e [numpy.linalg.eigvals](https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigvals.html).
 
