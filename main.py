@@ -5,14 +5,22 @@ Trabalho de Ciberseguranca - UFU (Sprints 1 e 2)
 Execução: python main.py
 """
 
-from __future__ import annotations  # garante compatibilidade com Python 3.8+
+from __future__ import annotations
 
+import argparse
 import csv
+from pathlib import Path
+import tempfile
+import os
+import unicodedata
 from typing import List, Optional, Tuple
 
-from tipos import TipoAtivo, Severidade, StatusVulnerabilidade, rotulo_severidade, rotulo_status
-from modelos import Ativo, Vulnerabilidade
+from tipos import TipoAtivo
+from modelos import Ativo, Vulnerabilidade, validar_numero
 from banco_dados import BancoDeDados
+from avaliacao import AvaliacaoDependencia, calcular_cvss
+from biblioteca import importar_ativos, preparar_importacao
+from catalogo_cvss import buscar_catalogo, carregar_catalogo
 
 
 # ------------------------------------------------------------------
@@ -32,6 +40,16 @@ def ler_inteiro(mensagem: str, minimo: Optional[int] = None) -> int:
             print(f"O valor deve ser maior ou igual a {minimo}.")
             continue
         return numero
+
+
+def ler_real(mensagem: str, limite: float, *, exclusivo=False) -> float:
+    """Aceita ponto ou vírgula decimal; valida antes de alterar o inventário."""
+    while True:
+        try:
+            numero = float(input(mensagem).strip().replace(",", "."))
+            return validar_numero(numero, "valor", limite, exclusivo=exclusivo)
+        except ValueError as erro:
+            print(f"Entrada inválida: {erro}")
 
 
 def ler_texto(mensagem: str, permitir_vazio: bool = False) -> str:
@@ -110,6 +128,201 @@ def cadastrar_ativo(db: BancoDeDados) -> None:
     print(f"\nAtivo '{hostname}' cadastrado com sucesso (ID {id_ativo}).")
 
 
+METRICAS_CVSS4 = (
+    ("AV", "Vetor de ataque: por onde a falha pode ser explorada", {
+        "N": "rede remota", "A": "rede adjacente (ex.: mesma rede local)",
+        "L": "acesso local ao ambiente", "P": "contato físico com o equipamento"}),
+    ("AC", "Complexidade: necessidade de contornar proteções contra o ataque", {
+        "L": "baixa, sem contornar essas proteções", "H": "alta, exige contorná-las"}),
+    ("AT", "Pré-condições: condições específicas de execução ou implantação", {
+        "N": "nenhuma condição especial", "P": "depende dessas condições"}),
+    ("PR", "Privilégios: permissões que o atacante precisa ter antes do ataque", {
+        "N": "nenhuma", "L": "permissões básicas", "H": "permissões elevadas/administrativas"}),
+    ("UI", "Interação: participação de outra pessoa para explorar a falha", {
+        "N": "dispensa interação", "P": "passiva, interação limitada/involuntária",
+        "A": "ativa, ação específica consciente ou quebra de proteção"}),
+    ("VC", "Confidencialidade do sistema vulnerável: exposição de informações", {
+        "N": "sem exposição", "L": "exposição limitada", "H": "exposição total ou de dados críticos"}),
+    ("VI", "Integridade do sistema vulnerável: alteração indevida de dados", {
+        "N": "sem alteração", "L": "alteração limitada", "H": "alteração total ou com efeito grave"}),
+    ("VA", "Disponibilidade do sistema vulnerável: interrupção do funcionamento", {
+        "N": "sem interrupção", "L": "redução/interrupção parcial", "H": "interrupção total ou grave"}),
+    ("SC", "Confidencialidade de outros sistemas: exposição fora do sistema vulnerável", {
+        "N": "sem exposição", "L": "exposição limitada", "H": "exposição total ou de dados críticos"}),
+    ("SI", "Integridade de outros sistemas: alteração fora do sistema vulnerável", {
+        "N": "sem alteração", "L": "alteração limitada", "H": "alteração total ou com efeito grave"}),
+    ("SA", "Disponibilidade de outros sistemas: interrupção fora do sistema vulnerável", {
+        "N": "sem interrupção", "L": "redução/interrupção parcial", "H": "interrupção total ou grave"}),
+)
+
+
+def explicar_cvss() -> None:
+    """Instruções acessíveis, sem supor que uma descrição prova a exploração."""
+    print("\n--- COMO FUNCIONA O CVSS ---")
+    print("CVSS é uma escala de severidade de 0 a 10 para uma falha específica.")
+    print("Um vetor reúne códigos técnicos como AV (acesso), PR (privilégios) e impactos.")
+    print("Exemplo CVSS 3.1, Log4Shell (referência):")
+    print("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H")
+    print("AV:N = pela rede; AC:L = baixa complexidade; PR:N = sem privilégios;")
+    print("UI:N = sem interação. C:H/I:H/A:H = impactos altos.")
+    print("Exemplo didático CVSS 4.0 (não associar sem análise técnica):")
+    print("CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N")
+    print("\nPARA ENCONTRAR UM VETOR PUBLICADO:")
+    print("1. Identifique o produto, versão e a CVE correspondente à falha.")
+    print("2. Visite https://nvd.nist.gov/vuln/search e pesquise a CVE.")
+    print("3. Abra o resultado, procure CVSS Metrics / Vector String (3.1 ou 4.0).")
+    print("4. Copie o vetor BASE COMPLETO e confira a fonte e o contexto afetado.")
+    print("5. Se não houver vetor Base publicado, utilize as perguntas técnicas.")
+    print("A biblioteca é uma fotografia local e pode ficar desatualizada.")
+    print("Uma CVE encontrada não prova que o seu equipamento está vulnerável.")
+    print("Não confunda severidade da falha com risco propagado do inventário.\n")
+
+
+def escolher_vetor_catalogo() -> str | None:
+    """Pesquisar CVEs validadas, escolher ou voltar sem gravar registros."""
+    try:
+        registros = carregar_catalogo()
+    except (OSError, ValueError) as erro:
+        print(f"Não foi possível ler o catálogo local: {erro}")
+        return None
+    print(f"\nBiblioteca local: {len(registros)} CVE(s) de referência; sem acesso online.")
+    print("Digite palavra-chave, produto, versão ou CVE. V = voltar.")
+    while True:
+        termo = input("Busca: ").strip()
+        if termo.casefold() in ("v", "voltar", "0"):
+            return None
+        resultados = buscar_catalogo(termo, registros)
+        if not resultados:
+            print("Nenhuma correspondência. Tente outra busca ou V para voltar.")
+            continue
+        for indice, item in enumerate(resultados, 1):
+            print(f"{indice} - {item['cve']} | {item['produto']} | CVSS {item['nota_base_publicada']:g}")
+            print(f"    Versão do cenário de exemplo: {item.get('versao_ficticia_do_ativo', 'não informada')}")
+        while True:
+            escolha = input("Número para consultar/selecionar; V = voltar à busca: ").strip()
+            if escolha.casefold() in ("v", "voltar", "0"):
+                break
+            if not escolha.isdecimal() or not 1 <= int(escolha) <= len(resultados):
+                print("Escolha um número apresentado ou V.")
+                continue
+            item = resultados[int(escolha) - 1]
+            print(f"\nCVE: {item['cve']} | Produto: {item['produto']}")
+            print(f"Vetor: {item['vetor_cvss']}")
+            print(f"Severidade Base: {item['nota_base_publicada']:g}")
+            print(f"Fonte: {item['fonte_primaria']}")
+            print(f"Consulta de referência: {item.get('consulta', 'não informada')}")
+            print("A versão do exemplo não garante aplicabilidade ao ativo atual.")
+            confirma = ler_sim_nao("Confirmou que a CVE se aplica a este ativo? (s/n): ")
+            if confirma:
+                return item['vetor_cvss']
+            print("Nenhuma vulnerabilidade foi associada; escolha outra ou volte.")
+
+
+def ler_vetor_cvss() -> str | None:
+    """Retorna vetor Base validado ou None ao voltar, sem gravação parcial."""
+    while True:
+        print("\n--- AVALIAÇÃO DE VULNERABILIDADE ---")
+        print("1 - Responder critérios técnicos CVSS 4.0")
+        print("2 - Informar vetor Base CVSS 3.1/4.0 publicado")
+        print("3 - Buscar CVE na biblioteca local de severidades")
+        print("4 - Entender CVSS, exemplos e como localizar vetores")
+        print("0 - Voltar ao cadastro anterior (sem gravar esta ocorrência)")
+        modo = input("Escolha: ").strip()
+        if modo in ("0", "v", "V"):
+            return None
+        if modo == "4":
+            explicar_cvss()
+            continue
+        if modo == "3":
+            vetor = escolher_vetor_catalogo()
+            if vetor is None:
+                continue
+            nota, normalizado = calcular_cvss(vetor)
+        elif modo == "1":
+            print("\nResponda com base em evidências, não apenas no tipo do ativo.")
+            print("N significa nenhum; se desconhecido, use V para voltar.")
+            print("SC/SI/SA tratam de impacto em outros sistemas, não dos pesos da matriz A.")
+            metricas = []
+            voltar = False
+            for codigo, rotulo, opcoes in METRICAS_CVSS4:
+                print(f"\nCAMPO: {codigo} — {rotulo}")
+                print("O QUE INFORMAR:")
+                for letra, significado in opcoes.items():
+                    print(f"  {letra} = {significado}")
+                while True:
+                    valor = input(codigo + " (V = voltar): ").strip().upper()
+                    if valor == "V":
+                        voltar = True
+                        break
+                    if valor in opcoes:
+                        metricas.append(codigo + ":" + valor)
+                        break
+                    print("Código inválido. Escolha uma das características indicadas.")
+                if voltar:
+                    break
+            if voltar:
+                continue
+            nota, normalizado = calcular_cvss("CVSS:4.0/" + "/".join(metricas))
+        elif modo == "2":
+            print("\nCole o vetor BASE COMPLETO, começando por CVSS:3.1/ ou CVSS:4.0/.")
+            print("Exemplo: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H")
+            print("Para achar o vetor: https://nvd.nist.gov/vuln/search → CVE → CVSS Metrics.")
+            print("Digite V para voltar ao menu de avaliação sem perder o cadastro.")
+            while True:
+                vetor = input("Vetor técnico CVSS (V = voltar): ").strip()
+                if vetor.casefold() in ("v", "voltar"):
+                    break
+                try:
+                    nota, normalizado = calcular_cvss(vetor)
+                    break
+                except ValueError as erro:
+                    print(f"{erro}. Utilize a ajuda da opção 4 se necessário.")
+            if vetor.casefold() in ("v", "voltar"):
+                continue
+        else:
+            print("Opção inválida. Escolha 0, 1, 2, 3 ou 4.")
+            continue
+        print(f"\nVetor Base utilizado: {normalizado}")
+        print(f"Severidade calculada: {nota:g} (não é o risco do ativo).")
+        print("NA MATRIZ: v recebe a severidade; M vincula a ocorrência ao ativo.")
+        print("b = M @ v (risco próprio); (I - A) @ x = b (risco efetivo).")
+        return normalizado
+
+
+def ler_avaliacao_dependencia() -> AvaliacaoDependencia:
+    print("\nCAMPO: A[i,j] — dependência do ativo i em relação ao fornecedor j")
+    print("O QUE INFORMAR: total de serviços necessários a i e quantos deles j fornece.")
+    print("O QUE CALCULAR: peso = fornecidos / total. Ex.: 2 de 5 serviços = 0,4.")
+    print("Indisponibilidade observada = 100 × minutos indisponíveis / duração da falha;")
+    print("essa medição é registrada separadamente e não substitui o peso de A.")
+    total = ler_inteiro("Quantidade total de serviços necessários ao ativo dependente: ", minimo=1)
+    fornecidos = ler_inteiro("Quantos desses serviços o outro ativo fornece: ", minimo=0)
+    duracao = indisponibilidade = fonte = None
+    if ler_sim_nao("Há medição de indisponibilidade durante uma falha? (s/n): "):
+        duracao = ler_real("Duração observada da falha do fornecedor (minutos): ", float("inf"))
+        indisponibilidade = ler_real("Tempo indisponível do ativo dependente nessa janela (minutos): ", float("inf"))
+        fonte = ler_texto("Fonte da medição ou identificação do cenário fictício: ")
+    return AvaliacaoDependencia(total, fornecidos, duracao, indisponibilidade, fonte)
+
+
+def importar_biblioteca(db: BancoDeDados) -> None:
+    caminho = ler_texto("Caminho da biblioteca JSON: ")
+    ativos = preparar_importacao(db, caminho)
+    print(f"Prévia validada: {len(ativos)} ativo(s), "
+          f"{sum(len(a.vulnerabilidades) for a in ativos)} ocorrência(s).")
+    for ativo in ativos:
+        print(f"ID {ativo.id_ativo} | {ativo.hostname} | dependências: {ativo.dependencias}")
+        for v in ativo.vulnerabilidades:
+            print(v.formatar())
+    if not ativos:
+        return
+    if ler_sim_nao("Confirmar a inclusão deste lote sem sobrescrever ativos existentes? (s/n): "):
+        importar_ativos(db, ativos)
+        print("Biblioteca importada com sucesso.")
+    else:
+        print("Importação cancelada; a base não foi alterada.")
+
+
 def ler_multiplas_vulnerabilidades() -> List[Vulnerabilidade]:
     vulnerabilidades = []
     while True:
@@ -117,9 +330,11 @@ def ler_multiplas_vulnerabilidades() -> List[Vulnerabilidade]:
         categoria = ler_texto(
             "  Categoria (ex.: senha fraca, software desatualizado, exposição de serviço): "
         )
-        severidade = escolher_enum("  Severidade:", Severidade)
-        status = escolher_enum("  Status de tratamento:", StatusVulnerabilidade)
-        vulnerabilidades.append(Vulnerabilidade(descricao, categoria, severidade, status))
+        vetor = ler_vetor_cvss()
+        if vetor is None:
+            print("Cadastro de ocorrência cancelado; mantendo dados anteriores.")
+            break
+        vulnerabilidades.append(Vulnerabilidade.por_cvss(descricao, categoria, vetor))
         if not ler_sim_nao("  Adicionar outra vulnerabilidade a este ativo? (s/n): "):
             break
     return vulnerabilidades
@@ -217,7 +432,8 @@ def deletar_ativo(db: BancoDeDados) -> None:
 
     if not ler_sim_nao(
         f"Confirma a remoção do ativo '{ativo_existente.hostname}' e de suas "
-        f"{len(ativo_existente.vulnerabilidades)} vulnerabilidade(s)? (s/n): "
+        f"{len(ativo_existente.vulnerabilidades)} vulnerabilidade(s), "
+        "limpando também dependências de entrada e saída? (s/n): "
     ):
         print("Operação cancelada.")
         return
@@ -240,10 +456,12 @@ def cadastrar_vulnerabilidade(db: BancoDeDados) -> None:
 
     descricao = ler_texto("Descrição da vulnerabilidade: ")
     categoria = ler_texto("Categoria: ")
-    severidade = escolher_enum("Severidade:", Severidade)
-    status = escolher_enum("Status de tratamento:", StatusVulnerabilidade)
+    vetor = ler_vetor_cvss()
+    if vetor is None:
+        print("Cadastro cancelado; a base não foi alterada.")
+        return
 
-    ativo.vulnerabilidades.append(Vulnerabilidade(descricao, categoria, severidade, status))
+    ativo.vulnerabilidades.append(Vulnerabilidade.por_cvss(descricao, categoria, vetor))
     db.salvar()
     print("Vulnerabilidade cadastrada com sucesso.")
 
@@ -312,27 +530,24 @@ def atualizar_vulnerabilidade(db: BancoDeDados) -> None:
     nova_descricao = ler_texto(f"Descrição [{vulnerabilidade.descricao}]: ", permitir_vazio=True)
     nova_categoria = ler_texto(f"Categoria [{vulnerabilidade.categoria}]: ", permitir_vazio=True)
 
-    nova_severidade = None
+    nova_avaliacao = None
     if ler_sim_nao(
-        f"Alterar a severidade (atual: {rotulo_severidade(vulnerabilidade.severidade)})? (s/n): "
+        f"Alterar a severidade (atual: {vulnerabilidade.severidade:g})? (s/n): "
     ):
-        nova_severidade = escolher_enum("Nova severidade:", Severidade)
-
-    novo_status = None
-    if ler_sim_nao(
-        f"Alterar o status de tratamento (atual: {rotulo_status(vulnerabilidade.status)})? (s/n): "
-    ):
-        novo_status = escolher_enum("Novo status de tratamento:", StatusVulnerabilidade)
+        vetor = ler_vetor_cvss()
+        if vetor is None:
+            print("Atualização cancelada; a base não foi alterada.")
+            return
+        nova_avaliacao = calcular_cvss(vetor)
 
     # Só altera depois de coletar tudo (ver comentário em atualizar_ativo).
     if nova_descricao:
         vulnerabilidade.descricao = nova_descricao
     if nova_categoria:
         vulnerabilidade.categoria = nova_categoria
-    if nova_severidade is not None:
-        vulnerabilidade.severidade = nova_severidade
-    if novo_status is not None:
-        vulnerabilidade.status = novo_status
+    if nova_avaliacao is not None:
+        vulnerabilidade.severidade, vulnerabilidade.vetor_cvss = nova_avaliacao
+        vulnerabilidade.fonte_severidade = None
 
     db.salvar()
     print("Vulnerabilidade atualizada com sucesso.")
@@ -377,6 +592,15 @@ def listar_ativos(db: BancoDeDados) -> None:
 # Extra: relatório de vulnerabilidades em CSV, ordenado por severidade
 # ------------------------------------------------------------------
 
+def _validar_celula_csv(valor):
+    """Não deixa dados informados virarem fórmulas ao abrir uma planilha."""
+    if isinstance(valor, str):
+        normalizado = unicodedata.normalize("NFKC", valor).lstrip()
+        if normalizado.startswith(("=", "+", "-", "@")) or any(c in valor for c in ("\t", "\r", "\n")):
+            raise ValueError("CSV recusado: campo contém fórmula ou controle de linha")
+    return valor
+
+
 def exportar_relatorio_vulnerabilidades(db: BancoDeDados) -> None:
     print("\n--- Exportar relatório de vulnerabilidades (CSV) ---")
     linhas = []
@@ -384,13 +608,12 @@ def exportar_relatorio_vulnerabilidades(db: BancoDeDados) -> None:
         for vulnerabilidade in ativo.vulnerabilidades:
             linhas.append(
                 {
-                    "valor_severidade": vulnerabilidade.severidade.value,
-                    "severidade": rotulo_severidade(vulnerabilidade.severidade),
+                    "valor_severidade": vulnerabilidade.severidade,
+                    "severidade": vulnerabilidade.severidade,
                     "id_ativo": ativo.id_ativo,
                     "hostname": ativo.hostname,
                     "categoria": vulnerabilidade.categoria,
                     "descricao": vulnerabilidade.descricao,
-                    "status": rotulo_status(vulnerabilidade.status),
                 }
             )
 
@@ -398,7 +621,7 @@ def exportar_relatorio_vulnerabilidades(db: BancoDeDados) -> None:
         print("Não há vulnerabilidades cadastradas para exportar.")
         return
 
-    # Mais graves primeiro (Crítica > Alta > Média > Baixa); em caso de
+    # Pontuações maiores primeiro; em caso de
     # empate, ordena pelo ID do ativo para o relatório ficar estável.
     linhas.sort(key=lambda linha: (-linha["valor_severidade"], linha["id_ativo"]))
 
@@ -407,12 +630,14 @@ def exportar_relatorio_vulnerabilidades(db: BancoDeDados) -> None:
         permitir_vazio=True,
     ) or "relatorio_vulnerabilidades.csv"
 
-    campos = ["severidade", "id_ativo", "hostname", "categoria", "descricao", "status"]
-    with open(nome_arquivo, "w", newline="", encoding="utf-8") as arquivo:
+    campos = ["severidade", "id_ativo", "hostname", "categoria", "descricao"]
+    registros = [{campo: _validar_celula_csv(linha[campo]) for campo in campos} for linha in linhas]
+    with open(nome_arquivo, "x", newline="", encoding="utf-8") as arquivo:
         escritor = csv.DictWriter(arquivo, fieldnames=campos)
         escritor.writeheader()
-        for linha in linhas:
-            escritor.writerow({campo: linha[campo] for campo in campos})
+        escritor.writerows(registros)
+        arquivo.flush()
+        os.fsync(arquivo.fileno())
 
     print(f"Relatório exportado para '{nome_arquivo}' ({len(linhas)} vulnerabilidade(s)).")
 
@@ -420,6 +645,96 @@ def exportar_relatorio_vulnerabilidades(db: BancoDeDados) -> None:
 # ------------------------------------------------------------------
 # Menu principal (Requisito 1)
 # ------------------------------------------------------------------
+
+def gerenciar_dependencias(db: BancoDeDados) -> None:
+    print("\n1 - Cadastrar | 2 - Editar peso | 3 - Remover | 4 - Listar dependências")
+    opcao = ler_inteiro("Escolha: ")
+    if opcao == 4:
+        for ativo in sorted(db.listar_todos(), key=lambda a: a.id_ativo):
+            for destino, peso in sorted(ativo.dependencias.items()):
+                print(f"{ativo.id_ativo} depende de {destino}; peso={peso:g}")
+                avaliacao = ativo.avaliacoes_dependencias.get(destino)
+                if avaliacao is not None:
+                    print(f"  Serviços: {avaliacao.servicos_fornecidos}/{avaliacao.total_servicos}")
+                    medida = avaliacao.indisponibilidade_percentual
+                    print("  Indisponibilidade observada: " +
+                          (f"{avaliacao.indisponibilidade_min:g} min / {avaliacao.duracao_falha_min:g} min = {medida:g}% ({avaliacao.fonte_medicao})"
+                           if medida is not None else "não medida"))
+                else:
+                    print("  Peso importado ou anterior; critérios de serviços não registrados.")
+        return
+    if opcao not in (1, 2, 3):
+        print("Opção inválida.")
+        return
+    origem = ler_inteiro("ID do ativo dependente: ", minimo=1)
+    destino = ler_inteiro("ID do ativo do qual ele depende: ", minimo=1)
+    if opcao == 3:
+        db.remover_dependencia(origem, destino)
+    else:
+        ativo = db.buscar_por_id(origem)
+        existe = ativo is not None and destino in ativo.dependencias
+        if opcao == 1 and existe:
+            raise ValueError("dependência já cadastrada; use editar peso")
+        if opcao == 2 and not existe:
+            raise ValueError("dependência inexistente")
+        avaliacao = ler_avaliacao_dependencia()
+        db.definir_dependencia(origem, destino, avaliacao.peso, avaliacao=avaliacao)
+        print(f"Peso calculado: {avaliacao.peso:g}")
+    print("Dependência gravada com sucesso.")
+
+
+def consultar_risco(db: BancoDeDados) -> None:
+    from servico_risco import analisar_inventario
+    print("\n1 - Matrizes e vetores | 2 - Ranking de risco | 3 - Risco de um ativo")
+    opcao = ler_inteiro("Escolha: ")
+    if opcao not in (1, 2, 3):
+        print("Opção inválida.")
+        return
+    analise = analisar_inventario(db)
+    r = analise.resultado
+    anteriores = sum(not v.vetor_cvss and not v.fonte_severidade
+                     for a in db.listar_todos() for v in a.vulnerabilidades)
+    if anteriores:
+        print(f"Atenção: {anteriores} severidade(s) anteriores sem vetor/fonte. "
+              "Foram preservadas; não foram recalculadas automaticamente.")
+    print("Risco próprio = direto (b); risco efetivo = propagado (x).")
+    print("Índice matemático de risco: pode ultrapassar 10; não é probabilidade, percentual ou CVSS.")
+    print(f"rho(A)={r.raio_espectral:.8g}; condição={r.condicao:.8g}; "
+          f"resíduo relativo={r.residuo_relativo:.3g}")
+    if opcao == 1:
+        print("Ordem dos ativos (linhas de M, linhas/colunas de A, b e x):", analise.ids_ativos)
+        print("Ordem das ocorrências (colunas de M e vetor v):", analise.ids_vulnerabilidades)
+        print("I é a matriz identidade: 1 na diagonal e 0 nas demais posições.")
+        print("rho(A) deve ser menor que 1 para a propagação convergir; o sistema valida essa condição.")
+        for nome, informar, calcular in (
+            ("M", "cadastre as ocorrências de vulnerabilidade em cada ativo",
+             "M[i,j] = 1 quando o ativo i tem a ocorrência j; caso contrário, 0"),
+            ("v", "responda os critérios CVSS ou forneça um vetor Base publicado",
+             "severidade de cada ocorrência, na mesma ordem das colunas de M"),
+            ("A", "registre os serviços necessários e fornecidos na opção 11",
+             "A[i,j] = serviços fornecidos por j / total necessário a i; 0 sem vínculo cadastrado"),
+            ("b", "nenhuma nota adicional; usa M e v",
+             "b = M @ v: soma das severidades de cada ativo, seu risco próprio/direto"),
+            ("x", "nenhuma nota adicional; usa A e b",
+             "resolver (I - A) @ x = b: risco efetivo, com propagação pelas dependências"),
+        ):
+            print(f"\nCAMPO: {nome}")
+            print(f"O QUE INFORMAR: {informar}.")
+            print(f"O QUE CALCULAR: {calcular}.")
+            valor = getattr(r, nome)
+            print(f"{nome} (forma {valor.shape}): {valor.tolist()}")
+        print("\n@ representa multiplicação matricial; o sistema monta as matrizes e resolve a equação.")
+        print("Cadastros antigos podem conter severidades/pesos numéricos sem os critérios de origem.")
+    elif opcao == 2:
+        for aid, direto, propagado in analise.ranking():
+            print(f"Ativo {aid}: risco direto={direto:.8g}; propagado={propagado:.8g}")
+        if not analise.ids_ativos:
+            print("Nenhum ativo cadastrado.")
+    else:
+        aid = ler_inteiro("ID do ativo: ", minimo=1)
+        direto, propagado = analise.individual(aid)
+        print(f"Ativo {aid}: risco direto={direto:.8g}; propagado={propagado:.8g}")
+
 
 def exibir_menu() -> None:
     print("\n===== Inventário de Segurança - Ativos de TI =====")
@@ -430,14 +745,16 @@ def exibir_menu() -> None:
     print("5 - Cadastrar vulnerabilidade em ativo existente")
     print("6 - Visualizar vulnerabilidades de um ativo")
     print("7 - Listar todos os ativos")
-    print("8 - Atualizar vulnerabilidade (ex.: mudar status)")
+    print("8 - Atualizar vulnerabilidade")
     print("9 - Remover vulnerabilidade")
     print("10 - Exportar relatório de vulnerabilidades (CSV)")
+    print("11 - Dependências: serviços e indisponibilidade")
+    print("12 - Matrizes, riscos e ranking")
+    print("13 - Importar biblioteca JSON de ativos")
     print("0 - Sair")
 
 
-def main() -> None:
-    db = BancoDeDados()
+def executar_menu(db: BancoDeDados) -> None:
     acoes = {
         1: cadastrar_ativo,
         2: buscar_ativo_interativo,
@@ -449,6 +766,9 @@ def main() -> None:
         8: atualizar_vulnerabilidade,
         9: remover_vulnerabilidade,
         10: exportar_relatorio_vulnerabilidades,
+        11: gerenciar_dependencias,
+        12: consultar_risco,
+        13: importar_biblioteca,
     }
 
     print("Bem-vindo ao Sistema de Inventário de Segurança!")
@@ -487,5 +807,20 @@ def main() -> None:
             print(f"[Erro] Ocorreu um problema ao executar a operação: {erro}")
 
 
+def main(*, demonstracao: bool = False) -> None:
+    if not demonstracao:
+        executar_menu(BancoDeDados())
+        return
+    with tempfile.TemporaryDirectory(prefix="ufu_demo_") as pasta:
+        db = BancoDeDados(Path(pasta) / "ativos_demo.json")
+        biblioteca = Path(__file__).resolve().parent / "exemplos" / "ativos_teste.json"
+        importar_ativos(db, preparar_importacao(db, biblioteca))
+        print("DEMONSTRAÇÃO TEMPORÁRIA: ativos e falhas fictícios; referências CVE reais.")
+        print("As alterações nesta demonstração são descartadas ao sair; a base real não é usada.")
+        executar_menu(db)
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--demo", action="store_true", help="Abre ativos fictícios em base temporária.")
+    main(demonstracao=parser.parse_args().demo)

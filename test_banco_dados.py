@@ -10,13 +10,12 @@ from unittest.mock import patch
 
 from banco_dados import BancoDeDados
 from modelos import Ativo, Vulnerabilidade
-from tipos import Severidade, StatusVulnerabilidade, TipoAtivo
+from tipos import TipoAtivo
 
 
 def novo_ativo(numero=1, hostname="Servidor-01"):
     return Ativo(numero, hostname, "João", "TI", TipoAtivo.SERVIDOR, [
-        Vulnerabilidade("Versão antiga", "Software", Severidade.ALTA,
-                        StatusVulnerabilidade.ABERTA)
+        Vulnerabilidade("Versão antiga", "Software", 7.5)
     ])
 
 
@@ -83,7 +82,7 @@ class TestBancoDeDados(unittest.TestCase):
         recarregado = BancoDeDados(self.caminho).buscar_por_id(1)
         self.assertEqual(recarregado.to_dict(), ativo.to_dict())
         self.assertIs(recarregado.tipo, TipoAtivo.SERVIDOR)
-        self.assertIs(recarregado.vulnerabilidades[0].severidade, Severidade.ALTA)
+        self.assertEqual(recarregado.vulnerabilidades[0].severidade, 7.5)
         self.assertIn("João", self.caminho.read_text(encoding="utf-8"))
 
     def test_reindexacao_hostname(self):
@@ -152,9 +151,9 @@ class TestBancoDeDados(unittest.TestCase):
                              ("vulnerabilidades", {}), ("vulnerabilidades", [None])]:
             registro = dict(valido, **{campo: valor})
             casos.append(json.dumps([valido, registro]).encode("utf-8"))
-        for campo in ("severidade", "status"):
+        for severidade in (-1, 11, None, True):
             registro = novo_ativo(2, "Outro").to_dict()
-            registro["vulnerabilidades"][0][campo] = "DESCONHECIDO"
+            registro["vulnerabilidades"][0]["severidade"] = severidade
             casos.append(json.dumps([valido, registro]).encode("utf-8"))
         casos.extend([
             json.dumps([valido, valido]).encode("utf-8"),
@@ -258,7 +257,7 @@ class TestBancoDeDados(unittest.TestCase):
                                     lista.append(novo_ativo().vulnerabilidades[0])
                                 elif operacao == "editar_vuln":
                                     vulnerabilidade.descricao = "Alterada"
-                                    vulnerabilidade.status = StatusVulnerabilidade.CORRIGIDA
+                                    vulnerabilidade.severidade = 0.0
                                 elif operacao == "remover_vuln":
                                     lista.pop()
                                 else:

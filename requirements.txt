@@ -1,2 +1,2 @@
-# Este projeto utiliza somente a biblioteca padrão do Python.
-# Não há dependências externas para instalar.
+numpy==2.3.5
+cvss==3.6

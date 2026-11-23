@@ -1,0 +1,45 @@
+{
+  "observacao": "CVEs reais em ativos ficticios. Fotografia das fontes; sem consulta automatica em tempo real.",
+  "referencia_inicial": "https://www.cvefind.com/pt/cve.html",
+  "registros": [
+    {
+      "cve": "CVE-2021-44228",
+      "produto": "Apache Log4j Core",
+      "versao_ficticia_do_ativo": "2.14.1",
+      "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+      "nota_base_publicada": 10.0,
+      "fonte_avaliacao": "nvd@nist.gov",
+      "fonte_primaria": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+      "api_fonte_primaria": "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2021-44228",
+      "referencia_cvefind": "https://www.cvefind.com/pt/cve/cve-2021-44228.html",
+      "consulta": "2026-11-18",
+      "ultima_modificacao_nvd": "2026-08-11T19:33:44.513"
+    },
+    {
+      "cve": "CVE-2014-0160",
+      "produto": "OpenSSL",
+      "versao_ficticia_do_ativo": "1.0.1f",
+      "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "nota_base_publicada": 7.5,
+      "fonte_avaliacao": "nvd@nist.gov",
+      "fonte_primaria": "https://nvd.nist.gov/vuln/detail/CVE-2014-0160",
+      "api_fonte_primaria": "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2014-0160",
+      "referencia_cvefind": "https://www.cvefind.com/pt/cve/cve-2014-0160.html",
+      "consulta": "2026-11-18",
+      "ultima_modificacao_nvd": "2026-06-17T00:02:24.467"
+    },
+    {
+      "cve": "CVE-2023-34362",
+      "produto": "Progress MOVEit Transfer",
+      "versao_ficticia_do_ativo": "2023.0.0 (15.0.0)",
+      "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "nota_base_publicada": 9.8,
+      "fonte_avaliacao": "nvd@nist.gov",
+      "fonte_primaria": "https://nvd.nist.gov/vuln/detail/CVE-2023-34362",
+      "api_fonte_primaria": "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2023-34362",
+      "referencia_cvefind": "https://www.cvefind.com/pt/cve/cve-2023-34362.html",
+      "consulta": "2026-11-18",
+      "ultima_modificacao_nvd": "2026-06-17T06:03:28.760"
+    }
+  ]
+}

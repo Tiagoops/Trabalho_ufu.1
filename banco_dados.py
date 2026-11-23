@@ -11,8 +11,9 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+from dataclasses import fields, is_dataclass
 
-from modelos import Ativo
+from modelos import Ativo, Vulnerabilidade, validar_numero
 
 CAMINHO_ARQUIVO_PADRAO = str(Path(__file__).resolve().parent / "ativos_db.txt")
 
@@ -28,6 +29,11 @@ class BancoDeDados:
         self._estado_salvo = self._capturar_estado()
 
     def _carregar(self) -> None:
+        from migracao import verificar_pendente
+        if verificar_pendente(self.caminho):
+            self._gravacao_bloqueada = True
+            print("[Aviso] Migração pendente. Conclua ou cancele antes de usar a base.")
+            return
         try:
             with open(self.caminho, "rb") as arquivo:
                 original = arquivo.read()
@@ -41,12 +47,21 @@ class BancoDeDados:
             )
             return
         try:
-            conteudo = original.decode("utf-8").strip()
+            conteudo = original.decode("utf-8-sig").strip()
             if not conteudo:
                 return
             dados = json.loads(conteudo)
             if not isinstance(dados, list):
                 raise ValueError("a raiz da base deve ser uma lista")
+            if any(isinstance(v, dict) and (
+                isinstance(v.get('severidade'), str) or 'status' in v
+            ) for a in dados if isinstance(a, dict)
+                   for v in (a.get('vulnerabilidades') or [])
+                   if isinstance(a.get('vulnerabilidades'), list)):
+                self._gravacao_bloqueada = True
+                print("[Aviso] Base antiga: gravações bloqueadas. Execute migracao.py "
+                      "para preparar backup e revisar a exclusão.")
+                return
             ativos = [Ativo.from_dict(item) for item in dados]
             self._validar_unicidade(ativos)
         except (ValueError, KeyError, TypeError, AttributeError) as erro:
@@ -59,6 +74,8 @@ class BancoDeDados:
     def _validar_unicidade(ativos: List[Ativo]) -> None:
         ids = set()
         hostnames = set()
+        ids_vulnerabilidades = set()
+        existentes = {a.id_ativo for a in ativos}
         for ativo in ativos:
             Ativo.from_dict(ativo.to_dict())
             if ativo.id_ativo in ids:
@@ -68,6 +85,12 @@ class BancoDeDados:
                 raise ValueError(f"hostname '{ativo.hostname}' repetido")
             ids.add(ativo.id_ativo)
             hostnames.add(chave)
+            if not set(ativo.dependencias) <= existentes:
+                raise ValueError("dependência aponta para ativo inexistente")
+            for vulnerabilidade in ativo.vulnerabilidades:
+                if vulnerabilidade.id_vulnerabilidade in ids_vulnerabilidades:
+                    raise ValueError("ID de vulnerabilidade repetido")
+                ids_vulnerabilidades.add(vulnerabilidade.id_vulnerabilidade)
 
     def _isolar_base_ilegivel(self, erro: Exception, original: bytes) -> None:
         """Copia os bytes originais para um backup exclusivo antes de liberar escrita."""
@@ -96,28 +119,36 @@ class BancoDeDados:
         )
 
     def _capturar_estado(self):
-        """Guarda valores e referências para restaurar inclusive aliases externos."""
-        return [
-            (
-                ativo,
-                (ativo.id_ativo, ativo.hostname, ativo.responsavel, ativo.setor, ativo.tipo),
-                ativo.vulnerabilidades,
-                [(v, (v.descricao, v.categoria, v.severidade, v.status))
-                 for v in ativo.vulnerabilidades],
-            )
-            for ativo in self.ativos_por_id.values()
-        ]
+        """Inclui dicionários de dependências, listas e referências externas."""
+        return self._capturar(list(self.ativos_por_id.values()))
+
+    @classmethod
+    def _capturar(cls, valor):
+        if isinstance(valor, list):
+            return ('lista', valor, [cls._capturar(v) for v in valor])
+        if isinstance(valor, dict):
+            return ('dict', valor, {k: cls._capturar(v) for k, v in valor.items()})
+        if is_dataclass(valor) and not valor.__dataclass_params__.frozen:
+            return ('objeto', valor, {f.name: cls._capturar(getattr(valor, f.name)) for f in fields(valor)})
+        return ('valor', valor, None)
+
+    @classmethod
+    def _restaurar(cls, estado):
+        tipo, valor, filhos = estado
+        if tipo == 'lista':
+            valor[:] = [cls._restaurar(f) for f in filhos]
+        elif tipo == 'dict':
+            valor.clear()
+            valor.update({k: cls._restaurar(v) for k, v in filhos.items()})
+        elif tipo == 'objeto':
+            for campo, filho in filhos.items():
+                setattr(valor, campo, cls._restaurar(filho))
+        return valor
 
     def _restaurar_estado(self) -> None:
         self.ativos_por_id.clear()
         self.ativos_por_hostname.clear()
-        for ativo, campos, lista, vulnerabilidades in self._estado_salvo:
-            (ativo.id_ativo, ativo.hostname, ativo.responsavel, ativo.setor, ativo.tipo) = campos
-            for vulnerabilidade, valores in vulnerabilidades:
-                (vulnerabilidade.descricao, vulnerabilidade.categoria,
-                 vulnerabilidade.severidade, vulnerabilidade.status) = valores
-            lista[:] = [v for v, _ in vulnerabilidades]
-            ativo.vulnerabilidades = lista
+        for ativo in self._restaurar(self._estado_salvo):
             self._indexar(ativo)
 
     @staticmethod
@@ -135,8 +166,9 @@ class BancoDeDados:
         temporario = None
         confirmado = False
         try:
-            if self._gravacao_bloqueada:
+            if self.gravacao_bloqueada:
                 raise RuntimeError("gravação bloqueada: a base não pôde ser lida ou protegida")
+            self._validar_ids_estaveis(self._estado_salvo)
             ativos = list(self.ativos_por_id.values())
             self._validar_unicidade(ativos)
             dados = [ativo.to_dict() for ativo in ativos]
@@ -148,7 +180,7 @@ class BancoDeDados:
                 prefix=caminho.name + ".", suffix=".tmp", dir=str(caminho.parent)
             )
             with os.fdopen(fd, "w", encoding="utf-8") as arquivo:
-                json.dump(dados, arquivo, ensure_ascii=False, indent=2)
+                json.dump(dados, arquivo, ensure_ascii=False, indent=2, allow_nan=False)
                 arquivo.flush()
                 os.fsync(arquivo.fileno())
             os.replace(temporario, self.caminho)
@@ -168,6 +200,26 @@ class BancoDeDados:
     def _indexar(self, ativo: Ativo) -> None:
         self.ativos_por_id[ativo.id_ativo] = ativo
         self.ativos_por_hostname[ativo.hostname.lower()] = ativo
+
+    @property
+    def gravacao_bloqueada(self) -> bool:
+        """Também detecta uma preparação iniciada depois que a base foi aberta."""
+        from migracao import verificar_pendente
+        return self._gravacao_bloqueada or verificar_pendente(self.caminho)
+
+    @classmethod
+    def _validar_ids_estaveis(cls, estado):
+        tipo, valor, filhos = estado
+        if tipo == 'objeto':
+            if (isinstance(valor, Vulnerabilidade)
+                    and valor.id_vulnerabilidade != filhos['id_vulnerabilidade'][1]):
+                raise ValueError("ID de vulnerabilidade não pode ser alterado")
+        if tipo in ('objeto', 'dict'):
+            for filho in filhos.values():
+                cls._validar_ids_estaveis(filho)
+        elif tipo == 'lista':
+            for filho in filhos:
+                cls._validar_ids_estaveis(filho)
 
     def existe_id(self, id_ativo: int) -> bool:
         return id_ativo in self.ativos_por_id
@@ -198,9 +250,43 @@ class BancoDeDados:
     def remover(self, id_ativo: int) -> Optional[Ativo]:
         ativo = self.ativos_por_id.pop(id_ativo, None)
         if ativo is not None:
+            for outro in self.ativos_por_id.values():
+                outro.dependencias.pop(id_ativo, None)
+                outro.avaliacoes_dependencias.pop(id_ativo, None)
             self.ativos_por_hostname.pop(ativo.hostname.lower(), None)
             self.salvar()
         return ativo
+
+    def definir_dependencia(self, origem: int, destino: int, peso: float, *, avaliacao=None) -> None:
+        """Cadastra ou edita uma relação; a estabilidade global é validada no cálculo."""
+        if type(origem) is not int or type(destino) is not int:
+            raise ValueError("IDs devem ser inteiros positivos")
+        if origem == destino:
+            raise ValueError("autodependência não é permitida")
+        if origem not in self.ativos_por_id or destino not in self.ativos_por_id:
+            raise ValueError("ativo de origem ou destino inexistente")
+        numero = validar_numero(peso, "peso", 1, exclusivo=True)
+        if avaliacao is not None:
+            from avaliacao import AvaliacaoDependencia
+            if not isinstance(avaliacao, AvaliacaoDependencia) or avaliacao.peso != numero:
+                raise ValueError("peso incompatível com os critérios informados")
+        ativo = self.ativos_por_id[origem]
+        ativo.dependencias[destino] = numero
+        if avaliacao is None:
+            ativo.avaliacoes_dependencias.pop(destino, None)
+        else:
+            ativo.avaliacoes_dependencias[destino] = avaliacao
+        self.salvar()
+
+    def remover_dependencia(self, origem: int, destino: int) -> None:
+        if type(origem) is not int or type(destino) is not int:
+            raise ValueError("IDs devem ser inteiros positivos")
+        ativo = self.buscar_por_id(origem)
+        if ativo is None or destino not in ativo.dependencias:
+            raise ValueError("dependência inexistente")
+        del ativo.dependencias[destino]
+        ativo.avaliacoes_dependencias.pop(destino, None)
+        self.salvar()
 
     def listar_todos(self) -> List[Ativo]:
         return list(self.ativos_por_id.values())

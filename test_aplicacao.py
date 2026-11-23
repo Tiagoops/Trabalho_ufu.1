@@ -17,11 +17,13 @@ import cores
 import main
 from banco_dados import BancoDeDados
 from modelos import Ativo, Vulnerabilidade
-from tipos import Severidade, StatusVulnerabilidade, TipoAtivo
+from tipos import TipoAtivo
 from test_banco_dados import novo_ativo
 
 
 RAIZ = Path(__file__).resolve().parent
+VETOR_ALTO = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+VETOR_MENOR = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
 
 
 class TestModelos(unittest.TestCase):
@@ -50,8 +52,7 @@ class TestModelos(unittest.TestCase):
             ativo = novo_ativo()
             texto = ativo.vulnerabilidades[0].formatar(1)
             self.assertIn("[1]", texto)
-            self.assertIn("[Alta]", texto)
-            self.assertIn("Aberta", texto)
+            self.assertIn("[Severidade: 7.5]", texto)
             self.assertNotIn("\x1b", texto)
             self.assertIn("Servidor-01", str(ativo))
 
@@ -106,10 +107,10 @@ class TestAplicacao(unittest.TestCase):
     def test_cadastro_com_vulnerabilidade_inicial(self):
         self.chamar(main.cadastrar_ativo,
                     ["1", "Servidor", "João", "TI", "2", "s",
-                     "Senha fraca", "Credenciais", "4", "1", "n"])
+                     "Senha fraca", "Credenciais", "2", VETOR_ALTO, "n"])
         ativo = BancoDeDados(self.raiz / "base.txt").buscar_por_id(1)
         self.assertEqual(ativo.hostname, "Servidor")
-        self.assertIs(ativo.vulnerabilidades[0].severidade, Severidade.CRITICA)
+        self.assertEqual(ativo.vulnerabilidades[0].severidade, 9.8)
         self.assertIn("cadastrado com sucesso", self.saida.getvalue())
 
     def test_cadastro_rejeita_duplicados_e_repete(self):
@@ -194,15 +195,15 @@ class TestAplicacao(unittest.TestCase):
         self.db.adicionar(ativo)
         self.chamar(main.visualizar_vulnerabilidades, ["1"])
         self.assertIn("sem vulnerabilidades", self.saida.getvalue())
-        self.chamar(main.cadastrar_vulnerabilidade, ["1", "Senha fraca", "Senha", "4", "1"])
+        self.chamar(main.cadastrar_vulnerabilidade, ["1", "Senha fraca", "Senha", "2", VETOR_ALTO])
         self.chamar(main.visualizar_vulnerabilidades, ["1"])
         self.assertIn("Senha fraca", self.saida.getvalue())
         self.chamar(main.atualizar_vulnerabilidade,
-                    ["1", "1", "Senha corrigida", "Credencial", "s", "1", "s", "3"])
+                    ["1", "1", "Senha corrigida", "Credencial", "s", "2", VETOR_MENOR])
         v = BancoDeDados(self.raiz / "base.txt").buscar_por_id(1).vulnerabilidades[0]
         self.assertEqual(v.descricao, "Senha corrigida")
-        self.assertIs(v.severidade, Severidade.BAIXA)
-        self.assertIs(v.status, StatusVulnerabilidade.CORRIGIDA)
+        self.assertEqual(v.severidade, 7.5)
+        self.assertEqual(v.vetor_cvss, VETOR_MENOR)
         self.chamar(main.remover_vulnerabilidade, ["1", "1", "n"])
         self.assertEqual(len(ativo.vulnerabilidades), 1)
         self.chamar(main.remover_vulnerabilidade, ["1", "1", "s"])
@@ -225,8 +226,8 @@ class TestAplicacao(unittest.TestCase):
         self.assertEqual(ativo.vulnerabilidades, [])
 
     def test_csv_colunas_acentos_virgulas_severidade_e_desempate(self):
-        for numero, severidade in ((8, Severidade.ALTA), (2, Severidade.ALTA),
-                                   (4, Severidade.CRITICA), (1, Severidade.BAIXA)):
+        for numero, severidade in ((8, 7.5), (2, 7.5),
+                                   (4, 9.8), (1, 2.0)):
             ativo = novo_ativo(numero, "Host-" + str(numero))
             ativo.vulnerabilidades[0].severidade = severidade
             ativo.vulnerabilidades[0].descricao = 'Exposição, versão "antiga"'
@@ -237,9 +238,9 @@ class TestAplicacao(unittest.TestCase):
             leitor = csv.DictReader(arquivo)
             linhas = list(leitor)
         self.assertEqual(leitor.fieldnames,
-                         ["severidade", "id_ativo", "hostname", "categoria", "descricao", "status"])
+                         ["severidade", "id_ativo", "hostname", "categoria", "descricao"])
         self.assertEqual([linha["id_ativo"] for linha in linhas], ["4", "2", "8", "1"])
-        self.assertEqual(linhas[0]["severidade"], "Crítica")
+        self.assertEqual(linhas[0]["severidade"], "9.8")
         self.assertEqual(linhas[0]["descricao"], 'Exposição, versão "antiga"')
 
     def test_csv_sem_vulnerabilidades_nao_cria_arquivo(self):
@@ -286,8 +287,8 @@ class TestAplicacao(unittest.TestCase):
             (main.cadastrar_ativo, ["2", "Novo", "Maria", "TI", "1", "n"]),
             (main.deletar_ativo, ["1", "s"]),
             (main.atualizar_ativo, ["1", "Novo", "", "", "n"]),
-            (main.cadastrar_vulnerabilidade, ["1", "Nova", "Cat", "1", "1"]),
-            (main.atualizar_vulnerabilidade, ["1", "1", "Alterada", "", "n", "n"]),
+            (main.cadastrar_vulnerabilidade, ["1", "Nova", "Cat", "2", VETOR_ALTO]),
+            (main.atualizar_vulnerabilidade, ["1", "1", "Alterada", "", "n"]),
             (main.remover_vulnerabilidade, ["1", "1", "s"]),
         ]
         self.db.adicionar(novo_ativo())
@@ -321,12 +322,12 @@ class TestCores(unittest.TestCase):
     def test_saida_sem_terminal_desativa(self):
         with patch.dict(os.environ, {}, clear=True), patch("sys.stdout.isatty", return_value=False):
             importlib.reload(cores)
-            self.assertEqual(cores.colorir_status("ABERTA", "Aberta"), "Aberta")
+            self.assertEqual(cores.colorir("Texto", "verde"), "Texto")
 
     def test_terminal_com_cores_e_cor_desconhecida(self):
         with patch.dict(os.environ, {}, clear=True), patch("sys.stdout.isatty", return_value=True):
             importlib.reload(cores)
-            self.assertEqual(cores.colorir_severidade("CRITICA", "Crítica"), "\x1b[1;31mCrítica\x1b[0m")
+            self.assertEqual(cores.colorir("Texto", "vermelho_forte"), "\x1b[1;31mTexto\x1b[0m")
             self.assertEqual(cores.colorir("Texto", "desconhecida"), "Texto")
 
 
@@ -337,11 +338,41 @@ class TestExecucaoIsolada(unittest.TestCase):
         self.raiz = Path(self.temp.name)
         self.projeto = self.raiz / "projeto"
         self.projeto.mkdir()
-        for nome in ("main.py", "banco_dados.py", "modelos.py", "tipos.py", "cores.py"):
+
+        arquivos = (
+            "main.py",
+            "banco_dados.py",
+            "modelos.py",
+            "tipos.py",
+            "cores.py",
+            "migracao.py",
+            "servico_risco.py",
+            "avaliacao.py",
+            "biblioteca.py",
+            "catalogo_cvss.py",
+        )
+
+        for nome in arquivos:
             shutil.copy2(RAIZ / nome, self.projeto / nome)
+
+        shutil.copytree(
+            RAIZ / "matematica",
+            self.projeto / "matematica"
+        )
+        shutil.copytree(
+            RAIZ / "exemplos",
+            self.projeto / "exemplos"
+        )
+
         self.outra = self.raiz / "outra"
         self.outra.mkdir()
-        self.env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1")
+
+        self.env = dict(
+            os.environ,
+            PYTHONIOENCODING="utf-8",
+            PYTHONDONTWRITEBYTECODE="1",
+        )
+
 
     def executar(self, argumentos, entrada=""):
         resultado = subprocess.run([sys.executable, "-B"] + argumentos,
@@ -351,11 +382,11 @@ class TestExecucaoIsolada(unittest.TestCase):
         self.assertEqual(resultado.stderr, "")
         return resultado
 
-    def test_sintaxe_compilacao_e_gramatica_python38(self):
+    def test_sintaxe_compilacao_e_gramatica_python311(self):
         for arquivo in RAIZ.glob("*.py"):
             with self.subTest(arquivo=arquivo.name):
                 texto = arquivo.read_text(encoding="utf-8")
-                arvore = ast.parse(texto, filename=arquivo.name, feature_version=(3, 8))
+                arvore = ast.parse(texto, filename=arquivo.name, feature_version=(3, 11))
                 compile(arvore, arquivo.name, "exec")
 
     def test_imports_nao_iniciam_menu_nem_criam_base(self):
@@ -366,6 +397,19 @@ class TestExecucaoIsolada(unittest.TestCase):
         self.assertEqual(list(self.outra.iterdir()), [])
         self.assertFalse((self.projeto / "ativos_db.txt").exists())
         self.assertFalse((self.projeto / "__pycache__").exists())
+
+    def test_demo_em_outro_diretorio_preserva_bases_e_usa_exemplos_empacotados(self):
+        real = self.projeto / "ativos_db.txt"
+        real.write_bytes(b"base real sentinela; nao abrir")
+        externo = self.outra / "ativos_db.txt"
+        externo.write_bytes(b"base externa sentinela")
+        r = self.executar([str(self.projeto / "main.py"), "--demo"], "12\n1\n11\n4\n0\n")
+        self.assertIn("DEMONSTRAÇÃO TEMPORÁRIA", r.stdout)
+        self.assertIn("demo-CVE-2021-44228", r.stdout)
+        self.assertIn("x (forma (4,)): [16.92", r.stdout)
+        self.assertIn("25%", r.stdout)
+        self.assertEqual(real.read_bytes(), b"base real sentinela; nao abrir")
+        self.assertEqual(externo.read_bytes(), b"base externa sentinela")
 
     def test_base_padrao_independe_da_pasta_e_nao_move_base_legada(self):
         legada = self.outra / "ativos_db.txt"
@@ -379,7 +423,7 @@ class TestExecucaoIsolada(unittest.TestCase):
         self.assertIn("Host", consulta.stdout)
 
     def test_csv_padrao_fica_no_diretorio_de_execucao(self):
-        entrada = "1\n1\nHost\nJoão\nTI\n2\ns\nExposição, versão antiga\nSoftware\n4\n1\nn\n10\n\n0\n"
+        entrada = "1\n1\nHost\nJoão\nTI\n2\ns\nExposição, versão antiga\nSoftware\n2\n" + VETOR_ALTO + "\nn\n10\n\n0\n"
         self.executar([str(self.projeto / "main.py")], entrada)
         csv_path = self.outra / "relatorio_vulnerabilidades.csv"
         self.assertTrue(csv_path.exists())
@@ -387,7 +431,7 @@ class TestExecucaoIsolada(unittest.TestCase):
         with csv_path.open(encoding="utf-8", newline="") as arquivo:
             linhas = list(csv.DictReader(arquivo))
         self.assertEqual(linhas[0]["descricao"], "Exposição, versão antiga")
-        self.assertEqual(linhas[0]["severidade"], "Crítica")
+        self.assertEqual(linhas[0]["severidade"], "9.8")
 
     def test_caminho_personalizado_relativo_e_respeitado(self):
         codigo = "import sys; sys.path.insert(0, " + repr(str(self.projeto)) + "); "
