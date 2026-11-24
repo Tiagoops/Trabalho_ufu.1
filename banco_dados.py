@@ -211,6 +211,8 @@ class BancoDeDados:
     def _validar_ids_estaveis(cls, estado):
         tipo, valor, filhos = estado
         if tipo == 'objeto':
+            if isinstance(valor, Ativo) and valor.id_ativo != filhos['id_ativo'][1]:
+                raise ValueError("ID de ativo não pode ser alterado")
             if (isinstance(valor, Vulnerabilidade)
                     and valor.id_vulnerabilidade != filhos['id_vulnerabilidade'][1]):
                 raise ValueError("ID de vulnerabilidade não pode ser alterado")
@@ -248,6 +250,8 @@ class BancoDeDados:
                 if trecho.lower() in ativo.hostname.lower()]
 
     def remover(self, id_ativo: int) -> Optional[Ativo]:
+        if type(id_ativo) is not int or id_ativo < 1:
+            raise ValueError("ID deve ser um inteiro positivo")
         ativo = self.ativos_por_id.pop(id_ativo, None)
         if ativo is not None:
             for outro in self.ativos_por_id.values():

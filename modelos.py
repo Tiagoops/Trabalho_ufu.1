@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 import math
 from typing import Dict, List, Optional
 from uuid import NAMESPACE_URL, uuid4, uuid5
@@ -104,7 +104,43 @@ class Ativo:
     campos_extras: dict = field(default_factory=dict, repr=False)
     avaliacoes_dependencias: Dict[int, AvaliacaoDependencia] = field(default_factory=dict)
 
+    def __eq__(self, outro):
+        if not isinstance(outro, Ativo):
+            return NotImplemented
+        return all(getattr(self, campo.name) == getattr(outro, campo.name)
+                   for campo in fields(Ativo))
+
+    def __post_init__(self) -> None:
+        if type(self) is not Ativo:
+            self._validar_tipo_concreto()
+
+    def _validar_tipo_concreto(self) -> None:
+        if not isinstance(self.tipo, TipoAtivo):
+            raise ValueError("tipo deve ser uma categoria TipoAtivo")
+        if type(self) is not Ativo and CLASSES_POR_TIPO[self.tipo] is not type(self):
+            raise ValueError("tipo do cadastro incompatível com a classe do ativo")
+
+    @staticmethod
+    def criar(id_ativo: int, hostname: str, responsavel: str, setor: str, tipo: TipoAtivo,
+              vulnerabilidades=None, dependencias=None, campos_extras=None,
+              avaliacoes_dependencias=None) -> Ativo:
+        """Seleciona um dos oito tipos concretos sem mudar os campos do cadastro."""
+        if not isinstance(tipo, TipoAtivo):
+            raise ValueError("tipo deve ser uma categoria TipoAtivo")
+        return CLASSES_POR_TIPO[tipo](
+            id_ativo, hostname, responsavel, setor, tipo,
+            [] if vulnerabilidades is None else vulnerabilidades,
+            {} if dependencias is None else dependencias,
+            {} if campos_extras is None else campos_extras,
+            {} if avaliacoes_dependencias is None else avaliacoes_dependencias,
+        )
+
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        """Consulta de preparação e verificação; não executa correções."""
+        return ("Revisar as ocorrências cadastradas e verificar as correções.",)
+
     def to_dict(self) -> dict:
+        self._validar_tipo_concreto()
         for destino, peso in self.dependencias.items():
             if type(destino) is not int or destino < 1 or destino == self.id_ativo:
                 raise ValueError("ID de dependência inválido ou autodependência")
@@ -181,3 +217,63 @@ class Ativo:
             f"Qtd. de vulnerabilidades: {len(self.vulnerabilidades)}",
             f"Qtd. de dependências: {len(self.dependencias)}",
         ])
+class EstacaoTrabalho(Ativo):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Proteger arquivos do usuário e testar login e aplicativos após a correção.",)
+
+
+class Notebook(EstacaoTrabalho):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Garantir energia e conexão estáveis; conferir acesso remoto e dados em mobilidade.",)
+
+
+class Servidor(Ativo):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Planejar janela dos serviços e conferir cópia recuperável antes da correção.",
+            f"Verificar serviços, clientes e as {len(self.dependencias)} dependência(s) cadastrada(s).",)
+
+
+class Roteador(Ativo):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Exportar configuração antes da correção; depois validar rotas e conectividade.",)
+
+
+class ImpressoraRede(Ativo):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Proteger configuração e credenciais; testar fila e impressão pela rede.",)
+
+
+class Software(Ativo):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Confirmar produto e versão, preparar retorno e executar testes funcionais.",)
+
+
+class AplicacaoWeb(Software):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return super().orientacoes_tratamento() + (
+            "Validar autenticação, rotas e integrações da aplicação web.",)
+
+
+class SistemaBancoDados(Software):
+    def orientacoes_tratamento(self) -> tuple[str, ...]:
+        return ("Conferir backup e restauração em ambiente separado antes da atualização.",) + (
+            super().orientacoes_tratamento()) + (
+            "Validar integridade, permissões e consultas das aplicações dependentes.",)
+
+
+CLASSES_POR_TIPO = {
+    TipoAtivo.NOTEBOOK: Notebook,
+    TipoAtivo.SERVIDOR: Servidor,
+    TipoAtivo.ROTEADOR: Roteador,
+    TipoAtivo.SOFTWARE_LICENCIADO: Software,
+    TipoAtivo.APLICACAO_WEB: AplicacaoWeb,
+    TipoAtivo.BANCO_DE_DADOS: SistemaBancoDados,
+    TipoAtivo.IMPRESSORA_REDE: ImpressoraRede,
+    TipoAtivo.ESTACAO_TRABALHO: EstacaoTrabalho,
+}
