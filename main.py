@@ -178,7 +178,7 @@ def explicar_cvss() -> None:
     print("Não confunda severidade da falha com risco propagado do inventário.\n")
 
 
-def escolher_vetor_catalogo() -> str | None:
+def escolher_referencia_catalogo() -> dict | None:
     """Pesquisar CVEs validadas, escolher ou voltar sem gravar registros."""
     try:
         registros = carregar_catalogo()
@@ -214,12 +214,13 @@ def escolher_vetor_catalogo() -> str | None:
             print("A versão do exemplo não garante aplicabilidade ao ativo atual.")
             confirma = ler_sim_nao("Confirmou que a CVE se aplica a este ativo? (s/n): ")
             if confirma:
-                return item['vetor_cvss']
+                return {"vetor": item["vetor_cvss"], "cve": item["cve"],
+                        "fonte_severidade": item["fonte_primaria"]}
             print("Nenhuma vulnerabilidade foi associada; escolha outra ou volte.")
 
 
-def ler_vetor_cvss() -> str | None:
-    """Retorna vetor Base validado ou None ao voltar, sem gravação parcial."""
+def ler_avaliacao_cvss() -> dict | None:
+    """Retorna vetor e eventual origem do catálogo, sem gravação parcial."""
     while True:
         print("\n--- AVALIAÇÃO DE VULNERABILIDADE ---")
         print("1 - Responder critérios técnicos CVSS 4.0")
@@ -233,11 +234,12 @@ def ler_vetor_cvss() -> str | None:
         if modo == "4":
             explicar_cvss()
             continue
+        referencia = {}
         if modo == "3":
-            vetor = escolher_vetor_catalogo()
-            if vetor is None:
+            referencia = escolher_referencia_catalogo()
+            if referencia is None:
                 continue
-            nota, normalizado = calcular_cvss(vetor)
+            nota, normalizado = calcular_cvss(referencia["vetor"])
         elif modo == "1":
             print("\nResponda com base em evidências, não apenas no tipo do ativo.")
             print("N significa nenhum; se desconhecido, use V para voltar.")
@@ -286,7 +288,8 @@ def ler_vetor_cvss() -> str | None:
         print(f"Severidade calculada: {nota:g} (não é o risco do ativo).")
         print("NA MATRIZ: v recebe a severidade; M vincula a ocorrência ao ativo.")
         print("b = M @ v (risco próprio); (I - A) @ x = b (risco efetivo).")
-        return normalizado
+        return {"vetor": normalizado, "cve": referencia.get("cve"),
+                "fonte_severidade": referencia.get("fonte_severidade")}
 
 
 def ler_avaliacao_dependencia() -> AvaliacaoDependencia:
@@ -330,11 +333,11 @@ def ler_multiplas_vulnerabilidades() -> List[Vulnerabilidade]:
         categoria = ler_texto(
             "  Categoria (ex.: senha fraca, software desatualizado, exposição de serviço): "
         )
-        vetor = ler_vetor_cvss()
-        if vetor is None:
+        avaliacao = ler_avaliacao_cvss()
+        if avaliacao is None:
             print("Cadastro de ocorrência cancelado; mantendo dados anteriores.")
             break
-        vulnerabilidades.append(Vulnerabilidade.por_cvss(descricao, categoria, vetor))
+        vulnerabilidades.append(Vulnerabilidade.por_cvss(descricao, categoria, **avaliacao))
         if not ler_sim_nao("  Adicionar outra vulnerabilidade a este ativo? (s/n): "):
             break
     return vulnerabilidades
@@ -450,12 +453,12 @@ def cadastrar_vulnerabilidade(db: BancoDeDados) -> None:
 
     descricao = ler_texto("Descrição da vulnerabilidade: ")
     categoria = ler_texto("Categoria: ")
-    vetor = ler_vetor_cvss()
-    if vetor is None:
+    avaliacao = ler_avaliacao_cvss()
+    if avaliacao is None:
         print("Cadastro cancelado; a base não foi alterada.")
         return
 
-    ativo.vulnerabilidades.append(Vulnerabilidade.por_cvss(descricao, categoria, vetor))
+    ativo.vulnerabilidades.append(Vulnerabilidade.por_cvss(descricao, categoria, **avaliacao))
     db.salvar()
     print("Vulnerabilidade cadastrada com sucesso.")
 
@@ -528,11 +531,13 @@ def atualizar_vulnerabilidade(db: BancoDeDados) -> None:
     if ler_sim_nao(
         f"Alterar a severidade (atual: {vulnerabilidade.severidade:g})? (s/n): "
     ):
-        vetor = ler_vetor_cvss()
-        if vetor is None:
+        avaliacao = ler_avaliacao_cvss()
+        if avaliacao is None:
             print("Atualização cancelada; a base não foi alterada.")
             return
-        nova_avaliacao = calcular_cvss(vetor)
+        nova_avaliacao = Vulnerabilidade.por_cvss(
+            nova_descricao or vulnerabilidade.descricao,
+            nova_categoria or vulnerabilidade.categoria, **avaliacao)
 
     # Só altera depois de coletar tudo (ver comentário em atualizar_ativo).
     if nova_descricao:
@@ -540,8 +545,10 @@ def atualizar_vulnerabilidade(db: BancoDeDados) -> None:
     if nova_categoria:
         vulnerabilidade.categoria = nova_categoria
     if nova_avaliacao is not None:
-        vulnerabilidade.severidade, vulnerabilidade.vetor_cvss = nova_avaliacao
-        vulnerabilidade.fonte_severidade = None
+        vulnerabilidade.severidade = nova_avaliacao.severidade
+        vulnerabilidade.vetor_cvss = nova_avaliacao.vetor_cvss
+        vulnerabilidade.fonte_severidade = nova_avaliacao.fonte_severidade
+        vulnerabilidade.cve = nova_avaliacao.cve
 
     db.salvar()
     print("Vulnerabilidade atualizada com sucesso.")

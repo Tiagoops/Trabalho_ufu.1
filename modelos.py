@@ -7,6 +7,7 @@ import math
 from typing import Dict, List, Optional
 from uuid import NAMESPACE_URL, uuid4, uuid5
 
+from catalogo_cvss import CVE_RE
 from tipos import TipoAtivo
 from avaliacao import AvaliacaoDependencia, calcular_cvss
 
@@ -44,6 +45,7 @@ class Vulnerabilidade:
     id_vulnerabilidade: str = field(default_factory=lambda: str(uuid4()))
     vetor_cvss: Optional[str] = None
     fonte_severidade: Optional[str] = None
+    cve: Optional[str] = None
 
     def __post_init__(self) -> None:
         self.severidade = validar_numero(self.severidade, "severidade", 10)
@@ -54,13 +56,24 @@ class Vulnerabilidade:
             self.vetor_cvss = normalizado
         if self.fonte_severidade is not None:
             _validar_textos({"fonte": self.fonte_severidade}, ("fonte",))
+        self._validar_referencia_cve()
+
+    def _validar_referencia_cve(self) -> None:
+        if self.cve is not None:
+            if not isinstance(self.cve, str) or not CVE_RE.fullmatch(self.cve):
+                raise ValueError("CVE inválida: use CVE-AAAA-NNNN ou mais dígitos")
+            if self.fonte_severidade != f"https://nvd.nist.gov/vuln/detail/{self.cve}":
+                raise ValueError("a fonte NVD deve corresponder à CVE registrada")
 
     @classmethod
-    def por_cvss(cls, descricao: str, categoria: str, vetor: str) -> Vulnerabilidade:
+    def por_cvss(cls, descricao: str, categoria: str, vetor: str, *,
+                 cve: Optional[str] = None, fonte_severidade: Optional[str] = None) -> Vulnerabilidade:
         nota, normalizado = calcular_cvss(vetor)
-        return cls(descricao, categoria, nota, vetor_cvss=normalizado)
+        return cls(descricao, categoria, nota, vetor_cvss=normalizado,
+                   cve=cve, fonte_severidade=fonte_severidade)
 
     def to_dict(self) -> dict:
+        self._validar_referencia_cve()
         return {
             "descricao": self.descricao,
             "categoria": self.categoria,
@@ -68,6 +81,7 @@ class Vulnerabilidade:
             "id_vulnerabilidade": self.id_vulnerabilidade,
             **({"vetor_cvss": self.vetor_cvss} if self.vetor_cvss is not None else {}),
             **({"fonte_severidade": self.fonte_severidade} if self.fonte_severidade is not None else {}),
+            **({"cve": self.cve} if self.cve is not None else {}),
         }
 
     @staticmethod
@@ -80,13 +94,15 @@ class Vulnerabilidade:
             identificador = str(uuid5(NAMESPACE_URL, "ufu:ocorrencia:" + referencia))
         _validar_textos({"id": identificador}, ("id",))
         return Vulnerabilidade(d["descricao"], d["categoria"], d["severidade"], identificador,
-                               d.get("vetor_cvss"), d.get("fonte_severidade"))
+                               d.get("vetor_cvss"), d.get("fonte_severidade"), d.get("cve"))
 
     def formatar(self, numero: Optional[int] = None) -> str:
         prefixo = f"  [{numero}] " if numero is not None else "  - "
-        origem = self.vetor_cvss or self.fonte_severidade or "informada anteriormente; sem critérios registrados"
+        origem = " | ".join(v for v in (self.vetor_cvss, self.fonte_severidade) if v)
+        origem = origem or "informada anteriormente; sem critérios registrados"
+        referencia = f" | CVE: {self.cve}" if self.cve is not None else ""
         return (f"{prefixo}[Severidade: {self.severidade:g}] {self.descricao} "
-                f"(Categoria: {self.categoria} | ID: {self.id_vulnerabilidade} | Origem: {origem})")
+                f"(Categoria: {self.categoria} | ID: {self.id_vulnerabilidade}{referencia} | Origem: {origem})")
 
     def __str__(self) -> str:
         return self.formatar()

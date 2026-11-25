@@ -70,14 +70,14 @@ class TestAvaliacaoAutomatica(unittest.TestCase):
     def test_questionario_tecnico_calcula_sem_pedir_nota(self):
         entradas = ["1", "N", "L", "N", "N", "N", "H", "H", "H", "H", "H", "N"]
         with patch("builtins.input", side_effect=entradas), contextlib.redirect_stdout(io.StringIO()):
-            vetor = main.ler_vetor_cvss()
+            vetor = main.ler_avaliacao_cvss()["vetor"]
         self.assertEqual(vetor, VETOR40)
         self.assertEqual(calcular_cvss(vetor)[0], 9.9)
 
     def test_codigo_de_metrica_invalido_e_corrigivel(self):
         entradas = ["1", "invalido", "N", "L", "N", "N", "N", "H", "H", "H", "H", "H", "N"]
         with patch("builtins.input", side_effect=entradas), contextlib.redirect_stdout(io.StringIO()):
-            self.assertEqual(main.ler_vetor_cvss(), VETOR40)
+            self.assertEqual(main.ler_avaliacao_cvss()["vetor"], VETOR40)
 
     def test_cli_calcula_peso_e_mostra_indisponibilidade(self):
         with tempfile.TemporaryDirectory() as pasta:

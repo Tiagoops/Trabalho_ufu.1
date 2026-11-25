@@ -349,3 +349,20 @@ do autor enquanto o frontend é desenvolvido. Isso não equivale ao atendimento
 do requisito de hospedagem do enunciado. A demonstração usa somente a CLI.
 As falhas intermitentes Windows em `os.replace` seguem sem causa identificada;
 não há retry automático nem garantia de que uma execução local vá completá-las.
+
+
+### Rastreabilidade da seleção no catálogo CVE
+
+Selecionar e confirmar uma CVE na biblioteca local grava na ocorrência o campo
+opcional `cve`, o vetor e a URL NVD em `fonte_severidade`. O ID da ocorrência
+continua independente: a mesma CVE pode estar associada a diferentes ativos.
+A consulta mostra tanto o vetor quanto a fonte. A recarga JSON e a importação
+de ativos preservam esses metadados; registros antigos sem `cve` continuam válidos
+e não recebem associação presumida pela descrição ou pelo vetor.
+
+Na edição, escolher outra CVE substitui sua referência. Uma avaliação manual
+remove a associação anterior à CVE e sua fonte; editar somente descrição ou
+categoria mantém os metadados. Cancelar a edição preserva o registro inteiro.
+São recusadas CVEs malformadas e fontes NVD que não correspondam ao identificador.
+O formato do CSV permanece o mesmo. Não há varredura nem sincronização online;
+a confirmação humana da aplicabilidade ao ativo continua necessária.
