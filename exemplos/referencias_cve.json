@@ -5,6 +5,14 @@
     {
       "cve": "CVE-2021-44228",
       "produto": "Apache Log4j Core",
+      "descricao": "Falha em determinadas versões do Apache Log4j Core que pode permitir execução de código.",
+      "cwes": [
+        {"codigo": "CWE-917", "fonte": "NIST"},
+        {"codigo": "CWE-20", "fonte": "Apache Software Foundation"},
+        {"codigo": "CWE-400", "fonte": "Apache Software Foundation"},
+        {"codigo": "CWE-502", "fonte": "Apache Software Foundation"}
+      ],
+      "consulta_descricao_cwe": "2026-11-25",
       "versao_ficticia_do_ativo": "2.14.1",
       "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
       "nota_base_publicada": 10.0,
@@ -18,6 +26,11 @@
     {
       "cve": "CVE-2014-0160",
       "produto": "OpenSSL",
+      "descricao": "Falha de leitura fora dos limites em determinadas versões do OpenSSL que pode expor informações da memória.",
+      "cwes": [
+        {"codigo": "CWE-125", "fonte": "NIST"}
+      ],
+      "consulta_descricao_cwe": "2026-11-25",
       "versao_ficticia_do_ativo": "1.0.1f",
       "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
       "nota_base_publicada": 7.5,
@@ -31,6 +44,11 @@
     {
       "cve": "CVE-2023-34362",
       "produto": "Progress MOVEit Transfer",
+      "descricao": "Falha de injeção SQL em determinadas versões do MOVEit Transfer que pode expor ou comprometer dados.",
+      "cwes": [
+        {"codigo": "CWE-89", "fonte": "NIST"}
+      ],
+      "consulta_descricao_cwe": "2026-11-25",
       "versao_ficticia_do_ativo": "2023.0.0 (15.0.0)",
       "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
       "nota_base_publicada": 9.8,

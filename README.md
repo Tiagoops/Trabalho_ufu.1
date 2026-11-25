@@ -351,7 +351,16 @@ As falhas intermitentes Windows em `os.replace` seguem sem causa identificada;
 não há retry automático nem garantia de que uma execução local vá completá-las.
 
 
+Para instalar, manter o catálogo e recuperar o inventário, consulte o
+[guia de operação](OPERACAO.md).
+
 ### Rastreabilidade da seleção no catálogo CVE
+
+Na avaliação de vulnerabilidade, a opção 3 permite buscar no catálogo local por
+CVE, produto, versão de exemplo, descrição ou código CWE completo, como `CWE-89`.
+A descrição é um resumo da fonte NVD. A consulta mostra os códigos CWE e quem
+forneceu cada classificação, além do endereço da referência. Os três registros
+foram consultados para descrição e CWE em 25/11/2026. O catálogo é lido offline.
 
 Selecionar e confirmar uma CVE na biblioteca local grava na ocorrência o campo
 opcional `cve`, o vetor e a URL NVD em `fonte_severidade`. O ID da ocorrência

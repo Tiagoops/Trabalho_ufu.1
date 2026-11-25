@@ -186,7 +186,7 @@ def escolher_referencia_catalogo() -> dict | None:
         print(f"Não foi possível ler o catálogo local: {erro}")
         return None
     print(f"\nBiblioteca local: {len(registros)} CVE(s) de referência; sem acesso online.")
-    print("Digite palavra-chave, produto, versão ou CVE. V = voltar.")
+    print("Busque por descrição, produto, versão, CVE ou código CWE. V = voltar.")
     while True:
         termo = input("Busca: ").strip()
         if termo.casefold() in ("v", "voltar", "0"):
@@ -207,6 +207,12 @@ def escolher_referencia_catalogo() -> dict | None:
                 continue
             item = resultados[int(escolha) - 1]
             print(f"\nCVE: {item['cve']} | Produto: {item['produto']}")
+            if item.get("descricao"):
+                print(f"Descrição de referência: {item['descricao']}")
+            for cwe in item.get("cwes", []):
+                print(f"{cwe['codigo']} | Classificação: {cwe['fonte']}")
+            if item.get("consulta_descricao_cwe"):
+                print(f"Consulta de descrição e CWE: {item['consulta_descricao_cwe']}")
             print(f"Vetor: {item['vetor_cvss']}")
             print(f"Severidade Base: {item['nota_base_publicada']:g}")
             print(f"Fonte: {item['fonte_primaria']}")
