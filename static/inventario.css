@@ -74,3 +74,17 @@ footer { max-width: 1240px; margin: auto; padding: 1.3rem 1.25rem; border-top: 1
   summary span { display: block; margin: .3rem 0 0 1rem; }
   footer { flex-direction: column; }
 }
+.acoes { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; }
+.botao { display: inline-block; font: inherit; cursor: pointer; }
+.principal { background: var(--verde); color: white; border-color: var(--verde); font-weight: 600; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #a74e16; outline-offset: 3px; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+.voltar { display: inline-block; margin-bottom: 1rem; font-size: .9rem; }
+.formulario { max-width: 900px; padding: 1.8rem; background: white; border: 1px solid var(--linha); border-radius: .5rem; }
+.campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; }
+.campo label { display: block; margin-bottom: .4rem; font-weight: 600; font-size: .9rem; }
+.campo input, .campo select { width: 100%; min-height: 2.8rem; padding: .6rem .7rem; border: 1px solid #829a91; border-radius: .3rem; font: inherit; color: var(--tinta); background: white; }
+.campo small { display: block; margin-top: .4rem; color: var(--muted); font-size: .8rem; }
+.formulario .nota { margin: 1.5rem 0; }
+.sucesso { border-color: #62927a; border-left-color: var(--verde); background: #edf5ee; }
+@media (max-width: 650px) { .campos { grid-template-columns: 1fr; } .formulario { padding: 1.2rem; } }

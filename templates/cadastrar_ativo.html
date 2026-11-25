@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastrar ativo | Inventário UFU</title>
+  <link rel="icon" href="data:,"><link rel="stylesheet" href="{{ url_for('static', filename='inventario.css') }}">
+</head>
+<body>
+  <a class="pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="topo"><div class="marca"><span class="simbolo" aria-hidden="true">I</span><div>Inventário de TI<small>UFU / Trabalho 2</small></div></div><span class="etiqueta">Cadastro de ativos</span></header>
+  <main id="conteudo">
+    <a class="voltar" href="{{ url_for('inventario') }}">← Voltar ao inventário</a>
+    <div class="abertura"><div><p class="sobretitulo">Novo registro</p><h1>Cadastrar ativo<span>.</span></h1><p>Preencha os dados do equipamento. Todos os campos são obrigatórios.</p></div></div>
+    {% if erro %}<div class="aviso erro" role="alert" id="erro-cadastro">{{ erro }}</div>{% endif %}
+    <form class="formulario" method="post" action="{{ url_for('cadastrar_ativo') }}"{% if erro %} aria-describedby="erro-cadastro"{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+      <div class="campos">
+        <div class="campo"><label for="id_ativo">ID do ativo</label><input id="id_ativo" name="id_ativo" type="number" min="1" step="1" value="{{ valores.id_ativo }}" required aria-describedby="ajuda-id"><small id="ajuda-id">Número inteiro positivo e único no inventário.</small></div>
+        <div class="campo"><label for="hostname">Hostname</label><input id="hostname" name="hostname" value="{{ valores.hostname }}" maxlength="200" required aria-describedby="ajuda-hostname"><small id="ajuda-hostname">Nome único do equipamento, por exemplo: demo-notebook-01.</small></div>
+        <div class="campo"><label for="responsavel">Responsável</label><input id="responsavel" name="responsavel" value="{{ valores.responsavel }}" maxlength="200" required></div>
+        <div class="campo"><label for="setor">Setor / localização</label><input id="setor" name="setor" value="{{ valores.setor }}" maxlength="200" required></div>
+        <div class="campo"><label for="tipo">Tipo de ativo</label><select id="tipo" name="tipo" required><option value="">Selecione um tipo</option>{% for tipo in tipos %}<option value="{{ tipo.name }}"{% if valores.tipo == tipo.name %} selected{% endif %}>{{ tipo.name|replace('_', ' ')|capitalize }}</option>{% endfor %}</select></div>
+      </div>
+      <p class="nota">O ativo será salvo sem vulnerabilidades e sem dependências. Nesta etapa, esses vínculos continuam sendo gerenciados pela CLI.</p>
+      <div class="acoes"><button class="botao principal" type="submit"{% if indisponivel %} disabled{% endif %}>Salvar ativo</button><a class="botao" href="{{ url_for('inventario') }}">Cancelar</a></div>
+    </form>
+  </main>
+  <footer>Inventário de ativos de TI <span>Cadastro de ativos · Trabalho 2 / UFU</span></footer>
+</body>
+</html>

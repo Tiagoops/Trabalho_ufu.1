@@ -57,19 +57,22 @@ def bloquear_escrita(caminho):
 
 
 class BancoDeDados:
-    def __init__(self, caminho: str = CAMINHO_ARQUIVO_PADRAO):
+    def __init__(self, caminho: str = CAMINHO_ARQUIVO_PADRAO, *, recuperar: bool = True):
+        """recuperar=False exige uma base válida e não tenta isolar erros em backup."""
         self.caminho = str(Path(caminho).resolve())
         self.ativos_por_id: Dict[int, Ativo] = {}
         self.ativos_por_hostname: Dict[str, Ativo] = {}
         self._gravacao_bloqueada = False
         self._estado_salvo = []
         self._assinatura = None
-        self._carregar()
+        self._carregar(recuperar=recuperar)
         self._estado_salvo = self._capturar_estado()
 
-    def _carregar(self) -> None:
+    def _carregar(self, *, recuperar: bool = True) -> None:
         from migracao import verificar_pendente
         if verificar_pendente(self.caminho):
+            if not recuperar:
+                raise InventarioIndisponivel("migração pendente")
             self._gravacao_bloqueada = True
             print("[Aviso] Migração pendente. Conclua ou cancele antes de usar a base.")
             return
@@ -77,9 +80,13 @@ class BancoDeDados:
             with open(self.caminho, "rb") as arquivo:
                 original = arquivo.read()
             self._assinatura = sha256(original).digest()
-        except FileNotFoundError:
+        except FileNotFoundError as erro:
+            if not recuperar:
+                raise InventarioIndisponivel("inventário ausente") from erro
             return
         except OSError as erro:
+            if not recuperar:
+                raise InventarioIndisponivel("inventário inacessível") from erro
             self._gravacao_bloqueada = True
             print(
                 f"[Aviso] Não foi possível acessar a base ({erro}). "
@@ -87,13 +94,17 @@ class BancoDeDados:
             )
             return
         try:
-            ativos = self._decodificar_ativos(original, aceitar_arquivo_vazio=True)
+            ativos = self._decodificar_ativos(original, aceitar_arquivo_vazio=recuperar)
         except _BaseLegada:
+            if not recuperar:
+                raise
             self._gravacao_bloqueada = True
             print("[Aviso] Base antiga: gravações bloqueadas. Execute migracao.py "
                   "para preparar backup e revisar a exclusão.")
             return
-        except (ValueError, KeyError, TypeError, AttributeError) as erro:
+        except (ValueError, KeyError, TypeError, AttributeError, RecursionError) as erro:
+            if not recuperar:
+                raise InventarioIndisponivel("inventário inválido") from erro
             self._isolar_base_ilegivel(erro, original)
             return
         for ativo in ativos:

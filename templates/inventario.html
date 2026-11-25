@@ -11,15 +11,17 @@
   <a class="pular" href="#conteudo">Ir para o conteúdo</a>
   <header class="topo">
     <div class="marca"><span class="simbolo" aria-hidden="true">I</span><div>Inventário de TI<small>UFU / Trabalho 2</small></div></div>
-    <span class="etiqueta">Somente leitura</span>
+    <span class="etiqueta">{{ "Cadastro de ativos" if permitir_cadastro else "Somente leitura" }}</span>
   </header>
   <main id="conteudo">
     <div class="abertura">
       <div><p class="sobretitulo">Visão do inventário</p><h1>Ativos e riscos<span>.</span></h1>
         <p>Equipamentos, vulnerabilidades e o risco transmitido entre ativos.</p></div>
-      <a class="botao" href="{{ url_for('inventario') }}">Atualizar consulta <span aria-hidden="true">↻</span></a>
+      <div class="acoes"><a class="botao" href="{{ url_for('inventario') }}">Atualizar consulta <span aria-hidden="true">↻</span></a>
+        {% if permitir_cadastro %}<a class="botao principal" href="{{ url_for('cadastrar_ativo') }}">Cadastrar ativo</a>{% endif %}</div>
     </div>
-    {% if demonstracao %}<p class="demonstracao">Demonstração com dados fictícios. Nenhum cadastro real é utilizado.</p>{% endif %}
+    {% for mensagem in get_flashed_messages() %}<div class="aviso sucesso" role="status">{{ mensagem }}</div>{% endfor %}
+    {% if demonstracao %}<p class="demonstracao">Demonstração com dados fictícios. Use apenas exemplos fictícios neste ambiente.</p>{% endif %}
     {% if ativos is none %}
       <section class="aviso erro" role="alert"><h2>Inventário indisponível</h2>
         <p>Não foi possível ler uma base válida. Verifique o arquivo e tente atualizar a consulta.</p></section>

@@ -80,64 +80,71 @@ sistema operacional. O catálogo auxilia a avaliação humana de aplicabilidade.
 Backup, operação em servidor, atualização automática e prazos de suporte
 dependem do ambiente e do acordo de entrega.
 
-## Consulta web local
+## Consulta e cadastro web local
 
-O navegador só consulta; cadastro, edição, remoção e a consulta online ao NVD
-continuam na CLI. O frontend começa com dados fictícios já incluídos na imagem.
 Na raiz do projeto:
 
 ```powershell
 docker compose -f docker/compose.yaml up -d --build frontend
-docker compose -f docker/compose.yaml logs --tail 50 frontend
 ```
 
-Abra <http://127.0.0.1:8000>. Para encerrar somente o frontend:
+Abra <http://127.0.0.1:8000>, clique **Cadastrar ativo**, preencha os cinco campos
+e clique **Salvar ativo**. Use apenas dados fictícios nesta demonstração. O ID
+precisa ser inteiro positivo e único; hostname também deve ser único. O novo
+ativo começa sem vulnerabilidades e dependências e aparece na listagem após a
+gravação. Cancelar volta ao inventário sem alterar a base.
+
+O volume `frontend_dados` guarda `/dados/inventario.json` e a trava de escrita.
+A primeira inicialização copia o exemplo fictício versionado; reinícios e
+recriações do contêiner preservam a base existente, inclusive se estiver
+inválida. O exemplo versionado e `ativos_db.txt` da CLI não são sobrescritos.
+Remover o volume elimina os cadastros da demonstração. Para parar sem removê-lo:
 
 ```powershell
 docker compose -f docker/compose.yaml stop frontend
 ```
 
-Para executar sem Docker, com Python 3.11 ou superior:
+Execução local sem Docker, com Python 3.11 ou superior:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -B iniciar_web.py
+```
+
+Sem variáveis, cria uma base demonstrativa em `dados_web/inventario.json` apenas
+na primeira inicialização. Essa pasta fica fora do Git e do contexto Docker.
+O servidor local continua usando Waitress, na porta 8000 em loopback. Encerre
+com Ctrl+C. Não execute junto com outro servidor na mesma porta.
+
+`INVENTARIO_ARQUIVO` define o caminho no servidor. `iniciar_web.py` habilita o
+cadastro nesse caminho e inicializa um arquivo ausente com dados fictícios;
+nunca sobrescreve um arquivo existente. Para apenas consultar, sem inicializar
+nem habilitar o cadastro, mantenha o comando anterior:
+
+```powershell
 $env:PYTHONDONTWRITEBYTECODE = '1'
 .\.venv\Scripts\waitress-serve.exe --listen=127.0.0.1:8000 --call app_web:create_app
 ```
 
-Encerre com Ctrl+C. O Waitress serve a aplicação sem habilitar o depurador do
-Flask. Sem `INVENTARIO_ARQUIVO`, lê `exemplos/inventario_web.json` e identifica
-a demonstração na tela. Para consultar outra base persistida, defina antes de
-iniciar o servidor (comece com uma cópia fictícia):
+A fábrica usa `INVENTARIO_CADASTRO=1` para habilitar cadastro em uma base
+configurada; o exemplo versionado é sempre protegido contra gravação.
+O navegador não escolhe caminhos. As consultas continuam sem escrita. Falha
+na base mostra inventário indisponível; `[]` válido significa nenhum ativo;
+falha só no cálculo mantém os ativos. Falha ao salvar mostra erro sem sucesso.
+
+Formulários abertos antes de um reinício devem ser recarregados, pois o token
+de proteção usa uma sessão assinada com chave temporária do processo. Não há
+autenticação; mantenha a porta em `127.0.0.1`. A implantação na faculdade e o
+controle de acesso em rede ficam para outra etapa.
+
+Verificações com arquivos temporários fictícios:
 
 ```powershell
-$env:INVENTARIO_ARQUIVO = 'C:\caminho\ficticio\inventario.json'
+.\.venv\Scripts\python.exe -B -m unittest tests.test_cadastro_web tests.test_app_web -v
+.\.venv\Scripts\python.exe -B -m unittest discover -q
+docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -q
 ```
 
-Essa variável pertence ao processo do servidor; o navegador não escolhe o
-arquivo. Reinicie o servidor para trocar o caminho. A base é relida em cada
-consulta. Arquivo ausente ou inválido mostra inventário indisponível, sem
-recuperação nem backup automático; `[]` válido mostra nenhum ativo cadastrado.
-Uma falha somente no risco preserva a listagem e os detalhes.
-
-No Docker, para uma base diferente, monte a pasta que a contém como somente
-leitura e aponte `INVENTARIO_ARQUIVO` para o caminho dentro do contêiner. Monte
-a pasta inteira para que o manifesto de migração, se existir, também possa ser
-consultado. O Compose padrão não monta a base real e não precisa dessa mudança.
-Ao voltar ao exemplo local padrão, remova a variável do terminal:
-
-```powershell
-Remove-Item Env:INVENTARIO_ARQUIVO -ErrorAction SilentlyContinue
-```
-
-A interface não possui autenticação; mantenha a porta em `127.0.0.1`.
-Exposição em rede e implantação na faculdade exigem uma etapa própria.
-
-Para validar os estados com bases temporárias fictícias:
-
-```powershell
-.\.venv\Scripts\python.exe -B -m unittest tests.test_app_web -v
-.\.venv\Scripts\python.exe -B -m unittest discover -v
-docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -v
-```
+A edição e remoção, o cadastro de vulnerabilidades, o NVD e as demais ações
+continuam na CLI até os próximos incrementos da interface.

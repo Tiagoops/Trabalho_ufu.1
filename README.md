@@ -393,22 +393,27 @@ São recusadas CVEs malformadas e fontes NVD que não correspondam ao identifica
 O formato do CSV permanece o mesmo. Não há varredura nem sincronização online;
 a confirmação humana da aplicabilidade ao ativo continua necessária.
 
-### Frontend de consulta (somente leitura)
+### Frontend de consulta e cadastro de ativos
 
 O frontend reutiliza `BancoDeDados.consultar_ativos` e `analisar_ativos`, com
-HTML renderizado pelo Flask e servido pelo Waitress. Essa combinação mantém o
+HTML renderizado pelo Flask e servido pelo Waitress. O cadastro usa a mesma
+persistência JSON da CLI, com abertura estrita `BancoDeDados(caminho, recuperar=False)`.
+Essa combinação mantém o
 Python e funciona em Windows e Linux sem um projeto JavaScript separado.
-O exemplo padrão é [inventario_web.json](exemplos/inventario_web.json), um
-retrato persistido do cenário fictício de `ativos_teste.json`. Sua equivalência
-é verificada pela suíte. Não há consulta automática ao NVD nesta página.
+A demonstração é iniciada a partir de [inventario_web.json](exemplos/inventario_web.json),
+um retrato do cenário fictício de `ativos_teste.json`, cuja equivalência é testada.
+O iniciador copia o exemplo apenas quando a base demonstrativa ainda não existe.
+O arquivo versionado e a base da CLI não são alterados. Não há NVD automático.
 
 ```powershell
 docker compose -f docker/compose.yaml up -d --build frontend
 ```
 
 Abra <http://127.0.0.1:8000>. O serviço `frontend` usa a imagem construída,
-sem montar o código do computador, com sistema de arquivos somente leitura e
-usuário sem privilégios. O serviço `inventario` mantém a CLI habitual.
+sem montar o código do computador, com usuário sem privilégios e filesystem
+somente leitura, exceto o volume `frontend_dados` em `/dados`. Esse volume guarda
+os novos cadastros e é preservado ao recriar o contêiner. O serviço `inventario`
+mantém a CLI e sua base habituais.
 Para encerrar apenas a consulta:
 
 ```powershell
@@ -428,9 +433,18 @@ ficam em cache. O risco agregado pode superar 10 e não é porcentagem nem CVSS.
 | Base válida contendo `[]` | Nenhum ativo cadastrado | 200 |
 
 A consulta não instancia o banco pelo construtor de recuperação e não chama
-salvar, trava ou criação de temporários. Não há cadastro, edição nem remoção
-pelo navegador. A necessidade de CRUD web depende de orientação complementar
-do docente; o PDF do Trabalho 2 não o exige explicitamente.
+salvar, trava ou criação de temporários. O botão **Cadastrar ativo** abre um
+formulário com ID, hostname, responsável, setor e tipo. Somente um envio válido
+salva um novo ativo; IDs e hostnames repetidos são recusados. Cancelar apenas
+volta à listagem. O cadastro começa sem vulnerabilidades e dependências.
+
+Os formulários usam token de proteção contra envios de outras páginas. Dados
+inválidos preservam os campos para correção; falhas de gravação não anunciam
+sucesso. A abertura estrita recusa base ausente/inválida ou migração pendente
+sem criar backup. A CLI conserva sua recuperação padrão.
+
+A ampliação para as demais opções do menu será incremental. Edição e remoção,
+avaliação de vulnerabilidades, importação e demais ações ainda usam a CLI.
 
 A interface não tem autenticação e a publicação padrão é apenas em loopback.
 Não exponha essa configuração em uma rede. A implantação na faculdade, os
@@ -442,3 +456,5 @@ Referências de implementação: [templates e escape automático do Flask](https
 e [Waitress no Windows e Linux](https://flask.palletsprojects.com/en/stable/deploying/waitress/).
 
 Resultados e limites desta entrega: [VALIDACAO_FRONTEND.md](validacao/VALIDACAO_FRONTEND.md).
+
+Cadastro, persistência e testes: [VALIDACAO_CADASTRO_WEB.md](validacao/VALIDACAO_CADASTRO_WEB.md).

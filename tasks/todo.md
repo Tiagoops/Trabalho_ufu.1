@@ -10,3 +10,10 @@
 Pendências externas: confirmar se há orientação complementar exigindo CRUD web.
 Push depende de autorização específica. Implantação na faculdade e teste de
 24 horas continuam adiados para uma próxima etapa.
+
+## Incremento de cadastro web
+
+- [x] Formulário e gravação JSON reaproveitando o banco existente.
+- [x] Testes de validação, duplicidade, proteção, concorrência e erros.
+- [x] Docker/Compose, navegador, persistência após recriação e documentação.
+- [x] Revisão final concluída; entrega preparada para o commit das três etapas, sem push.

@@ -15,8 +15,16 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     image: trabalho-ufu:local
-    command: ["waitress-serve", "--listen=0.0.0.0:8000", "--call", "app_web:create_app"]
+    command: ["python", "-B", "iniciar_web.py"]
+    environment:
+      INVENTARIO_ARQUIVO: /dados/inventario.json
+      INVENTARIO_HOST: 0.0.0.0
+      INVENTARIO_DEMONSTRACAO: "1"
     ports:
       - "127.0.0.1:8000:8000"
     user: "65534:65534"
     read_only: true
+    volumes:
+      - frontend_dados:/dados
+volumes:
+  frontend_dados:

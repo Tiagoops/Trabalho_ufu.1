@@ -26,3 +26,17 @@ Pendências de escopo: orientação complementar sobre CRUD no navegador.
 Implantação na faculdade e 24 horas ficam para depois. Fazer um commit ao
 concluir as três etapas, preservar os dois arquivos não rastreados originais e
 não fazer push sem autorização específica.
+
+## Incremento: cadastro web solicitado em 25/11/2026
+
+1. Formulário de ativo e gravação: app_web.py, banco_dados.py,
+   templates/cadastrar_ativo.html, templates/inventario.html, static/inventario.css.
+   Aceite: cadastro válido persiste e retorna à listagem, mantendo a classe de POO.
+2. Proteção e falhas: tests/test_cadastro_web.py e iniciar_web.py.
+   Aceite: duplicidades e envios inválidos não gravam; GET/cancelar não escrevem;
+   base inválida não cria backup; erro/conflito não anuncia sucesso.
+3. Demonstração persistente: Dockerfile/Compose, ignores, operação e evidências.
+   Aceite: cadastro no navegador, volume preservado após recriação, exemplo
+   versionado preservado, suíte Windows/Linux e um commit após as três etapas.
+
+As demais opções do menu seguem pendentes para incrementos seguintes.
