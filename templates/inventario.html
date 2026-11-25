@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ativos e riscos | Inventário UFU</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='inventario.css') }}">
+</head>
+<body>
+  <a class="pular" href="#conteudo">Ir para o conteúdo</a>
+  <header class="topo">
+    <div class="marca"><span class="simbolo" aria-hidden="true">I</span><div>Inventário de TI<small>UFU / Trabalho 2</small></div></div>
+    <span class="etiqueta">Somente leitura</span>
+  </header>
+  <main id="conteudo">
+    <div class="abertura">
+      <div><p class="sobretitulo">Visão do inventário</p><h1>Ativos e riscos<span>.</span></h1>
+        <p>Equipamentos, vulnerabilidades e o risco transmitido entre ativos.</p></div>
+      <a class="botao" href="{{ url_for('inventario') }}">Atualizar consulta <span aria-hidden="true">↻</span></a>
+    </div>
+    {% if demonstracao %}<p class="demonstracao">Demonstração com dados fictícios. Nenhum cadastro real é utilizado.</p>{% endif %}
+    {% if ativos is none %}
+      <section class="aviso erro" role="alert"><h2>Inventário indisponível</h2>
+        <p>Não foi possível ler uma base válida. Verifique o arquivo e tente atualizar a consulta.</p></section>
+    {% else %}
+      <dl class="resumo">
+        <div><dt>Ativos cadastrados</dt><dd>{{ ativos|length }}</dd></div>
+        <div><dt>Vulnerabilidades associadas</dt><dd>{{ total_vulnerabilidades }}</dd></div>
+        <div><dt>Dependências entre ativos</dt><dd>{{ total_dependencias }}</dd></div>
+      </dl>
+      {% if risco_indisponivel %}
+        <section class="aviso" role="alert"><h2>Risco indisponível</h2>
+          <p>Os ativos foram carregados, mas o cálculo de risco não pôde ser concluído. Os cadastros continuam disponíveis abaixo.</p></section>
+      {% endif %}
+      {% if not ativos %}
+        <section class="vazio"><span aria-hidden="true">∅</span><h2>Nenhum ativo cadastrado</h2>
+          <p>O inventário está disponível e a base está vazia.</p></section>
+      {% else %}
+        <section aria-labelledby="lista-titulo">
+          <div class="titulo-secao"><h2 id="lista-titulo">Ativos do inventário</h2><span>{{ ativos|length }} {{ 'registro' if ativos|length == 1 else 'registros' }}</span></div>
+          <p class="ajuda-tabela">Deslize a tabela para os lados para consultar todas as colunas.</p>
+          <div class="tabela" role="region" aria-label="Tabela de ativos com rolagem horizontal" tabindex="0">
+            <table>
+              <caption>Risco próprio e efetivo de cada ativo. Valores arredondados para duas casas decimais.</caption>
+              <thead><tr><th scope="col">ID</th><th scope="col">Ativo / responsável</th><th scope="col">Tipo</th><th scope="col">Vulnerabilidades</th><th scope="col">Risco próprio</th><th scope="col">Risco efetivo</th></tr></thead>
+              <tbody>{% for ativo in ativos|sort(attribute='id_ativo') %}
+                <tr><td class="id">{{ ativo.id_ativo }}</td>
+                  <th scope="row"><a href="#detalhes-{{ ativo.id_ativo }}">{{ ativo.hostname }}</a><small>{{ ativo.setor }} · {{ ativo.responsavel }}</small></th>
+                  <td>{{ ativo.tipo.name|replace('_', ' ')|lower }}</td><td>{{ ativo.vulnerabilidades|length }}</td>
+                  {% if ativo.id_ativo in riscos %}
+                    <td class="numero">{{ riscos[ativo.id_ativo][0]|numero }}</td><td class="numero efetivo">{{ riscos[ativo.id_ativo][1]|numero }}</td>
+                  {% else %}<td>Indisponível</td><td>Indisponível</td>{% endif %}
+                </tr>
+              {% endfor %}</tbody>
+            </table>
+          </div>
+          <p class="nota">Risco próprio: vulnerabilidades do ativo. Risco efetivo: inclui as dependências. Os valores podem superar 10 e não representam porcentagens nem notas CVSS.</p>
+        </section>
+        <section class="detalhes" aria-labelledby="detalhes-titulo">
+          <div class="titulo-secao"><h2 id="detalhes-titulo">Vulnerabilidades e dependências</h2><span>Detalhes por ativo</span></div>
+          {% for ativo in ativos|sort(attribute='id_ativo') %}
+            <details id="detalhes-{{ ativo.id_ativo }}">
+              <summary>{{ ativo.hostname }} <span>ID {{ ativo.id_ativo }} · {{ ativo.vulnerabilidades|length }} {{ 'vulnerabilidade' if ativo.vulnerabilidades|length == 1 else 'vulnerabilidades' }}</span></summary>
+              <div class="conteudo-detalhe"><h3>Vulnerabilidades associadas</h3>
+                {% for v in ativo.vulnerabilidades %}
+                  <article class="ocorrencia"><h4>{{ v.descricao }}</h4><p>{{ v.categoria }} · Severidade: {{ v.severidade|numero }}</p>
+                    <p>ID da ocorrência: {{ v.id_vulnerabilidade }}{% if v.cve %} · {{ v.cve }}{% endif %}</p>
+                    {% if v.vetor_cvss %}<p class="vetor">{{ v.vetor_cvss }}</p>{% endif %}
+                    {% if v.fonte_severidade %}<p>Fonte: {{ v.fonte_severidade }}</p>{% endif %}
+                  </article>
+                {% else %}<p>Nenhuma vulnerabilidade associada.</p>{% endfor %}
+                <h3>Ativos dos quais depende</h3>
+                <ul>{% for destino, peso in ativo.dependencias|dictsort %}<li>Ativo {{ destino }} · peso {{ peso|numero }}</li>{% else %}<li>Nenhuma dependência cadastrada.</li>{% endfor %}</ul>
+              </div>
+            </details>
+          {% endfor %}
+        </section>
+      {% endif %}
+    {% endif %}
+  </main>
+  <footer>Inventário de ativos de TI <span>Consulta de ativos e riscos · Trabalho 2 / UFU</span></footer>
+</body>
+</html>

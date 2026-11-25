@@ -79,3 +79,65 @@ A cobertura da trava foi verificada para processos cooperantes no mesmo
 sistema operacional. O catálogo auxilia a avaliação humana de aplicabilidade.
 Backup, operação em servidor, atualização automática e prazos de suporte
 dependem do ambiente e do acordo de entrega.
+
+## Consulta web local
+
+O navegador só consulta; cadastro, edição, remoção e a consulta online ao NVD
+continuam na CLI. O frontend começa com dados fictícios já incluídos na imagem.
+Na raiz do projeto:
+
+```powershell
+docker compose -f docker/compose.yaml up -d --build frontend
+docker compose -f docker/compose.yaml logs --tail 50 frontend
+```
+
+Abra <http://127.0.0.1:8000>. Para encerrar somente o frontend:
+
+```powershell
+docker compose -f docker/compose.yaml stop frontend
+```
+
+Para executar sem Docker, com Python 3.11 ou superior:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+$env:PYTHONDONTWRITEBYTECODE = '1'
+.\.venv\Scripts\waitress-serve.exe --listen=127.0.0.1:8000 --call app_web:create_app
+```
+
+Encerre com Ctrl+C. O Waitress serve a aplicação sem habilitar o depurador do
+Flask. Sem `INVENTARIO_ARQUIVO`, lê `exemplos/inventario_web.json` e identifica
+a demonstração na tela. Para consultar outra base persistida, defina antes de
+iniciar o servidor (comece com uma cópia fictícia):
+
+```powershell
+$env:INVENTARIO_ARQUIVO = 'C:\caminho\ficticio\inventario.json'
+```
+
+Essa variável pertence ao processo do servidor; o navegador não escolhe o
+arquivo. Reinicie o servidor para trocar o caminho. A base é relida em cada
+consulta. Arquivo ausente ou inválido mostra inventário indisponível, sem
+recuperação nem backup automático; `[]` válido mostra nenhum ativo cadastrado.
+Uma falha somente no risco preserva a listagem e os detalhes.
+
+No Docker, para uma base diferente, monte a pasta que a contém como somente
+leitura e aponte `INVENTARIO_ARQUIVO` para o caminho dentro do contêiner. Monte
+a pasta inteira para que o manifesto de migração, se existir, também possa ser
+consultado. O Compose padrão não monta a base real e não precisa dessa mudança.
+Ao voltar ao exemplo local padrão, remova a variável do terminal:
+
+```powershell
+Remove-Item Env:INVENTARIO_ARQUIVO -ErrorAction SilentlyContinue
+```
+
+A interface não possui autenticação; mantenha a porta em `127.0.0.1`.
+Exposição em rede e implantação na faculdade exigem uma etapa própria.
+
+Para validar os estados com bases temporárias fictícias:
+
+```powershell
+.\.venv\Scripts\python.exe -B -m unittest tests.test_app_web -v
+.\.venv\Scripts\python.exe -B -m unittest discover -v
+docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -v
+```

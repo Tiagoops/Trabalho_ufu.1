@@ -345,8 +345,8 @@ não acompanham a substituição. Se a gravação falhar, o objeto anterior é r
 ### Estado da entrega local
 
 A implantação no servidor e a comprovação de 24 horas estão adiadas por decisão
-do autor enquanto o frontend é desenvolvido. Isso não equivale ao atendimento
-do requisito de hospedagem do enunciado. A demonstração usa somente a CLI.
+do autor até a conclusão e revisão do frontend. Isso não equivale ao atendimento
+do requisito de hospedagem do enunciado. Há demonstração pela CLI e consulta web com dados fictícios.
 As falhas intermitentes Windows em `os.replace` seguem sem causa identificada;
 não há retry automático nem garantia de que uma execução local vá completá-las.
 
@@ -392,3 +392,53 @@ categoria mantém os metadados. Cancelar a edição preserva o registro inteiro.
 São recusadas CVEs malformadas e fontes NVD que não correspondam ao identificador.
 O formato do CSV permanece o mesmo. Não há varredura nem sincronização online;
 a confirmação humana da aplicabilidade ao ativo continua necessária.
+
+### Frontend de consulta (somente leitura)
+
+O frontend reutiliza `BancoDeDados.consultar_ativos` e `analisar_ativos`, com
+HTML renderizado pelo Flask e servido pelo Waitress. Essa combinação mantém o
+Python e funciona em Windows e Linux sem um projeto JavaScript separado.
+O exemplo padrão é [inventario_web.json](exemplos/inventario_web.json), um
+retrato persistido do cenário fictício de `ativos_teste.json`. Sua equivalência
+é verificada pela suíte. Não há consulta automática ao NVD nesta página.
+
+```powershell
+docker compose -f docker/compose.yaml up -d --build frontend
+```
+
+Abra <http://127.0.0.1:8000>. O serviço `frontend` usa a imagem construída,
+sem montar o código do computador, com sistema de arquivos somente leitura e
+usuário sem privilégios. O serviço `inventario` mantém a CLI habitual.
+Para encerrar apenas a consulta:
+
+```powershell
+docker compose -f docker/compose.yaml stop frontend
+```
+
+A página mostra os ativos, suas vulnerabilidades, dependências, risco próprio e
+risco efetivo. Os detalhes abrem pelo teclado ou pelo mouse. Em telas pequenas,
+a tabela tem rolagem horizontal. Atualizar consulta relê a base; respostas não
+ficam em cache. O risco agregado pode superar 10 e não é porcentagem nem CVSS.
+
+| Situação | Comportamento | HTTP |
+|---|---|---|
+| Base válida com ativos e cálculo válido | Ativos, detalhes e riscos | 200 |
+| Base válida com falha no cálculo | Ativos e detalhes; risco indisponível | 200 |
+| Base ausente, inválida, inacessível ou com migração pendente | Inventário indisponível | 503 |
+| Base válida contendo `[]` | Nenhum ativo cadastrado | 200 |
+
+A consulta não instancia o banco pelo construtor de recuperação e não chama
+salvar, trava ou criação de temporários. Não há cadastro, edição nem remoção
+pelo navegador. A necessidade de CRUD web depende de orientação complementar
+do docente; o PDF do Trabalho 2 não o exige explicitamente.
+
+A interface não tem autenticação e a publicação padrão é apenas em loopback.
+Não exponha essa configuração em uma rede. A implantação na faculdade, os
+controles de acesso daquele ambiente e o teste de 24 horas seguem pendentes.
+Veja execução local e configuração da base em [OPERACAO.md](OPERACAO.md).
+
+Referências de implementação: [templates e escape automático do Flask](https://flask.palletsprojects.com/en/stable/quickstart/#rendering-templates),
+[segurança das respostas](https://flask.palletsprojects.com/en/stable/web-security/)
+e [Waitress no Windows e Linux](https://flask.palletsprojects.com/en/stable/deploying/waitress/).
+
+Resultados e limites desta entrega: [VALIDACAO_FRONTEND.md](validacao/VALIDACAO_FRONTEND.md).

@@ -1,0 +1,127 @@
+[
+  {
+    "cenario_ficticio": true,
+    "componentes": [
+      {
+        "produto": "Apache Log4j Core",
+        "versao": "2.14.1"
+      }
+    ],
+    "id_ativo": 10,
+    "hostname": "demo-aplicacao",
+    "responsavel": "Responsavel ficticio",
+    "setor": "Laboratorio ficticio",
+    "tipo": "APLICACAO_WEB",
+    "vulnerabilidades": [
+      {
+        "descricao": "CVE-2021-44228 - Log4Shell (Apache Log4j Core 2.14.1 no cenario ficticio)",
+        "categoria": "Vulnerabilidade conhecida de software",
+        "severidade": 10.0,
+        "id_vulnerabilidade": "demo-CVE-2021-44228",
+        "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "fonte_severidade": "NVD CVSS 3.1; https://nvd.nist.gov/vuln/detail/CVE-2021-44228; referencia CVE Find: https://www.cvefind.com/pt/cve/cve-2021-44228.html; consulta em 2026-11-18"
+      }
+    ],
+    "dependencias": {
+      "20": 0.4,
+      "30": 0.2
+    },
+    "avaliacoes_dependencias": {
+      "20": {
+        "total_servicos": 5,
+        "servicos_fornecidos": 2,
+        "duracao_falha_min": 120,
+        "indisponibilidade_min": 30,
+        "fonte_medicao": "Simulacao ficticia para demonstracao"
+      },
+      "30": {
+        "total_servicos": 5,
+        "servicos_fornecidos": 1,
+        "duracao_falha_min": null,
+        "indisponibilidade_min": null,
+        "fonte_medicao": null
+      }
+    }
+  },
+  {
+    "cenario_ficticio": true,
+    "componentes": [
+      {
+        "produto": "OpenSSL",
+        "versao": "1.0.1f"
+      }
+    ],
+    "id_ativo": 20,
+    "hostname": "demo-servidor-tls",
+    "responsavel": "Responsavel ficticio",
+    "setor": "Laboratorio ficticio",
+    "tipo": "SERVIDOR",
+    "vulnerabilidades": [
+      {
+        "descricao": "CVE-2014-0160 - Heartbleed (OpenSSL 1.0.1f no cenario ficticio)",
+        "categoria": "Vulnerabilidade conhecida de software",
+        "severidade": 7.5,
+        "id_vulnerabilidade": "demo-CVE-2014-0160",
+        "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "fonte_severidade": "NVD CVSS 3.1; https://nvd.nist.gov/vuln/detail/CVE-2014-0160; referencia CVE Find: https://www.cvefind.com/pt/cve/cve-2014-0160.html; consulta em 2026-11-18"
+      }
+    ],
+    "dependencias": {
+      "30": 0.5
+    },
+    "avaliacoes_dependencias": {
+      "30": {
+        "total_servicos": 2,
+        "servicos_fornecidos": 1,
+        "duracao_falha_min": null,
+        "indisponibilidade_min": null,
+        "fonte_medicao": null
+      }
+    }
+  },
+  {
+    "cenario_ficticio": true,
+    "componentes": [
+      {
+        "produto": "Progress MOVEit Transfer",
+        "versao": "2023.0.0 (15.0.0)"
+      }
+    ],
+    "id_ativo": 30,
+    "hostname": "demo-transferencia",
+    "responsavel": "Responsavel ficticio",
+    "setor": "Laboratorio ficticio",
+    "tipo": "APLICACAO_WEB",
+    "vulnerabilidades": [
+      {
+        "descricao": "CVE-2023-34362 - Injecao SQL no MOVEit Transfer (Progress MOVEit Transfer 2023.0.0 (15.0.0) no cenario ficticio)",
+        "categoria": "Vulnerabilidade conhecida de software",
+        "severidade": 9.8,
+        "id_vulnerabilidade": "demo-CVE-2023-34362",
+        "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "fonte_severidade": "NVD CVSS 3.1; https://nvd.nist.gov/vuln/detail/CVE-2023-34362; referencia CVE Find: https://www.cvefind.com/pt/cve/cve-2023-34362.html; consulta em 2026-11-18"
+      }
+    ],
+    "dependencias": {}
+  },
+  {
+    "id_ativo": 40,
+    "hostname": "demo-estacao",
+    "responsavel": "Responsavel ficticio",
+    "setor": "Laboratorio ficticio",
+    "tipo": "ESTACAO_TRABALHO",
+    "vulnerabilidades": [],
+    "dependencias": {
+      "10": 0.25
+    },
+    "avaliacoes_dependencias": {
+      "10": {
+        "total_servicos": 4,
+        "servicos_fornecidos": 1,
+        "duracao_falha_min": null,
+        "indisponibilidade_min": null,
+        "fonte_medicao": null
+      }
+    }
+  }
+]
