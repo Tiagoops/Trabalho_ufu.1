@@ -10,7 +10,7 @@ from unittest.mock import patch
 import main
 from banco_dados import BancoDeDados
 from biblioteca import importar_ativos, preparar_importacao
-from catalogo_cvss import buscar_catalogo, carregar_catalogo, main as importar_catalogo
+from catalogo_cvss import buscar_catalogo, carregar_catalogo, consultar_nvd, main as importar_catalogo
 from modelos import Ativo, Vulnerabilidade
 from tipos import TipoAtivo
 
@@ -177,6 +177,42 @@ class TestCatalogoCve(unittest.TestCase):
             importar_catalogo()
         self.assertEqual(falha.exception.code, 1)
         self.assertFalse(candidato.exists())
+
+    def test_consulta_online_confirma_e_persiste_origem(self):
+        ref = self.referencias[2]
+        cve = {"id": ref["cve"], "weaknesses": [{"description": [{"value": "CWE-89"}]}],
+               "metrics": {"cvssMetricV31": [
+                   {"source": "nvd@nist.gov", "cvssData": {"vectorString": ref["vetor_cvss"],
+                                                        "baseScore": ref["nota_base_publicada"]}}
+               ]}}
+        resposta = json.dumps({"vulnerabilities": [{"cve": cve}]}).encode()
+        antes = self.caminho.read_bytes()
+        entrada = ['1', 'Ocorrência fictícia', 'Software', '5', ref["cve"].lower()]
+        with patch('catalogo_cvss.urlopen', side_effect=lambda *a, **k: io.BytesIO(resposta)) as rede:
+            self.chamar(main.cadastrar_vulnerabilidade, entrada + ['n', '0'])
+            self.assertEqual(self.caminho.read_bytes(), antes)
+            self.chamar(main.cadastrar_vulnerabilidade, entrada + ['s'])
+            rede.assert_called_with('https://services.nvd.nist.gov/rest/json/cves/2.0?cveId='
+                                    + ref["cve"], timeout=8)
+        v = BancoDeDados.consultar_ativos(self.caminho)[0].vulnerabilidades[0]
+        self.assertEqual((v.cve, v.severidade, v.fonte_severidade),
+                         (ref["cve"], ref["nota_base_publicada"], ref["fonte_primaria"]))
+
+    def test_consulta_online_trata_dados_ausentes_e_falha_de_conexao(self):
+        cve = "CVE-2023-34362"
+        resposta = {"vulnerabilities": [{"cve": {"id": cve}}]}
+        with patch('catalogo_cvss.urlopen', return_value=io.BytesIO(json.dumps(resposta).encode())):
+            self.assertIsNone(consultar_nvd(cve)["vetor_cvss"])
+        with patch('catalogo_cvss.urlopen', side_effect=TimeoutError) as rede:
+            with self.assertRaisesRegex(ValueError, "formato"):
+                consultar_nvd("https://example.org")
+            rede.assert_not_called()
+            saida = io.StringIO()
+            entradas = ['5', cve, '3', 'CWE-89', '1', 's']
+            with patch('builtins.input', side_effect=entradas), contextlib.redirect_stdout(saida):
+                referencia = main.ler_avaliacao_cvss()
+            self.assertIn("não foi possível conectar ao NVD", saida.getvalue())
+            self.assertEqual(referencia["cve"], cve)
 
     def test_legacy_sem_cve_nao_recebe_associacao_inferida(self):
         registro = {'descricao': 'CVE-2021-44228 citada livremente', 'categoria': 'Software', 'severidade': 10,

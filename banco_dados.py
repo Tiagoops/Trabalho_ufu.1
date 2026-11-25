@@ -20,6 +20,14 @@ from modelos import Ativo, Vulnerabilidade, validar_numero
 CAMINHO_ARQUIVO_PADRAO = str(Path(__file__).resolve().parent / "ativos_db.txt")
 
 
+class InventarioIndisponivel(ValueError):
+    """A base não pode ser apresentada como inventário válido."""
+
+
+class _BaseLegada(InventarioIndisponivel):
+    pass
+
+
 @contextmanager
 def bloquear_escrita(caminho):
     """A trava é liberada pelo SO ao fechar ou encerrar; o arquivo não é removido."""
@@ -79,28 +87,53 @@ class BancoDeDados:
             )
             return
         try:
-            conteudo = original.decode("utf-8-sig").strip()
-            if not conteudo:
-                return
-            dados = json.loads(conteudo)
-            if not isinstance(dados, list):
-                raise ValueError("a raiz da base deve ser uma lista")
-            if any(isinstance(v, dict) and (
-                isinstance(v.get('severidade'), str) or 'status' in v
-            ) for a in dados if isinstance(a, dict)
-                   for v in (a.get('vulnerabilidades') or [])
-                   if isinstance(a.get('vulnerabilidades'), list)):
-                self._gravacao_bloqueada = True
-                print("[Aviso] Base antiga: gravações bloqueadas. Execute migracao.py "
-                      "para preparar backup e revisar a exclusão.")
-                return
-            ativos = [Ativo.from_dict(item) for item in dados]
-            self._validar_unicidade(ativos)
+            ativos = self._decodificar_ativos(original, aceitar_arquivo_vazio=True)
+        except _BaseLegada:
+            self._gravacao_bloqueada = True
+            print("[Aviso] Base antiga: gravações bloqueadas. Execute migracao.py "
+                  "para preparar backup e revisar a exclusão.")
+            return
         except (ValueError, KeyError, TypeError, AttributeError) as erro:
             self._isolar_base_ilegivel(erro, original)
             return
         for ativo in ativos:
             self._indexar(ativo)
+
+    @classmethod
+    def consultar_ativos(cls, caminho: str | Path = CAMINHO_ARQUIVO_PADRAO) -> list[Ativo]:
+        """Lê um retrato do inventário sem criar backup, trava ou temporários."""
+        from migracao import verificar_pendente
+
+        try:
+            caminho = Path(caminho).resolve()
+            if verificar_pendente(caminho):
+                raise InventarioIndisponivel("migração pendente")
+            return cls._decodificar_ativos(caminho.read_bytes())
+        except InventarioIndisponivel:
+            raise
+        except (OSError, ValueError, KeyError, TypeError, AttributeError, RecursionError) as erro:
+            raise InventarioIndisponivel("inventário ausente, inválido ou inacessível") from erro
+
+    @classmethod
+    def _decodificar_ativos(cls, original: bytes, *, aceitar_arquivo_vazio=False) -> list[Ativo]:
+        conteudo = original.decode("utf-8-sig").strip()
+        if not conteudo and aceitar_arquivo_vazio:
+            return []
+        dados = json.loads(conteudo)
+        if not isinstance(dados, list):
+            raise ValueError("a raiz da base deve ser uma lista")
+        for item in dados:
+            if not isinstance(item, dict):
+                raise ValueError("cada ativo deve ser um objeto")
+            ocorrencias = item.get("vulnerabilidades")
+            if isinstance(ocorrencias, list) and any(
+                isinstance(v, dict) and (isinstance(v.get("severidade"), str) or "status" in v)
+                for v in ocorrencias
+            ):
+                raise _BaseLegada("base antiga requer migração")
+        ativos = [Ativo.from_dict(item) for item in dados]
+        cls._validar_unicidade(ativos)
+        return ativos
 
     @staticmethod
     def _validar_unicidade(ativos: List[Ativo]) -> None:

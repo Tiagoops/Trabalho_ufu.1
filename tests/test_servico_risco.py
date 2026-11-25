@@ -5,9 +5,9 @@ import unittest
 
 import numpy as np
 
-from banco_dados import BancoDeDados
+from banco_dados import BancoDeDados, InventarioIndisponivel
 from modelos import Ativo, Vulnerabilidade
-from servico_risco import analisar_inventario
+from servico_risco import analisar_ativos, analisar_inventario
 from tipos import TipoAtivo
 
 
@@ -67,6 +67,45 @@ class TestServicoRisco(unittest.TestCase):
         antes = self.caminho.read_bytes()
         with self.assertRaisesRegex(ValueError, "rho"):
             analisar_inventario(self.db)
+        self.assertEqual(self.caminho.read_bytes(), antes)
+
+    def test_consulta_somente_leitura_distingue_base_vazia_e_indisponivel(self):
+        raiz = self.caminho.parent
+        with self.assertRaises(InventarioIndisponivel):
+            BancoDeDados.consultar_ativos(self.caminho)
+        self.assertEqual(list(raiz.iterdir()), [])
+
+        for dados in (b"{inv\xe1lido", b"", b"{}", b"[]"):
+            with self.subTest(dados=dados):
+                self.caminho.write_bytes(dados)
+                if dados == b"[]":
+                    self.assertEqual(BancoDeDados.consultar_ativos(self.caminho), [])
+                else:
+                    with self.assertRaises(InventarioIndisponivel):
+                        BancoDeDados.consultar_ativos(self.caminho)
+                self.assertEqual(list(raiz.iterdir()), [self.caminho])
+                self.assertEqual(self.caminho.read_bytes(), dados)
+        with self.assertRaises(InventarioIndisponivel):
+            BancoDeDados.consultar_ativos(raiz)
+
+    def test_lista_recarregada_permanece_disponivel_quando_risco_falha(self):
+        for numero in (1, 2, 3):
+            ativo = Ativo(numero, f"H{numero}", "Ana", "TI", TipoAtivo.SERVIDOR,
+                          [Vulnerabilidade("Falha fictícia", "Teste", 4, f"v{numero}")])
+            self.db.adicionar(ativo)
+        self.db.definir_dependencia(1, 2, .5)
+        ativos = BancoDeDados.consultar_ativos(self.caminho)
+        self.assertEqual(analisar_ativos(ativos).individual(1), (4, 6))
+
+        for origem in (1, 2, 3):
+            for destino in (1, 2, 3):
+                if origem != destino:
+                    self.db.definir_dependencia(origem, destino, .6)
+        antes = self.caminho.read_bytes()
+        ativos = BancoDeDados.consultar_ativos(self.caminho)
+        with self.assertRaisesRegex(ValueError, "rho"):
+            analisar_ativos(ativos)
+        self.assertEqual([a.hostname for a in ativos], ["H1", "H2", "H3"])
         self.assertEqual(self.caminho.read_bytes(), antes)
 
     def test_ids_de_ocorrencias_duplicados_recusados(self):

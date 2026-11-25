@@ -354,11 +354,28 @@ não há retry automático nem garantia de que uma execução local vá complet�
 Para instalar, manter o catálogo e recuperar o inventário, consulte o
 [guia de operação](OPERACAO.md).
 
+### Consulta independente do inventário e do risco
+
+Em Python, `BancoDeDados.consultar_ativos(caminho)` lê e valida o JSON sem
+criar backup, trava ou arquivo temporário. A lista vazia representa a base
+JSON `[]`. Arquivo ausente, inválido ou inacessível e migração pendente geram
+`InventarioIndisponivel`. Para calcular o risco como operação separada, passe
+essa mesma lista a `servico_risco.analisar_ativos(ativos)`. Uma falha do
+cálculo pode ser tratada sem descartar a lista já carregada.
+O menu do terminal continua usando a recuperação normal com backup.
+
 ### Rastreabilidade da seleção no catálogo CVE
 
 Na avaliação de vulnerabilidade, a opção 3 permite buscar no catálogo local por
 CVE, produto, versão de exemplo, descrição ou código CWE completo, como `CWE-89`.
-A descrição é um resumo da fonte NVD. A consulta mostra os códigos CWE e quem
+A opção 5 consulta a API pública do NVD pela internet por identificador CVE.
+Somente a CVE digitada vai na consulta. O programa mostra o código, os CWEs
+publicados, o vetor Base 3.1 ou 4.0 do NIST e a página oficial para conferência.
+Após a confirmação de aplicabilidade, o cadastro usa a referência online.
+Se o NVD estiver indisponível ou sem uma avaliação compatível, use o catálogo
+local ou informe um vetor validado. A busca online não atualiza o catálogo.
+
+A descrição do catálogo é um resumo da fonte NVD. A consulta mostra os códigos CWE e quem
 forneceu cada classificação, além do endereço da referência. Os três registros
 foram consultados para descrição e CWE em 25/11/2026. O catálogo é lido offline.
 

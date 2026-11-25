@@ -5,10 +5,14 @@ Não é scanner nem prova que uma versão instalada está vulnerável.
 from __future__ import annotations
 
 import argparse
+from http.client import HTTPException
 import json
 from pathlib import Path
 import re
 import unicodedata
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from avaliacao import calcular_cvss
 
@@ -16,6 +20,7 @@ ARQUIVO_CATALOGO = Path(__file__).resolve().parent / "exemplos" / "referencias_c
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,}", re.ASCII)
 CWE_RE = re.compile(r"CWE-[1-9][0-9]*")
 LIMITE_CATALOGO = 5_000_000
+API_NVD = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
 
 def _normalizar(texto: str) -> str:
@@ -91,6 +96,59 @@ def buscar_catalogo(termo: str, registros: list[dict]) -> list[dict]:
     campos = ("cve", "produto", "descricao", "versao_ficticia_do_ativo")
     return [item for item in registros
             if any(termo in _normalizar(str(item.get(campo, ""))) for campo in campos)]
+
+
+def consultar_nvd(cve: str) -> dict:
+    """Consulta uma CVE pública pelo ID e valida a avaliação recebida."""
+    cve = cve.strip().upper()
+    if len(cve) > 32 or not CVE_RE.fullmatch(cve):
+        raise ValueError("informe uma CVE no formato CVE-AAAA-NNNN")
+    url = f"{API_NVD}?{urlencode({'cveId': cve})}"
+    try:
+        with urlopen(url, timeout=8) as resposta:
+            dados = resposta.read(LIMITE_CATALOGO + 1)
+    except HTTPError as erro:
+        if erro.code == 404:
+            raise ValueError("CVE não encontrada no NVD") from erro
+        if erro.code in (403, 429):
+            raise ValueError("NVD recusou a consulta. Aguarde ou use o catálogo local") from erro
+        raise ValueError("NVD indisponível. Use o catálogo local ou tente depois") from erro
+    except (OSError, HTTPException) as erro:
+        raise ValueError("não foi possível conectar ao NVD. Use o catálogo local ou tente depois") from erro
+    if len(dados) > LIMITE_CATALOGO:
+        raise ValueError("resposta do NVD excedeu o tamanho permitido")
+    try:
+        registros = json.loads(dados)["vulnerabilities"]
+        if registros == []:
+            raise ValueError("CVE não encontrada no NVD")
+        if not isinstance(registros, list) or len(registros) != 1:
+            raise TypeError
+        registro = registros[0]["cve"]
+        if registro["id"] != cve:
+            raise TypeError
+        if registro.get("vulnStatus") == "Rejected":
+            raise ValueError("registro CVE rejeitado na fonte")
+        cwes = sorted({
+            codigo
+            for fraqueza in registro.get("weaknesses", [])
+            for descricao in fraqueza["description"]
+            if isinstance(codigo := descricao["value"], str) and CWE_RE.fullmatch(codigo)
+        })
+        referencia = {"cve": cve, "cwes": cwes, "vetor_cvss": None, "nota_base_publicada": None,
+                      "fonte_primaria": f"https://nvd.nist.gov/vuln/detail/{cve}"}
+        metricas = registro.get("metrics", {})
+        for chave in ("cvssMetricV40", "cvssMetricV31"):
+            for metrica in metricas.get(chave, []):
+                if metrica["source"] != "nvd@nist.gov":
+                    continue
+                cvss = metrica["cvssData"]
+                nota, vetor = calcular_cvss(cvss["vectorString"])
+                if type(cvss["baseScore"]) not in (float, int) or cvss["baseScore"] != nota:
+                    raise ValueError("nota e vetor CVSS do NVD são inconsistentes")
+                return {**referencia, "vetor_cvss": vetor, "nota_base_publicada": nota}
+        return referencia
+    except (KeyError, TypeError, AttributeError, UnicodeError, json.JSONDecodeError, RecursionError) as erro:
+        raise ValueError("resposta inesperada do NVD") from erro
 
 
 def preparar_importacao_catalogo(origem: Path, atual: Path = ARQUIVO_CATALOGO) -> tuple[dict, list[str]]:

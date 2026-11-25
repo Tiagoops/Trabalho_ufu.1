@@ -1,10 +1,12 @@
 """Traduz ocorrências e dependências do inventário em matrizes identificadas."""
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 import numpy as np
 
 from banco_dados import BancoDeDados
 from matematica.risco import ResultadoRisco, calcular_risco
+from modelos import Ativo
 
 
 @dataclass(frozen=True)
@@ -30,8 +32,13 @@ def analisar_inventario(db: BancoDeDados) -> AnaliseInventario:
     """Uma coluna por ocorrência, mesmo quando as descrições coincidem."""
     if db.gravacao_bloqueada:
         raise ValueError("base bloqueada: resolva a leitura ou migração antes de calcular")
-    ativos = sorted(db.listar_todos(), key=lambda a: a.id_ativo)
-    db._validar_unicidade(ativos)
+    return analisar_ativos(db.listar_todos())
+
+
+def analisar_ativos(ativos: Iterable[Ativo]) -> AnaliseInventario:
+    """Calcula o risco de um retrato de ativos, independentemente da leitura do arquivo."""
+    ativos = sorted(ativos, key=lambda a: a.id_ativo)
+    BancoDeDados._validar_unicidade(ativos)
     ids = tuple(a.id_ativo for a in ativos)
     ocorrencias = sorted(((v.id_vulnerabilidade, a.id_ativo, v.severidade)
                           for a in ativos for v in a.vulnerabilidades), key=lambda item: item[0])

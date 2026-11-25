@@ -20,7 +20,7 @@ from modelos import Ativo, Vulnerabilidade, validar_numero
 from banco_dados import BancoDeDados
 from avaliacao import AvaliacaoDependencia, calcular_cvss
 from biblioteca import importar_ativos, preparar_importacao
-from catalogo_cvss import buscar_catalogo, carregar_catalogo
+from catalogo_cvss import buscar_catalogo, carregar_catalogo, consultar_nvd
 
 
 # ------------------------------------------------------------------
@@ -225,14 +225,39 @@ def escolher_referencia_catalogo() -> dict | None:
             print("Nenhuma vulnerabilidade foi associada; escolha outra ou volte.")
 
 
+def escolher_referencia_nvd() -> dict | None:
+    cve = input("Identificador da CVE (V = voltar): ").strip()
+    if cve.casefold() in ("v", "voltar", "0"):
+        return None
+    try:
+        item = consultar_nvd(cve)
+    except ValueError as erro:
+        print(f"Consulta online: {erro}.")
+        return None
+
+    print(f"CVE: {item['cve']}")
+    print(f"CWEs publicados: {', '.join(item['cwes']) or 'não informados'}")
+    print(f"Fonte: {item['fonte_primaria']}")
+    if item["vetor_cvss"] is None:
+        print("A fonte ainda não oferece um vetor Base 3.1 ou 4.0 do NIST. Escolha outro modo de avaliação.")
+        return None
+    print(f"Severidade Base do NIST: {item['nota_base_publicada']:g}")
+    print(f"Vetor: {item['vetor_cvss']}")
+    if not ler_sim_nao("Conferiu na fonte que a CVE se aplica a este ativo? (s/n): "):
+        return None
+    return {"vetor": item["vetor_cvss"], "cve": item["cve"],
+            "fonte_severidade": item["fonte_primaria"]}
+
+
 def ler_avaliacao_cvss() -> dict | None:
-    """Retorna vetor e eventual origem do catálogo, sem gravação parcial."""
+    """Retorna vetor e eventual referência CVE, sem gravação parcial."""
     while True:
         print("\n--- AVALIAÇÃO DE VULNERABILIDADE ---")
         print("1 - Responder critérios técnicos CVSS 4.0")
         print("2 - Informar vetor Base CVSS 3.1/4.0 publicado")
         print("3 - Buscar CVE na biblioteca local de severidades")
         print("4 - Entender CVSS, exemplos e como localizar vetores")
+        print("5 - Consultar uma CVE online no NVD (envia somente o identificador)")
         print("0 - Voltar ao cadastro anterior (sem gravar esta ocorrência)")
         modo = input("Escolha: ").strip()
         if modo in ("0", "v", "V"):
@@ -241,8 +266,8 @@ def ler_avaliacao_cvss() -> dict | None:
             explicar_cvss()
             continue
         referencia = {}
-        if modo == "3":
-            referencia = escolher_referencia_catalogo()
+        if modo in ("3", "5"):
+            referencia = escolher_referencia_catalogo() if modo == "3" else escolher_referencia_nvd()
             if referencia is None:
                 continue
             nota, normalizado = calcular_cvss(referencia["vetor"])
@@ -288,7 +313,7 @@ def ler_avaliacao_cvss() -> dict | None:
             if vetor.casefold() in ("v", "voltar"):
                 continue
         else:
-            print("Opção inválida. Escolha 0, 1, 2, 3 ou 4.")
+            print("Opção inválida. Escolha uma opção de 0 a 5.")
             continue
         print(f"\nVetor Base utilizado: {normalizado}")
         print(f"Severidade calculada: {nota:g} (não é o risco do ativo).")
