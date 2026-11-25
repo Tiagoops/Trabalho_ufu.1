@@ -201,7 +201,7 @@ class Ativo:
             avaliacoes[int(chave)] = avaliacao
         if len({a.total_servicos for a in avaliacoes.values()}) > 1:
             raise ValueError("o total de serviços deve ser igual nos vínculos avaliados do mesmo ativo")
-        return Ativo(
+        return Ativo.criar(
             d["id_ativo"], d["hostname"], d["responsavel"], d["setor"], TipoAtivo[d["tipo"]],
             [Vulnerabilidade.from_dict(v, f"{d['id_ativo']}:{i}")
              for i, v in enumerate(d.get("vulnerabilidades", []))],

@@ -1,7 +1,7 @@
 """Persistência JSON com índices e restauração do último estado salvo.
 
-Uma única instância deve escrever na base por vez. Não há coordenação entre
-processos concorrentes nem garantia de durabilidade contra queda de energia.
+Gravações cooperantes usam trava do sistema operacional e recusam snapshots
+desatualizados. Não há garantia de durabilidade contra queda de energia.
 """
 from __future__ import annotations
 
@@ -9,6 +9,8 @@ import json
 import os
 import tempfile
 from datetime import datetime
+from contextlib import contextmanager
+from hashlib import sha256
 from pathlib import Path
 from typing import Dict, List, Optional
 from dataclasses import fields, is_dataclass
@@ -18,13 +20,42 @@ from modelos import Ativo, Vulnerabilidade, validar_numero
 CAMINHO_ARQUIVO_PADRAO = str(Path(__file__).resolve().parent / "ativos_db.txt")
 
 
+@contextmanager
+def bloquear_escrita(caminho):
+    """A trava é liberada pelo SO ao fechar ou encerrar; o arquivo não é removido."""
+    trava = Path(str(Path(caminho).resolve()) + ".lock")
+    with trava.open("a+b") as arquivo:
+        if os.fstat(arquivo.fileno()).st_size == 0:
+            arquivo.write(b"0")
+            arquivo.flush()
+        arquivo.seek(0)
+        if os.name == "nt":
+            import msvcrt
+            adquirir = lambda: msvcrt.locking(arquivo.fileno(), msvcrt.LK_NBLCK, 1)
+            liberar = lambda: msvcrt.locking(arquivo.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            adquirir = lambda: fcntl.flock(arquivo, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            liberar = lambda: fcntl.flock(arquivo, fcntl.LOCK_UN)
+        try:
+            adquirir()
+        except OSError as erro:
+            raise RuntimeError("outro escritor está usando esta base; tente após encerrar a operação") from erro
+        try:
+            yield
+        finally:
+            arquivo.seek(0)
+            liberar()
+
+
 class BancoDeDados:
     def __init__(self, caminho: str = CAMINHO_ARQUIVO_PADRAO):
-        self.caminho = os.fspath(caminho)
+        self.caminho = str(Path(caminho).resolve())
         self.ativos_por_id: Dict[int, Ativo] = {}
         self.ativos_por_hostname: Dict[str, Ativo] = {}
         self._gravacao_bloqueada = False
         self._estado_salvo = []
+        self._assinatura = None
         self._carregar()
         self._estado_salvo = self._capturar_estado()
 
@@ -37,6 +68,7 @@ class BancoDeDados:
         try:
             with open(self.caminho, "rb") as arquivo:
                 original = arquivo.read()
+            self._assinatura = sha256(original).digest()
         except FileNotFoundError:
             return
         except OSError as erro:
@@ -93,7 +125,8 @@ class BancoDeDados:
                 ids_vulnerabilidades.add(vulnerabilidade.id_vulnerabilidade)
 
     def _isolar_base_ilegivel(self, erro: Exception, original: bytes) -> None:
-        """Copia os bytes originais para um backup exclusivo antes de liberar escrita."""
+        """Preserva os bytes e bloqueia escrita até o arquivo ser corrigido externamente."""
+        self._gravacao_bloqueada = True
         destino = None
         caminho = Path(self.caminho)
         carimbo = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -115,7 +148,7 @@ class BancoDeDados:
             return
         print(
             f"[Aviso] Base inválida ({erro}). Backup preservado em '{destino}'. "
-            "Iniciando com base vazia; o original só será substituído ao salvar."
+            "Gravações bloqueadas. Revise o arquivo e reabra o inventário."
         )
 
     def _capturar_estado(self):
@@ -168,28 +201,39 @@ class BancoDeDados:
         try:
             if self.gravacao_bloqueada:
                 raise RuntimeError("gravação bloqueada: a base não pôde ser lida ou protegida")
-            self._validar_ids_estaveis(self._estado_salvo)
-            ativos = list(self.ativos_por_id.values())
-            self._validar_unicidade(ativos)
-            dados = [ativo.to_dict() for ativo in ativos]
-            estado = self._capturar_estado()
-            por_id = {ativo.id_ativo: ativo for ativo in ativos}
-            por_hostname = {ativo.hostname.lower(): ativo for ativo in ativos}
-            caminho = Path(self.caminho)
-            fd, temporario = tempfile.mkstemp(
-                prefix=caminho.name + ".", suffix=".tmp", dir=str(caminho.parent)
-            )
-            with os.fdopen(fd, "w", encoding="utf-8") as arquivo:
-                json.dump(dados, arquivo, ensure_ascii=False, indent=2, allow_nan=False)
-                arquivo.flush()
-                os.fsync(arquivo.fileno())
-            os.replace(temporario, self.caminho)
-            confirmado = True
-            self._estado_salvo = estado
-            self.ativos_por_id.clear()
-            self.ativos_por_id.update(por_id)
-            self.ativos_por_hostname.clear()
-            self.ativos_por_hostname.update(por_hostname)
+            with bloquear_escrita(self.caminho):
+                try:
+                    atual = sha256(Path(self.caminho).read_bytes()).digest()
+                except FileNotFoundError:
+                    atual = None
+                if atual != self._assinatura:
+                    raise RuntimeError("a base mudou em outra instância; reabra o inventário antes de gravar")
+                self._validar_ids_estaveis(self._estado_salvo)
+                ativos = list(self.ativos_por_id.values())
+                self._validar_unicidade(ativos)
+                dados = [ativo.to_dict() for ativo in ativos]
+                estado = self._capturar_estado()
+                por_id = {ativo.id_ativo: ativo for ativo in ativos}
+                por_hostname = {ativo.hostname.lower(): ativo for ativo in ativos}
+                assinatura_nova = sha256(json.dumps(
+                    dados, ensure_ascii=False, indent=2, allow_nan=False
+                ).encode("utf-8")).digest()
+                caminho = Path(self.caminho)
+                fd, temporario = tempfile.mkstemp(
+                    prefix=caminho.name + ".", suffix=".tmp", dir=str(caminho.parent)
+                )
+                with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as arquivo:
+                    json.dump(dados, arquivo, ensure_ascii=False, indent=2, allow_nan=False)
+                    arquivo.flush()
+                    os.fsync(arquivo.fileno())
+                os.replace(temporario, self.caminho)
+                confirmado = True
+                self._assinatura = assinatura_nova
+                self._estado_salvo = estado
+                self.ativos_por_id.clear()
+                self.ativos_por_id.update(por_id)
+                self.ativos_por_hostname.clear()
+                self.ativos_por_hostname.update(por_hostname)
         except BaseException:
             if not confirmado:
                 self._restaurar_estado()
@@ -238,6 +282,22 @@ class BancoDeDados:
             raise ValueError(f"já existe um ativo com o hostname '{ativo.hostname}'")
         self._indexar(ativo)
         self.salvar()
+
+    def atualizar_ativo(self, id_ativo: int, *, hostname: str, responsavel: str,
+                        setor: str, tipo) -> Ativo:
+        """Troca o objeto, preservando IDs, ocorrências, vínculos e campos adicionais."""
+        if type(id_ativo) is not int or id_ativo < 1:
+            raise ValueError("ID deve ser um inteiro positivo")
+        anterior = self.buscar_por_id(id_ativo)
+        if anterior is None:
+            raise ValueError("ativo inexistente")
+        novo = Ativo.criar(id_ativo, hostname, responsavel, setor, tipo,
+                           anterior.vulnerabilidades, anterior.dependencias,
+                           anterior.campos_extras, anterior.avaliacoes_dependencias)
+        Ativo.from_dict(novo.to_dict())
+        self.ativos_por_id[id_ativo] = novo
+        self.salvar()
+        return novo
 
     def buscar_por_id(self, id_ativo: int) -> Optional[Ativo]:
         return self.ativos_por_id.get(id_ativo)

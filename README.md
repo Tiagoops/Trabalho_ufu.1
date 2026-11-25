@@ -77,6 +77,7 @@ Repositório: https://github.com/Tiagoops/Trabalho_ufu.1. Clonar a branch `main`
 | 11 | Calcular dependências pelos serviços, medir indisponibilidade, editar ou remover |
 | 12 | Exibir matrizes/vetores, ranking ou risco individual |
 | 13 | Importar biblioteca JSON, com prévia e validação do lote |
+| 14 | Consultar orientações específicas da classe do ativo |
 | 0 | Encerrar |
 
 A CLI não pede mais notas de severidade ou pesos prontos. Você responde características técnicas CVSS (ou informa um vetor publicado) e quantidades de serviços. Os valores são calculados. Tempos de falha aceitam ponto ou vírgula decimal. A API continua lendo números anteriores para compatibilidade, sem inventar critérios ausentes.
@@ -222,6 +223,24 @@ Na consulta, a ordem dos IDs é mostrada junto às matrizes. Ativos são ordenad
 
 O risco é um **índice matemático**, pode ultrapassar 10 e não representa probabilidade, percentual, CVSS ou prejuízo financeiro. Não foram criadas faixas de risco agregado. Os pesos agora são calculados pela participação dos serviços descrita abaixo.
 
+### Demonstração automática do modelo e da recarga
+
+Na raiz do projeto, execute `python -B -m exemplos.demonstrar_modelo` com as dependências instaladas.
+O programa cria uma base temporária, importa o cenário existente e abre outra instância do banco.
+Confere os dados recarregados, M, v, A, b, x e os riscos individuais, sem usar a base real.
+Mostra IDs de linhas e colunas, os diagnósticos numéricos e a conferência manual independente.
+O JSON guarda entradas; os riscos são recalculados em memória. A base temporária é removida ao sair.
+
+Para os ativos `[10,20,30,40]`, as ocorrências são ordenadas por ID: Heartbleed, Log4Shell e MOVEit.
+Logo, `v=[7.5,10,9.8]` e `M=[[0,1,0],[1,0,0],[0,0,1],[0,0,0]]`; M não é identidade.
+As dependências são 10→20 (0,4), 10→30 (0,2), 20→30 (0,5) e 40→10 (0,25).
+A seta significa “depende de”; a influência do risco percorre do fornecedor para o dependente.
+Manual: x30=9,8; x20=7,5+0,5×9,8=12,40; x10=10+0,4×12,40+0,2×9,8=16,92;
+x40=0+0,25×16,92=4,23. O ativo 40 tem risco próprio zero e recebe risco pelo vínculo com 10.
+O peso 0,4 é 2/5 dos serviços; os 25% observados são 30/120 minutos, sem multiplicar o peso.
+As comparações desse cenário pequeno usam rtol=atol=1e-12, sem arredondar entradas ou cálculos.
+Risco efetivo é um índice que pode ultrapassar 10, não porcentagem, probabilidade ou CVSS agregado.
+
 ### Exemplos verificáveis
 
 | Cenário | Entrada | Resultado esperado |
@@ -246,7 +265,7 @@ As matrizes são densas: memória O(n²+nm) e solução/autovalores com custo c�
 
 ## Migração sem conversão de severidades
 
-**Feche outras instâncias do inventário antes de migrar.** Não há trava entre processos. Um formato antigo bloqueia gravações, sem converter enumerações nem tratar a base como inventário novo. A migração é separada da inicialização normal.
+**Feche outras instâncias do inventário antes de migrar.** A migração usa a mesma trava de gravação do inventário. Um formato antigo bloqueia gravações, sem converter enumerações nem tratar a base como inventário novo. A migração é separada da inicialização normal.
 
 Primeiro, prepare a prévia:
 
@@ -280,9 +299,9 @@ Se houver falha entre a substituição da base e a confirmação do manifesto, e
 
 A gravação usa temporário exclusivo no mesmo diretório, `flush`, `fsync` e `os.replace`. Falhas antes da substituição restauram objetos, listas, dicionários e índices ao último sucesso, preservando referências em memória. Campos adicionais dos ativos também sobrevivem à leitura/gravação.
 
-Arquivo inválido é copiado para backup antes da recuperação vazia, conforme o comportamento anterior. Se o backup falhar, gravações ficam bloqueadas. Formato antigo e migração pendente têm tratamento separado: ficam bloqueados e não iniciam uma recuperação vazia gravável.
+Arquivo inválido bloqueia gravações mesmo quando o backup é criado com sucesso. Revise e corrija o arquivo explicitamente e reabra o inventário; não há restauração nem limpeza automática. Se o backup falhar, o original também permanece protegido. Formato antigo e migração pendente continuam bloqueados até o procedimento explícito de migração.
 
-Use somente um escritor por vez. Não há coordenação entre processos, garantia contra queda de energia ou serviço de servidor por 24 horas validado. O relatório CSV usa criação exclusiva: não sobrescreve arquivos existentes nem a base, e recusa campos com fórmulas/controles de linha.
+Gravações do inventário e da migração usam trava do sistema operacional no arquivo adjacente `.lock`, liberada ao finalizar a operação ou o processo. O arquivo permanece e não deve ser apagado enquanto houver instâncias abertas. Uma instância desatualizada recusa gravação se os bytes da base mudaram: reabra o inventário para ler a versão atual. A proteção cobre processos cooperantes no mesmo sistema operacional; não foi certificada entre o host Windows e o Linux do Docker sobre a mesma pasta, nem em sistemas de arquivos remotos. Não execute escritores nesses ambientes simultaneamente. Não há garantia contra queda de energia ou serviço de servidor por 24 horas validado. O relatório CSV usa criação exclusiva: não sobrescreve arquivos existentes nem a base, e recusa campos com fórmulas/controles de linha.
 
 ## Testes
 
@@ -308,3 +327,25 @@ Os arquivos em `validacao/historico/` preservam saídas e manifestos das versõe
 Documentação oficial: [numpy.linalg.solve](https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html) e [numpy.linalg.eigvals](https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigvals.html).
 
 Dependência de avaliação: [cvss 3.6](https://pypi.org/project/cvss/), projeto Red Hat Product Security, licença LGPLv3+. Usada como biblioteca instalada; sua implementação não foi copiada para o projeto.
+
+
+### Classes concretas e demonstração de POO
+
+Cadastro, importação e leitura JSON usam `Ativo.criar`, selecionando a classe
+pela categoria persistida, sem deduzi-la pelo hostname. `Notebook` especializa
+`EstacaoTrabalho`; `AplicacaoWeb` e `SistemaBancoDados` especializam `Software`.
+A opção 14 chama `orientacoes_tratamento()` e mostra o comportamento específico.
+São orientações de revisão; não executam correções nem alteram o risco calculado.
+
+Atualizar um ativo pela CLI substitui seu objeto pela classe correta, preservando
+ID, ocorrências, dependências, avaliações e campos extras. Quem usa a API deve
+consultar novamente `buscar_por_id` após `atualizar_ativo`; referências antigas
+não acompanham a substituição. Se a gravação falhar, o objeto anterior é restaurado.
+
+### Estado da entrega local
+
+A implantação no servidor e a comprovação de 24 horas estão adiadas por decisão
+do autor enquanto o frontend é desenvolvido. Isso não equivale ao atendimento
+do requisito de hospedagem do enunciado. A demonstração usa somente a CLI.
+As falhas intermitentes Windows em `os.replace` seguem sem causa identificada;
+não há retry automático nem garantia de que uma execução local vá completá-las.

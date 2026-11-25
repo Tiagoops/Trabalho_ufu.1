@@ -10,10 +10,11 @@ from unittest.mock import patch
 
 import numpy as np
 
+from avaliacao import AvaliacaoDependencia
 from banco_dados import BancoDeDados
 from biblioteca import importar_ativos, preparar_importacao
 import main
-from modelos import Ativo
+from modelos import Ativo, Vulnerabilidade
 from servico_risco import analisar_inventario
 from tipos import TipoAtivo
 
@@ -44,13 +45,28 @@ class TestBiblioteca(unittest.TestCase):
         self.assertEqual(r.ids_vulnerabilidades, (
             "demo-CVE-2014-0160", "demo-CVE-2021-44228", "demo-CVE-2023-34362"))
         np.testing.assert_array_equal(r.resultado.M, [[0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 0]])
-        np.testing.assert_allclose(r.resultado.v, [7.5, 10, 9.8])
-        np.testing.assert_allclose(r.resultado.b, [10, 7.5, 9.8, 0])
+        np.testing.assert_array_equal(r.resultado.A, [
+            [0, .4, .2, 0], [0, 0, .5, 0], [0, 0, 0, 0], [.25, 0, 0, 0],
+        ])
+        # Erro de float64 em quatro ativos é muito menor que 1e-12; não arredondar antes.
+        np.testing.assert_allclose(r.resultado.v, [7.5, 10, 9.8], rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(r.resultado.b, [10, 7.5, 9.8, 0], rtol=1e-12, atol=1e-12)
         # x30=9.8; x20=7.5+0.5*9.8; x10=10+0.4*12.4+0.2*9.8; x40=0.25*x10.
-        np.testing.assert_allclose(r.resultado.x, [16.92, 12.4, 9.8, 4.23])
+        np.testing.assert_allclose(r.resultado.x, [16.92, 12.4, 9.8, 4.23], rtol=1e-12, atol=1e-12)
         self.assertEqual(self.db.buscar_por_id(10).avaliacoes_dependencias[20].indisponibilidade_percentual, 25)
         novo = BancoDeDados(self.caminho)
-        np.testing.assert_array_equal(analisar_inventario(novo).resultado.A, r.resultado.A)
+        recarga = analisar_inventario(novo)
+        self.assertEqual(recarga.ids_ativos, r.ids_ativos)
+        self.assertEqual(recarga.ids_vulnerabilidades, r.ids_vulnerabilidades)
+        for nome in ('M', 'v', 'A'):
+            np.testing.assert_array_equal(getattr(recarga.resultado, nome), getattr(r.resultado, nome))
+        for nome in ('b', 'x'):
+            np.testing.assert_allclose(getattr(recarga.resultado, nome), getattr(r.resultado, nome),
+                                       rtol=1e-12, atol=1e-12)
+        for aid, proprio, efetivo in ((10, 10, 16.92), (20, 7.5, 12.4), (30, 9.8, 9.8), (40, 0, 4.23)):
+            np.testing.assert_allclose(recarga.individual(aid), [proprio, efetivo], rtol=1e-12, atol=1e-12)
+        self.assertEqual([a.to_dict() for a in novo.listar_todos()],
+                         [a.to_dict() for a in self.db.listar_todos()])
         self.assertEqual(novo.buscar_por_id(10).campos_extras["componentes"][0]["versao"], "2.14.1")
 
     def test_vetores_recalculam_as_notas_publicadas_dos_tres_cves(self):
@@ -147,3 +163,54 @@ class TestBiblioteca(unittest.TestCase):
         with patch("main.executar_menu", side_effect=observar), contextlib.redirect_stdout(io.StringIO()):
             main.main(demonstracao=True)
         self.assertFalse(arquivos[0].exists())
+
+
+    def test_cadastro_individual_e_vinculos_reproduzem_cenario_apos_recarga(self):
+        for item in self.dados:
+            ocorrencias = []
+            for dados in item['vulnerabilidades']:
+                v = Vulnerabilidade.por_cvss(dados['descricao'], dados['categoria'], dados['vetor_cvss'])
+                # ID do cenário atribuído antes de qualquer persistência.
+                v.id_vulnerabilidade = dados['id_vulnerabilidade']
+                v.fonte_severidade = dados['fonte_severidade']
+                ocorrencias.append(v)
+            self.db.adicionar(Ativo(item['id_ativo'], item['hostname'], item['responsavel'],
+                                   item['setor'], TipoAtivo[item['tipo']], ocorrencias))
+        for item in self.dados:
+            for destino, criterios in item['avaliacoes_dependencias'].items():
+                avaliacao = AvaliacaoDependencia(**criterios)
+                self.db.definir_dependencia(item['id_ativo'], int(destino), avaliacao.peso,
+                                           avaliacao=avaliacao)
+        recarregado = BancoDeDados(self.caminho)
+        r = analisar_inventario(recarregado)
+        self.assertEqual(r.ids_ativos, (10, 20, 30, 40))
+        self.assertEqual(r.ids_vulnerabilidades,
+                         ('demo-CVE-2014-0160', 'demo-CVE-2021-44228', 'demo-CVE-2023-34362'))
+        np.testing.assert_array_equal(r.resultado.M, [[0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 0]])
+        np.testing.assert_allclose(r.resultado.A,
+            [[0, .4, .2, 0], [0, 0, .5, 0], [0, 0, 0, 0], [.25, 0, 0, 0]], rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(r.resultado.v, [7.5, 10, 9.8], rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(r.resultado.b, [10, 7.5, 9.8, 0], rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(r.resultado.x, [16.92, 12.4, 9.8, 4.23], rtol=1e-12, atol=1e-12)
+        a = recarregado.buscar_por_id(10).avaliacoes_dependencias[20]
+        self.assertEqual(a.peso, .4)
+        self.assertEqual(a.indisponibilidade_percentual, 25)
+
+    def test_demonstracao_abre_nova_instancia_e_descarta_apenas_base_temporaria(self):
+        from exemplos import demonstrar_modelo
+        caminhos = []
+
+        def abrir(caminho):
+            self.assertNotEqual(Path(caminho).resolve(), (RAIZ / 'ativos_db.txt').resolve())
+            caminhos.append(Path(caminho))
+            return BancoDeDados(caminho)
+
+        saida = io.StringIO()
+        with patch('exemplos.demonstrar_modelo.BancoDeDados', side_effect=abrir):
+            with contextlib.redirect_stdout(saida):
+                demonstrar_modelo.main()
+        self.assertEqual(len(caminhos), 2)
+        self.assertEqual(caminhos[0], caminhos[1])
+        self.assertFalse(caminhos[0].exists())
+        for trecho in ('40 | 0,00 | 4,23', 'rho(A)', '25%', 'Base temporária descartada'):
+            self.assertIn(trecho, saida.getvalue())

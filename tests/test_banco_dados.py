@@ -170,13 +170,17 @@ class TestBancoDeDados(unittest.TestCase):
                 self.assertEqual(novos.pop().read_bytes(), original)
                 self.assertEqual(self.caminho.read_bytes(), original)
 
-    def test_recuperacao_permite_novo_cadastro_sem_perder_backup(self):
+    def test_recuperacao_bloqueia_novo_cadastro_mesmo_com_backup(self):
         original = b"base corrompida"
         self.caminho.write_bytes(original)
         db = BancoDeDados(self.caminho)
-        db.adicionar(novo_ativo())
+        self.assertTrue(db.gravacao_bloqueada)
+        with self.assertRaisesRegex(RuntimeError, "bloqueada"):
+            db.adicionar(novo_ativo())
+        self.assertEqual(db.listar_todos(), [])
+        self.assertEqual(self.caminho.read_bytes(), original)
         self.assertEqual(self.backups()[0].read_bytes(), original)
-        self.assertIsNotNone(BancoDeDados(self.caminho).buscar_por_id(1))
+        self.assertTrue(BancoDeDados(self.caminho).gravacao_bloqueada)
 
     def test_backup_falha_ao_criar_bloqueia_gravacao(self):
         original = b"{invalido"

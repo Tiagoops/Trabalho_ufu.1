@@ -123,7 +123,7 @@ def cadastrar_ativo(db: BancoDeDados) -> None:
     if ler_sim_nao("Deseja cadastrar vulnerabilidades iniciais já conhecidas? (s/n): "):
         vulnerabilidades = ler_multiplas_vulnerabilidades()
 
-    ativo = Ativo(id_ativo, hostname, responsavel, setor, tipo, vulnerabilidades)
+    ativo = Ativo.criar(id_ativo, hostname, responsavel, setor, tipo, vulnerabilidades)
     db.adicionar(ativo)
     print(f"\nAtivo '{hostname}' cadastrado com sucesso (ID {id_ativo}).")
 
@@ -404,17 +404,11 @@ def atualizar_ativo(db: BancoDeDados) -> None:
     if ler_sim_nao("Deseja alterar o tipo de ativo? (s/n): "):
         novo_tipo = escolher_enum("Novo tipo de ativo:", TipoAtivo)
 
-    hostname_antigo = ativo.hostname
-    if novo_hostname:
-        ativo.hostname = novo_hostname
-    if novo_responsavel:
-        ativo.responsavel = novo_responsavel
-    if novo_setor:
-        ativo.setor = novo_setor
-    if novo_tipo is not None:
-        ativo.tipo = novo_tipo
-
-    db.reindexar_apos_edicao(ativo, hostname_antigo)
+    db.atualizar_ativo(
+        id_ativo, hostname=novo_hostname or ativo.hostname,
+        responsavel=novo_responsavel or ativo.responsavel,
+        setor=novo_setor or ativo.setor, tipo=novo_tipo or ativo.tipo,
+    )
     print("\nAtivo atualizado com sucesso.")
 
 
@@ -736,6 +730,16 @@ def consultar_risco(db: BancoDeDados) -> None:
         print(f"Ativo {aid}: risco direto={direto:.8g}; propagado={propagado:.8g}")
 
 
+def consultar_orientacoes(db: BancoDeDados) -> None:
+    ativo = db.buscar_por_id(ler_inteiro("ID do ativo: "))
+    if ativo is None:
+        print("Ativo não encontrado.")
+        return
+    print(f"{ativo.hostname}: {type(ativo).__name__}")
+    for orientacao in ativo.orientacoes_tratamento():
+        print("- " + orientacao)
+
+
 def exibir_menu() -> None:
     print("\n===== Inventário de Segurança - Ativos de TI =====")
     print("1 - Cadastrar novo ativo")
@@ -751,6 +755,7 @@ def exibir_menu() -> None:
     print("11 - Dependências: serviços e indisponibilidade")
     print("12 - Matrizes, riscos e ranking")
     print("13 - Importar biblioteca JSON de ativos")
+    print("14 - Orientações por tipo de ativo (POO)")
     print("0 - Sair")
 
 
@@ -769,6 +774,7 @@ def executar_menu(db: BancoDeDados) -> None:
         11: gerenciar_dependencias,
         12: consultar_risco,
         13: importar_biblioteca,
+        14: consultar_orientacoes,
     }
 
     print("Bem-vindo ao Sistema de Inventário de Segurança!")

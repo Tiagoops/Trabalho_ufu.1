@@ -7,3 +7,4 @@ __pycache__/
 /relatorio_vulnerabilidades.csv
 .venv/
 /ativos_db.txt.migracao.json
+/ativos_db.txt.lock
