@@ -1,0 +1,93 @@
+{
+  "consultado_utc": "2026-11-26T22:13:55.076988+00:00",
+  "git": {
+    "head": "0b8b900a288c2e053a67e0d086785193cdca5c1d",
+    "shallow": "false",
+    "commits": 25,
+    "merges": 0,
+    "refs": [
+      "refs/heads/main 0b8b900a288c2e053a67e0d086785193cdca5c1d",
+      "refs/remotes/origin/HEAD bd1eacd3992ddf82a2060fed5e05234adf81978f",
+      "refs/remotes/origin/main bd1eacd3992ddf82a2060fed5e05234adf81978f"
+    ],
+    "historico_recente": [
+      "0b8b900 Corrige IDs importados e retomada da migração; registra ensaio web",
+      "bd1eacd fix: rejeita JSON invalido e propaga falhas de inicializacao",
+      "c392576 fix: valida identidade da base antes de reutilizar a interface",
+      "9e91138 fix: recupera bloqueios Windows e compartilha base local",
+      "ee855b7 docs: atualiza matriz e registra diagnostico da gravacao Windows",
+      "2e1195e feat: completar gestao do inventario pela interface web",
+      "89ffa44 feat: permite escolher entre interface web e terminal",
+      "ea1603f feat: permite cadastrar ativos pelo navegador",
+      "a3800fe feat: adiciona frontend de consulta de ativos e riscos",
+      "030cd59 feat: consulta CVEs no NVD e separa leitura de risco",
+      "c9b8538 feat: amplia catalogo CVE e prepara importacao revisavel",
+      "657fdbd feat: preserva CVE e fonte nas ocorrencias"
+    ],
+    "workflows_locais": []
+  },
+  "repositorio": {
+    "fonte": {
+      "url": "https://api.github.com/repos/Tiagoops/Trabalho_ufu.1",
+      "http": 200,
+      "autenticacao": "nenhuma",
+      "outra_pagina": false
+    },
+    "resultado": {
+      "full_name": "Tiagoops/Trabalho_ufu.1",
+      "private": false,
+      "visibility": "public",
+      "default_branch": "main",
+      "html_url": "https://github.com/Tiagoops/Trabalho_ufu.1"
+    }
+  },
+  "branches": {
+    "fonte": {
+      "url": "https://api.github.com/repos/Tiagoops/Trabalho_ufu.1/branches?per_page=100",
+      "http": 200,
+      "autenticacao": "nenhuma",
+      "outra_pagina": false
+    },
+    "resultado": [
+      {
+        "nome": "main",
+        "sha": "bd1eacd3992ddf82a2060fed5e05234adf81978f"
+      }
+    ]
+  },
+  "pull_requests": {
+    "fonte": {
+      "url": "https://api.github.com/repos/Tiagoops/Trabalho_ufu.1/pulls?state=all&per_page=100",
+      "http": 200,
+      "autenticacao": "nenhuma",
+      "outra_pagina": false
+    },
+    "resultado": []
+  },
+  "workflows": {
+    "fonte": {
+      "url": "https://api.github.com/repos/Tiagoops/Trabalho_ufu.1/actions/workflows?per_page=100",
+      "http": 200,
+      "autenticacao": "nenhuma",
+      "outra_pagina": false
+    },
+    "resultado": {
+      "total_count": 0,
+      "workflows": []
+    }
+  },
+  "sha256_base_operacional": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763",
+  "s3_09": {
+    "localizacao": "caderno do autor, conforme resposta nesta conversa",
+    "conteudo_auditado": false,
+    "exigido_como_documento_na_apresentacao": false,
+    "fonte_exigencia": "Trabalho_2.pdf, pagina 3, secao 5.B"
+  },
+  "enunciado": {
+    "arquivo": "Trabalho_2.pdf",
+    "sha256": "aa99c9ab175005c05b4487046a5d1058981fd7a93fa3be6cee0b41b52b255685",
+    "pagina": 3,
+    "secao": "5.B",
+    "exige_documento_adicional": false
+  }
+}

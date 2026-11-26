@@ -16,8 +16,8 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 | Lista JSON de objetos — 20% | Implementado e testado | banco_dados.py: consultar_retrato e salvar; to_dict/from_dict; testes de rollback, identidade e concorrência | Retentativas limitadas, conflito e rollback validados; permissão permanente continua sendo erro |
 | Contêiner e 24h no servidor — 45% | Configuração local comprovada; implantação e 24h abertas | docker/compose.servidor.yaml, healthcheck, volume nomeado e persistência após recriar; 280 testes por ambiente; VALIDACAO_ETAPAS_1_4.md | Aguardando endereço, acesso e identificação docente; teste local não comprova servidor nem 24h |
 | Risco próprio/efetivo — 15% | Implementado e testado | servico_risco.py e matematica/risco.py; M, v, A, b=Mv, solve, rho, condição e resíduo; oráculo manual | Índice não é probabilidade nem percentual; não inventar fatores para demonstrar POO |
-| Frontend, opções 0–14 | Implementado e ensaiado parcialmente no Chrome | Cadastro, edição, busca, CVSS, dependência, risco, remoções, CSV e Sair/Entrar executados; relatório da etapa 3 | Seletor de upload bloqueado pela permissão da extensão; telas pequenas não repetidas |
-| Importação JSON | HTTP real aprovado; seletor visual pendente | Prévia válida sem escrita, confirmação com ID legado preservado e lote inseguro 400 sem escrita; importacao_http.json | Chrome exige acesso a URLs de arquivos para a automação; permissão não alterada |
+| Frontend, opções 0–14 | Implementado e ensaiado parcialmente no Chrome | Fluxos da etapa 3 preservados; tentativa visual adicional e 10 testes de transferências/IDs registrados em VALIDACAO_ETAPAS_5_6.md | Controle do Windows interrompido por URL não identificada; upload visual e telas 320/768 px continuam pendentes |
+| Importação JSON | HTTP e testes aprovados; seletor visual pendente | Prévia sem escrita, confirmação e rejeições cobertas; 10 testes de transferências/IDs passaram nesta rodada | Tentativa nativa interrompida pela ferramenta; nenhuma permissão de extensão alterada |
 | CSV | Clique e download no Chrome aprovados | relatorio_ensaio.csv: duas ocorrências fictícias, 9,8 e 7,5, após edição de ativo e ocorrência | Layout pequeno não certificado nesta rodada |
 | NVD pela nova interface | Fluxo HTTP real aprovado | CVE-2021-44228 consultada na API; prévia preserva a base; confirmação explícita; nota 10.0 e referência recarregadas em ativo fictício 9903 | CVE encontrada não prova falha em equipamento real |
 | Estados da base e sessão | Aprovados por HTTP / testes | JSON inválido → 503 sem novos arquivos; [] → 200 com mensagem vazia; falha só no risco preserva ativos em HTTP 200 (validacao_risco_http.json); Sair e Entrar novamente aprovados | Sair encerra sessão, não o servidor; não apaga dados |
@@ -26,10 +26,10 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 | Identidade antes do reuso web | Corrigida e validada | GET /metadados, protocolo 1; caminho canônico identificado sem expô-lo; porta e montagem Docker conferidas; bases distintas com bytes iguais recusadas por HTTP real | Instância antiga sem metadados precisa ser reiniciada; protocolo não é autenticação |
 | Honeypot no cadastro | Implementado e validado | Campo website oculto por CSS; preenchimento retorna 400 antes de abrir a base; vazio/ausente mantém cadastro; tests/test_cadastro_web.py | Proteção complementar: não detecta bots que deixam o campo vazio |
 | IDs de ocorrência em links | Corrigido | Validação compartilhada recusa segmentos de caminho/controles antes de importar; IDs válidos preservados; tests/test_ids_ocorrencias_web.py | Não renomeia dados automaticamente; base incompatível exige correção explícita |
-| S3_09 — relatório original | Não localizado nas fontes consultadas | Página Notion e duas exportações Trello descrevem relatório e checklist concluído; o cartão não possui anexos nas duas exportações; busca dirigida por nomes em Downloads/Documentos sem resultado | Localizar arquivo original/recibo com o aluno. Não recriar retroativamente como evidência histórica |
-| Branches / merges | Conferência concluída; comprovação acadêmica não localizada | Na auditoria anterior: histórico completo (não shallow), 20 commits, 0 merges; API GitHub: 1 branch main e 0 PRs | Branches apagadas ou atividades externas não podem ser descartadas; não inventar histórico |
+| S3_09 — material de estudo | Localização esclarecida pelo autor; não é documento exigido na apresentação | Autor informou material no caderno; PDF, página 3, seção 5.B dispensa documento adicional; VALIDACAO_ETAPAS_5_6.md | Caderno não inspecionado; não certifica exercícios nem avaliação diária |
+| Branches / merges / PR / CI | Conferência atual concluída; evidências da sprint não encontradas | Checkout não shallow: 25 commits antes da revisão, 0 merges; API pública: 1 main, 0 PRs e 0 workflows, sem paginação; conferencia_academica.json | S3_08 é estudo/avaliação diária; não fabricar histórico nem confundir com requisito extra da Tabela 1 |
 | S5_19 — apresentação | Material existente e ensaio funcional registrado | Slides/roteiro anteriores e VALIDACAO_ETAPAS_1_4.md, tópico 3 | Ensaio oral de 5 minutos e revisão por colega dependem do aluno; ensaio funcional não os substitui |
-| Acesso do docente / prazo | bd1eacd público; correção atual ainda exige publicação | Publicação anterior conferida; prazo do enunciado 27/11/2026 | Novo push requer autorização específica; não certifica acesso pela rede do docente |
+| Acesso do docente / prazo | Acesso público anônimo confirmado | API GitHub HTTP 200 sem credencial, private=false, main=bd1eacd; prazo 27/11/2026; conferência das etapas 5–6 | Novos commits ainda dependem de push autorizado; rede do docente não testada |
 
 ## Modelo demonstrável
 
@@ -99,3 +99,10 @@ e teste de falha fortalecido. Ensaio Chrome registrado no tópico 3 do relatóri
 CSV aprovado, upload visual bloqueado pela extensão. Compose de servidor passou
 localmente com volume fictício e recriação persistente; implantação depende dos
 dados de acesso solicitados. A causa externa histórica e as 24h não foram comprovadas.
+
+26/11/2026, etapas 5–6: autor informou o S3_09 no caderno; PDF 5.B dispensa
+documento adicional na apresentação. Acesso público anônimo e histórico Git
+reconferidos; sem PR/workflow encontrado. O controle do navegador encerrou a
+tentativa visual por não identificar a URL Windows com segurança. Upload e
+telas pequenas continuam parciais; 10 testes existentes passaram. Ver
+VALIDACAO_ETAPAS_5_6.md. Não há mudança de código, push ou implantação.

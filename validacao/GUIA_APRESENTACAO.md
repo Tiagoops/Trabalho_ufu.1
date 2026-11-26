@@ -11,7 +11,8 @@ CLI e web compartilham dados/inventario.json. Os sete registros existentes
 foram preservados; para cadastrar/remover durante ensaio, use uma cópia fictícia.
 Validação atual: 280 testes Windows (1 omitido) e Linux (2 omitidos), sem falhas.
 Ensaio funcional Chrome e Compose de servidor fictício: VALIDACAO_ETAPAS_1_4.md.
-Upload visual pendente por permissão da extensão; não confundir com HTTP aprovado.
+Upload visual e telas pequenas pendentes por interrupção do controle do Chrome;
+não confundir com HTTP aprovado. Conferência posterior: VALIDACAO_ETAPAS_5_6.md.
 Set-Location -LiteralPath 'C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT'
 docker run --rm -it trabalho-ufu:local python -B main.py --demo
 Deixe modelos.py, banco_dados.py, matematica/risco.py e docker/Dockerfile abertos.
@@ -78,3 +79,11 @@ ENSAIO PELO ALUNO
 Execute sem ler as respostas; cronometre 5 minutos; explique a conta de x10 e
 x40; peça a um colega perguntas e comentários. Registre tempo real e pontos
 de dificuldade. Não registrar essa atividade como concluída antes de fazê-la.
+
+CONFERÊNCIA ACADÊMICA POSTERIOR — 26/11/2026
+O autor informou que o material S3_09 está no caderno. O PDF, seção 5.B,
+dispensa documento adicional; não é necessário localizar um relatório digital
+para apresentar o programa. Isso não certifica os exercícios ou a nota diária.
+Repositório público acessível sem login; os novos commits ainda precisam de
+push autorizado. Branches/PR/CI conferidos, sem comprovação encontrada para
+o estudo S3_08. Não apresentar o ensaio funcional como ensaio oral concluído.
