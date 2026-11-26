@@ -1,0 +1,269 @@
+{
+  "data_local": "2026-11-26",
+  "navegador": "Chrome desktop, extensão de controle",
+  "origem": "Consolidação manual dos retornos DOM/AX observados nesta sessão; não é gravação automática do navegador.",
+  "viewports": [
+    {
+      "width": 320,
+      "height": 800
+    },
+    {
+      "width": 768,
+      "height": 1024
+    }
+  ],
+  "antes": {
+    "rota": "/ativos/10",
+    "viewport": 320,
+    "clientWidth": 305,
+    "scrollWidth": 350,
+    "elemento": "Cadastrar vulnerabilidade",
+    "causa": ".titulo-secao sem flex-wrap"
+  },
+  "depois": [
+    {
+      "rota": "/",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/novo",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10/editar",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10/remover",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/vulnerabilidades",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10/vulnerabilidades/nova",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias/nova",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias/10/20/editar",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias/10/20/remover",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/riscos",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/importar",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ajuda/cvss",
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/sessao-encerrada",
+      "viewport": 320,
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/novo",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10/editar",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10/remover",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/vulnerabilidades",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ativos/10/vulnerabilidades/nova",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias/nova",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias/10/20/editar",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/dependencias/10/20/remover",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/riscos",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/importar",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/ajuda/cvss",
+      "viewport": 768,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "elementos_fora_apos_correcao": []
+    },
+    {
+      "rota": "/sessao-encerrada",
+      "viewport": 768,
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "elementos_fora_apos_correcao": []
+    }
+  ],
+  "interacoes": {
+    "cadastro_9501_em_320": "sucesso",
+    "modo_cvss_4_0": "conferido nas duas larguras",
+    "tela_apos_submeter_avaliacao_sem_confirmar": "layout medido nas duas larguras",
+    "matriz_A_expandida": "sem overflow global nas duas larguras",
+    "rolagem_horizontal_tabela320": {
+      "scrollLeft_aproximado": 344.8,
+      "scrollLeft_pagina": 0
+    },
+    "sair_entrar": "sessão encerrada nas duas larguras; retorno com cinco ativos fictícios"
+  },
+  "imagens": "Capturas inspecionadas na sessão de controle; este pacote registra medições e não contém arquivos de screenshot.",
+  "limites": [
+    "não testa dispositivos físicos, gestos touch, outros navegadores ou auditoria WCAG integral",
+    "não conclui o upload pelo seletor nativo",
+    "NVD ao vivo não repetido",
+    "após concluir os casos, o controle Windows perdeu acesso; restauração do viewport temporário não confirmada"
+  ],
+  "imagem_final": "sha256:03036fab9716560ccbb02fbe00963654b2d0c2853083af407e85ae709c765be7",
+  "css_sha256": "723f26a543298bfd1fd5bc3a2dd7aa984ca4345714d30391652d9877925f6602"
+}

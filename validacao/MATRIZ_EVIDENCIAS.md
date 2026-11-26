@@ -1,7 +1,7 @@
 # Matriz de evidências — revisão de 26/11/2026
 
 Checkout oficial: C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT
-Código validado: correções de IDs e migração sobre bd1eacd; 280 testes por ambiente. O commit que contém esta matriz identifica a entrega; rodadas anteriores permanecem no histórico.
+Código validado: correções de IDs/migração e quebra de títulos em telas pequenas; 280 testes por ambiente. O commit que contém esta matriz identifica a entrega; rodadas anteriores preservadas no histórico.
 Repositório: https://github.com/Tiagoops/Trabalho_ufu.1
 Referência remota conferida antes desta etapa: bd1eacd, publicado com autorização específica. As novas alterações exigem novo push autorizado; não presumir que já estão no GitHub.
 
@@ -16,9 +16,9 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 | Lista JSON de objetos — 20% | Implementado e testado | banco_dados.py: consultar_retrato e salvar; to_dict/from_dict; testes de rollback, identidade e concorrência | Retentativas limitadas, conflito e rollback validados; permissão permanente continua sendo erro |
 | Contêiner e 24h no servidor — 45% | Configuração local comprovada; implantação e 24h abertas | docker/compose.servidor.yaml, healthcheck, volume nomeado e persistência após recriar; 280 testes por ambiente; VALIDACAO_ETAPAS_1_4.md | Aguardando endereço, acesso e identificação docente; teste local não comprova servidor nem 24h |
 | Risco próprio/efetivo — 15% | Implementado e testado | servico_risco.py e matematica/risco.py; M, v, A, b=Mv, solve, rho, condição e resíduo; oráculo manual | Índice não é probabilidade nem percentual; não inventar fatores para demonstrar POO |
-| Frontend, opções 0–14 | Implementado e ensaiado parcialmente no Chrome | Fluxos da etapa 3 preservados; tentativa visual adicional e 10 testes de transferências/IDs registrados em VALIDACAO_ETAPAS_5_6.md | Controle do Windows interrompido por URL não identificada; upload visual e telas 320/768 px continuam pendentes |
-| Importação JSON | HTTP e testes aprovados; seletor visual pendente | Prévia sem escrita, confirmação e rejeições cobertas; 10 testes de transferências/IDs passaram nesta rodada | Tentativa nativa interrompida pela ferramenta; nenhuma permissão de extensão alterada |
-| CSV | Clique e download no Chrome aprovados | relatorio_ensaio.csv: duas ocorrências fictícias, 9,8 e 7,5, após edição de ativo e ocorrência | Layout pequeno não certificado nesta rodada |
+| Frontend, opções 0–14 | Layout validado no Chrome em 320/768 px nos casos registrados | 16 rotas nas duas larguras; cadastro fictício, critérios/prévia CVSS, expansão e rolagem de tabelas, Sair/Entrar; VALIDACAO_TELAS_PEQUENAS.md | Upload nativo ainda não concluído; dispositivos físicos e outros navegadores não testados |
+| Importação JSON | HTTP/testes e layout 320/768 px aprovados; upload nativo pendente | Prévia sem escrita e rejeições cobertas; página de importação medida no navegador | A validação de layout não certifica a seleção e envio pelo diálogo nativo |
+| CSV | Download Chrome aprovado na rodada anterior | relatorio_ensaio.csv com duas ocorrências fictícias; link de exportação na navegação responsiva | Download não repetido nesta rodada de layout |
 | NVD pela nova interface | Fluxo HTTP real aprovado | CVE-2021-44228 consultada na API; prévia preserva a base; confirmação explícita; nota 10.0 e referência recarregadas em ativo fictício 9903 | CVE encontrada não prova falha em equipamento real |
 | Estados da base e sessão | Aprovados por HTTP / testes | JSON inválido → 503 sem novos arquivos; [] → 200 com mensagem vazia; falha só no risco preserva ativos em HTTP 200 (validacao_risco_http.json); Sair e Entrar novamente aprovados | Sair encerra sessão, não o servidor; não apaga dados |
 | Windows WinError 5 | Recuperação do inventário e migração validada | Retry compartilhado; teste antigo distingue fase da falha; controles transitório, permanente, conflito e handle nativo; tests/test_migracao_windows.py | Processo externo histórico não identificado; permissão permanente segue sendo erro |
@@ -106,3 +106,10 @@ reconferidos; sem PR/workflow encontrado. O controle do navegador encerrou a
 tentativa visual por não identificar a URL Windows com segurança. Upload e
 telas pequenas continuam parciais; 10 testes existentes passaram. Ver
 VALIDACAO_ETAPAS_5_6.md. Não há mudança de código, push ou implantação.
+
+26/11/2026, telas pequenas: reproduzido overflow de 350 px em largura útil
+de 305 px no detalhe do ativo. Uma propriedade flex-wrap no título corrigiu
+o vazamento; 16 rotas passaram em 320/768 px, com tabelas rolando dentro de
+seus contêineres. Suítes de 280 testes Windows/Linux aprovadas com omissões
+de plataforma. Registro em VALIDACAO_TELAS_PEQUENAS.md. Upload nativo,
+implantação docente, 24h e ensaio oral permanecem pendentes.

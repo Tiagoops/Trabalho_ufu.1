@@ -1,5 +1,5 @@
 GUIA DE APRESENTAÇÃO — REVISÃO 26/11/2026
-Código atual: IDs e migração sobre bd1eacd (26/11/2026). Slides históricos: apresentacao/Inventario_UFU.pptx.
+Código atual: IDs, migração e telas pequenas (26/11/2026). Slides históricos: apresentacao/Inventario_UFU.pptx.
 Materiais locais no workspace: outputs/revisao_final_2026-11-26/.
 O PowerPoint e o replay foram entregues localmente; não fazem parte do código-fonte versionado.
 Este material prepara o aluno; não comprova ensaio oral nem revisão por pares.
@@ -11,8 +11,9 @@ CLI e web compartilham dados/inventario.json. Os sete registros existentes
 foram preservados; para cadastrar/remover durante ensaio, use uma cópia fictícia.
 Validação atual: 280 testes Windows (1 omitido) e Linux (2 omitidos), sem falhas.
 Ensaio funcional Chrome e Compose de servidor fictício: VALIDACAO_ETAPAS_1_4.md.
-Upload visual e telas pequenas pendentes por interrupção do controle do Chrome;
-não confundir com HTTP aprovado. Conferência posterior: VALIDACAO_ETAPAS_5_6.md.
+Layout Chrome em 320/768 px validado: VALIDACAO_TELAS_PEQUENAS.md.
+Upload pelo seletor nativo continua pendente; não confundir layout com envio aprovado.
+A conferência anterior permanece em VALIDACAO_ETAPAS_5_6.md.
 Set-Location -LiteralPath 'C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT'
 docker run --rm -it trabalho-ufu:local python -B main.py --demo
 Deixe modelos.py, banco_dados.py, matematica/risco.py e docker/Dockerfile abertos.

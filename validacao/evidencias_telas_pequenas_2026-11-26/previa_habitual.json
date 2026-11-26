@@ -1,0 +1,23 @@
+{
+  "http": {
+    "/": 200,
+    "/metadados": 200,
+    "/ativos/70": 200,
+    "/riscos?ativo_id=70": 200
+  },
+  "css_http_igual_ao_validado": true,
+  "imagem": "sha256:03036fab9716560ccbb02fbe00963654b2d0c2853083af407e85ae709c765be7",
+  "sha256_css": "723f26a543298bfd1fd5bc3a2dd7aa984ca4345714d30391652d9877925f6602",
+  "sha256_base_inalterada": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763",
+  "ativos_preservados": 7,
+  "risco_70": {
+    "b": 0.0,
+    "x": 7.3500000000000005
+  },
+  "launcher": "mesma base reconhecida",
+  "ensaios_ficticios": {
+    "ativos": 5,
+    "ocorrencias": 3
+  },
+  "rollback": "trabalho-ufu:antes-telas-0b8b900"
+}

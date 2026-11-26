@@ -47,7 +47,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .resumo div:nth-child(2) dt { color: #512b1b; }
 dt { font-size: 12px; color: var(--muted); }
 dd { margin: 12px 0 0; font-size: 32px; font-weight: 650; line-height: 1.1; letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
-.titulo-secao { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 24px 0 12px; }
+.titulo-secao { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 16px; margin: 24px 0 12px; }
 h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.015em; }
 .titulo-secao span { color: var(--muted); font-size: 11px; }
 .ajuda-tabela { display: none; font-size: 12px; color: var(--muted); }
