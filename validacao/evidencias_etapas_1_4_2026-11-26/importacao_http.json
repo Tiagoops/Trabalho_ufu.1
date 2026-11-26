@@ -1,0 +1,16 @@
+{
+  "meio": "HTTP real, sem clique/upload no navegador",
+  "id_invalido": {
+    "http": 400,
+    "sem_escrita": true
+  },
+  "previa_valida": {
+    "http": 200,
+    "sem_escrita": true
+  },
+  "confirmacao": {
+    "ativo": 703,
+    "id_preservado": "legado:703",
+    "edicao_http": 200
+  }
+}

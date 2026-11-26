@@ -69,3 +69,14 @@ operacional já testada, não uma correção da causa no Windows.
 - Microsoft: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/1d2673a8-8fb9-4868-920a-775ccaa30cf8
 - Registros brutos e script: outputs/revisao_final_2026-11-26/ (workspace local).
 - Resumo versionado: evidencias_2026-11-26/resumo.json.
+
+## Migração — revisão posterior de 26/11/2026
+
+O teste antigo de retomada aceitava qualquer OSError. Um WinError 5
+controlado antes de gravar a base reproduziu a assinatura da falha; agora
+o teste exige a falha específica de confirmação do manifesto. A migração
+reutiliza o retry limitado do inventário, com revisão antes de repetir,
+preservando erros permanentes e conflitos. Controle simulado e handle
+Windows real foram aprovados; 280 testes por ambiente passaram (omissões
+de plataforma registradas). Não identifica o processo histórico causador.
+Ver VALIDACAO_ETAPAS_1_4.md e evidencias_etapas_1_4_2026-11-26/.

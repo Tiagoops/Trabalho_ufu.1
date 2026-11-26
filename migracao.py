@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import tempfile
 
-from banco_dados import bloquear_escrita
+from banco_dados import bloquear_escrita, substituir_arquivo
 
 
 def _hash(conteudo: bytes) -> str:
@@ -24,6 +24,19 @@ def _manifesto(caminho: str | Path) -> Path:
 
 def _gravar(caminho: Path, conteudo: bytes) -> None:
     """Substitui somente após sincronizar o arquivo temporário no mesmo diretório."""
+    try:
+        assinatura = _hash(caminho.read_bytes())
+    except FileNotFoundError:
+        assinatura = None
+
+    def conferir_revisao():
+        try:
+            atual = _hash(caminho.read_bytes())
+        except FileNotFoundError:
+            atual = None
+        if atual != assinatura:
+            raise RuntimeError("arquivo da migração mudou durante a gravação; operação recusada")
+
     temporario = None
     try:
         fd, temporario = tempfile.mkstemp(prefix=caminho.name + ".", suffix=".tmp", dir=caminho.parent)
@@ -31,7 +44,8 @@ def _gravar(caminho: Path, conteudo: bytes) -> None:
             arquivo.write(conteudo)
             arquivo.flush()
             os.fsync(arquivo.fileno())
-        os.replace(temporario, caminho)
+        conferir_revisao()
+        substituir_arquivo(temporario, caminho, conferir_revisao)
     finally:
         if temporario is not None and os.path.exists(temporario):
             os.unlink(temporario)
@@ -168,7 +182,7 @@ def main() -> None:
                 return
             aplicar_migracao(args.caminho, confirmacao=estado["sha256_original"])
             print("Migração concluída. Ativos preservados; vulnerabilidades antigas excluídas.")
-    except (OSError, ValueError, KeyError) as erro:
+    except (OSError, ValueError, KeyError, RuntimeError) as erro:
         parser.exit(1, f"Migração interrompida: {erro}\n")
 
 

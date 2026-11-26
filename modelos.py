@@ -94,6 +94,9 @@ class Vulnerabilidade:
         if "id_vulnerabilidade" not in d:
             identificador = str(uuid5(NAMESPACE_URL, "ufu:ocorrencia:" + referencia))
         _validar_textos({"id": identificador}, ("id",))
+        if (identificador in (".", "..") or "/" in identificador or "\\" in identificador
+                or not identificador.isprintable()):
+            raise ValueError("ID de vulnerabilidade incompatível com os links: remova separadores de caminho e caracteres de controle.")
         return Vulnerabilidade(d["descricao"], d["categoria"], d["severidade"], identificador,
                                d.get("vetor_cvss"), d.get("fonte_severidade"), d.get("cve"))
 

@@ -1,0 +1,12 @@
+{
+  "repeticoes_sem_injecao": 60,
+  "aprovadas": 60,
+  "recusas_observadas": [],
+  "controle_winerror5_na_primeira_troca_da_base": {
+    "reproduziu_falha_do_teste": true,
+    "codigo_injetado": [
+      5
+    ]
+  },
+  "interpretacao": "O teste antigo aceita qualquer OSError e pode confundir falha anterior na base com a falha intencional do manifesto. O controle reproduz a assinatura; a causa historica espontanea nao foi capturada."
+}

@@ -1,5 +1,5 @@
 GUIA DE APRESENTAÇÃO — REVISÃO 26/11/2026
-Código atual: correção de base única sobre ee855b7 (26/11/2026). Slides históricos: apresentacao/Inventario_UFU.pptx.
+Código atual: IDs e migração sobre bd1eacd (26/11/2026). Slides históricos: apresentacao/Inventario_UFU.pptx.
 Materiais locais no workspace: outputs/revisao_final_2026-11-26/.
 O PowerPoint e o replay foram entregues localmente; não fazem parte do código-fonte versionado.
 Este material prepara o aluno; não comprova ensaio oral nem revisão por pares.
@@ -9,8 +9,9 @@ PREPARAÇÃO
 Interface para apresentação: http://127.0.0.1:8000 (somente neste computador).
 CLI e web compartilham dados/inventario.json. Os sete registros existentes
 foram preservados; para cadastrar/remover durante ensaio, use uma cópia fictícia.
-Validação atual: 250 testes em Windows, Linux e Compose, um caso ignorado por
-plataforma em cada execução. Detalhes: validacao/VALIDACAO_BASE_UNICA.md.
+Validação atual: 280 testes Windows (1 omitido) e Linux (2 omitidos), sem falhas.
+Ensaio funcional Chrome e Compose de servidor fictício: VALIDACAO_ETAPAS_1_4.md.
+Upload visual pendente por permissão da extensão; não confundir com HTTP aprovado.
 Set-Location -LiteralPath 'C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT'
 docker run --rm -it trabalho-ufu:local python -B main.py --demo
 Deixe modelos.py, banco_dados.py, matematica/risco.py e docker/Dockerfile abertos.
@@ -71,7 +72,7 @@ São grandezas separadas. Peso é serviços fornecidos/total necessário; os tem
 observados servem de registro e não são multiplicadores do risco.
 12. Build Docker comprova 24h?
 Não. Precisa executar a versão identificada no servidor autorizado, registrar
-período e verificações funcionais. Essa etapa continua adiada.
+período e verificações funcionais. A implantação aguarda os dados de acesso; as 24h não foram iniciadas.
 
 ENSAIO PELO ALUNO
 Execute sem ler as respostas; cronometre 5 minutos; explique a conta de x10 e

@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_falha_entre_base_e_manifesto_bloqueia_app_ate_retomada (tests.test_migracao.TestMigracao.test_falha_entre_base_e_manifesto_bloqueia_app_ate_retomada)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users/Nitro/Downloads/Trabalho_UFU_COMMIT\tests\test_migracao.py", line 127, in test_falha_entre_base_e_manifesto_bloqueia_app_ate_retomada
+    self.assertEqual(self.caminho.read_bytes(), depois)
+AssertionError: b'[\n  {\n    "id_ativo": 7,\n    "hostname"[440 chars]}\n]' != b'[{"id_ativo": 7, "hostname": "Servidor", "[379 chars]3}}]'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.049s
+
+FAILED (failures=1)

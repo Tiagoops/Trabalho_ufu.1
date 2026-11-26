@@ -1,0 +1,21 @@
+{
+  "controle_winerror5_apos_correcao": "aprovado, uma recusa recuperada",
+  "compose_servidor_local_ficticio": {
+    "container": "ufu-validacao-servidor-20261126-frontend-1",
+    "url": "http://127.0.0.1:52256",
+    "usuario": "65534:65534",
+    "raiz_somente_leitura": true,
+    "volume_dados_gravavel": true,
+    "cadastro_http_704": true,
+    "persistencia_apos_recriar": true,
+    "comando_healthcheck_aprovado": true,
+    "reinicios_apos_recriar": 0,
+    "implantacao_docente": false,
+    "execucao_24h": false
+  },
+  "csv_baixado_no_chrome": {
+    "registros": 2,
+    "sha256": "ebd3c72e7a0337e12d3e84c6e756a00923bcf42a984f1e570c1b55b0cb27dfae"
+  },
+  "base_operacional_sha256_inalterado": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763"
+}

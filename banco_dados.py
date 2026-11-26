@@ -26,6 +26,24 @@ CAMINHO_ARQUIVO_PADRAO = str(caminho_inventario())
 _WINDOWS = os.name == "nt"
 
 
+def substituir_arquivo(temporario, caminho, conferir_revisao):
+    """Troca atômica comum ao inventário e à migração, com espera limitada."""
+    atrasos = (0.01, 0.03, 0.08, 0.2, 0.5)
+    for tentativa in range(len(atrasos) + 1):
+        try:
+            os.replace(temporario, caminho)
+            return
+        except PermissionError as erro:
+            if (not _WINDOWS or getattr(erro, "winerror", None) not in (5, 32, 33)
+                    or tentativa == len(atrasos)):
+                raise
+            logging.getLogger(__name__).warning(
+                "Windows bloqueou a substituição (erro %s); nova tentativa %s/6.",
+                erro.winerror, tentativa + 2)
+            time.sleep(atrasos[tentativa])
+            conferir_revisao()
+
+
 class InventarioIndisponivel(ValueError):
     """A base não pode ser apresentada como inventário válido."""
 
@@ -263,23 +281,6 @@ class BancoDeDados:
         if atual != self._assinatura:
             raise RuntimeError("a base mudou em outra instância; reabra o inventário antes de gravar")
 
-    def _substituir_arquivo(self, temporario):
-        # Leitores externos podem bloquear brevemente o rename no Windows.
-        atrasos = (0.01, 0.03, 0.08, 0.2, 0.5)
-        for tentativa in range(len(atrasos) + 1):
-            try:
-                os.replace(temporario, self.caminho)
-                return
-            except PermissionError as erro:
-                if (not _WINDOWS or getattr(erro, "winerror", None) not in (5, 32, 33)
-                        or tentativa == len(atrasos)):
-                    raise
-                logging.getLogger(__name__).warning(
-                    "Windows bloqueou a substituição (erro %s); nova tentativa %s/6.",
-                    erro.winerror, tentativa + 2)
-                time.sleep(atrasos[tentativa])
-                self._conferir_revisao_disco()
-
     def salvar(self) -> None:
         temporario = None
         confirmado = False
@@ -306,7 +307,7 @@ class BancoDeDados:
                     json.dump(dados, arquivo, ensure_ascii=False, indent=2, allow_nan=False)
                     arquivo.flush()
                     os.fsync(arquivo.fileno())
-                self._substituir_arquivo(temporario)
+                substituir_arquivo(temporario, self.caminho, self._conferir_revisao_disco)
                 confirmado = True
                 self._assinatura = assinatura_nova
                 self._estado_salvo = estado

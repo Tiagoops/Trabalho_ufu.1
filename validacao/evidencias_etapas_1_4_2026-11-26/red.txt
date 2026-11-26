@@ -1,0 +1,167 @@
+======================================================================
+ERROR: test_alteracao_externa_durante_espera_e_preservada (tests.test_migracao_windows.TestMigracaoWindows.test_alteracao_externa_durante_espera_e_preservada)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 36, in test_alteracao_externa_durante_espera_e_preservada
+    with self.assertRaises(RuntimeError):migracao._gravar(self.base,b'novo')
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\migracao.py", line 34, in _gravar
+    os.replace(temporario, caminho)
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+PermissionError: [WinError 5] bloqueio fict�cio
+
+======================================================================
+ERROR: test_bloqueio_transitorio_repete_mesmo_temporario_e_confirma (tests.test_migracao_windows.TestMigracaoWindows.test_bloqueio_transitorio_repete_mesmo_temporario_e_confirma)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 23, in test_bloqueio_transitorio_repete_mesmo_temporario_e_confirma
+    migracao._gravar(self.base,b'novo')
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\migracao.py", line 34, in _gravar
+    os.replace(temporario, caminho)
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 20, in substituir
+    if len(chamadas)<3:raise bloqueio()
+                       ^^^^^^^^^^^^^^^^
+PermissionError: [WinError 5] bloqueio fict�cio
+
+======================================================================
+ERROR: test_handle_real_liberado_durante_gravacao_da_migracao (tests.test_migracao_windows.TestMigracaoWindows.test_handle_real_liberado_durante_gravacao_da_migracao)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 71, in test_handle_real_liberado_durante_gravacao_da_migracao
+    migracao._gravar(self.base,b'novo')
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\migracao.py", line 34, in _gravar
+    os.replace(temporario, caminho)
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 64, in substituir
+    try:return original(origem,destino)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Nitro\\AppData\\Local\\Temp\\tmp5f0c7msl\\base.json._a77bx5d.tmp' -> 'C:\\Users\\Nitro\\AppData\\Local\\Temp\\tmp5f0c7msl\\base.json'
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='../outra')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='.')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='..')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='a/b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='a\\b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='id\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_id_com_separador_segmento_ponto_ou_controle_e_recusado (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_id_com_separador_segmento_ponto_ou_controle_e_recusado) (vid='id\x00')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 22, in test_id_com_separador_segmento_ponto_ou_controle_e_recusado
+    with self.subTest(vid=vid),self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita) (vid='../outra')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 32, in test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita
+    self.assertEqual(r.status_code,400)
+AssertionError: 200 != 400
+
+======================================================================
+FAIL: test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita) (vid='a\\b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 32, in test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita
+    self.assertEqual(r.status_code,400)
+AssertionError: 200 != 400
+
+======================================================================
+FAIL: test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita (tests.test_ids_ocorrencias_web.TestIdsOcorrenciasWeb.test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita) (vid='id\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_ids_ocorrencias_web.py", line 32, in test_importacao_recusa_id_inseguro_antes_da_previa_sem_escrita
+    self.assertEqual(r.status_code,400)
+AssertionError: 200 != 400
+
+======================================================================
+FAIL: test_bloqueio_persistente_preserva_original_e_limpa_temporario (tests.test_migracao_windows.TestMigracaoWindows.test_bloqueio_persistente_preserva_original_e_limpa_temporario)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 28, in test_bloqueio_persistente_preserva_original_e_limpa_temporario
+    with patch('banco_dados._WINDOWS',True),patch('migracao.os.replace',side_effect=bloqueio()) as trocar,patch('time.sleep'),self.assertLogs('banco_dados',level='WARNING'):
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\_log.py", line 84, in __exit__
+    self._raiseFailure(
+AssertionError: no logs of level WARNING or higher triggered on banco_dados
+
+======================================================================
+FAIL: test_retomada_nao_confunde_bloqueio_transitorio_com_falha_do_manifesto (tests.test_migracao_windows.TestMigracaoWindows.test_retomada_nao_confunde_bloqueio_transitorio_com_falha_do_manifesto)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_migracao_windows.py", line 47, in test_retomada_nao_confunde_bloqueio_transitorio_com_falha_do_manifesto
+    with patch('banco_dados._WINDOWS',True),patch('migracao.os.replace',side_effect=substituir),patch('time.sleep'),self.assertLogs('banco_dados',level='WARNING'):
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\_log.py", line 84, in __exit__
+    self._raiseFailure(
+AssertionError: no logs of level WARNING or higher triggered on banco_dados
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.553s
+
+FAILED (failures=12, errors=3)

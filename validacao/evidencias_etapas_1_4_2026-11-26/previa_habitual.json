@@ -1,0 +1,17 @@
+{
+  "http": {
+    "/": 200,
+    "/metadados": 200,
+    "/ativos/70": 200,
+    "/riscos?ativo_id=70": 200
+  },
+  "launcher_mesma_base": "inventario",
+  "ativo70": {
+    "b": 0.0,
+    "x": 7.3500000000000005
+  },
+  "ativos_preservados": 7,
+  "sha256_base": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763",
+  "imagem": "sha256:4393f1bd64e80fa784ea2967877c6b820a0738796f09a6a42620587320eaf1c9",
+  "rollback": "trabalho-ufu:antes-ids-migracao-bd1eacd"
+}

@@ -275,3 +275,70 @@ após o processo terminar. O mesmo status é devolvido ao Docker e aos scripts.
 A rodada de 271 testes está em `validacao/evidencias_json_status_2026-11-26/`.
 Ela registra uma falha inicial intermitente de um teste antigo de retomada de
 migração Windows, as verificações posteriores e o limite de causa não confirmada.
+
+## IDs importados e migração — revisão de 26/11/2026
+
+IDs de ocorrências não podem conter `/`, `\`, controles ou ser `.`/`..`.
+Registros com ID incompatível são recusados antes da prévia de importação;
+uma base incompatível fica indisponível. IDs válidos são preservados, sem
+renomeação automática. Corrija dados antigos explicitamente em cópia com backup.
+
+A migração também reutiliza as seis tentativas limitadas de substituição no
+Windows e verifica se o arquivo mudou antes de repetir. Recusa permanente ou
+conflito continuam sendo erro. A CLI apresenta status 1 sem traceback para esses
+conflitos. Diagnóstico e resultados atuais: validacao/VALIDACAO_ETAPAS_1_4.md.
+
+## Servidor do docente — preparação, ainda sem implantação
+
+Use `docker/compose.servidor.yaml` em checkout separado e limpo da versão
+publicada e validada. Antes, confira a instalação que já existe, contêineres,
+volumes, porta e faça cópia recuperável dos dados. Não substitua outra entrega
+nem apague volumes. O Compose habitual `docker/compose.yaml` permanece local.
+
+O acompanhamento S5_20 informa projeto `trab02_2026_2_MATRICULA` e porta externa
+2000 + os três últimos dígitos da matrícula. Confirme com o docente; nenhum valor
+real foi preenchido. Em Bash, substitua os três valores abaixo pelos confirmados:
+
+```bash
+export UFU_PROJETO='trab02_2026_2_MATRICULA'
+export UFU_PORTA='PORTA_CONFIRMADA'
+export UFU_IMAGEM='trabalho-ufu:COMMIT_VALIDADO'
+docker compose -f docker/compose.servidor.yaml config --quiet
+docker compose -f docker/compose.servidor.yaml build frontend
+docker compose -f docker/compose.servidor.yaml up -d --wait --wait-timeout 60
+docker compose -f docker/compose.servidor.yaml ps
+docker compose -f docker/compose.servidor.yaml logs --tail 100 frontend
+curl --fail "http://127.0.0.1:${UFU_PORTA}/metadados"
+```
+
+O serviço inicia diretamente a web e permanece ativo sem menu/TTY. Cria base
+vazia somente se ausente; `/dados` usa volume nomeado do projeto, com usuário
+65534, e sobrevive à recriação. O volume antigo de outra configuração não é
+importado automaticamente. Para copiar dados, valide uma cópia e combine a
+origem/destino antes de alterar o volume. Não execute `down -v`.
+
+A porta é publicada somente no loopback do servidor. Para apresentação remota,
+um túnel SSH permite abrir `http://127.0.0.1:8000` no computador local:
+
+```bash
+ssh -N -L 8000:127.0.0.1:PORTA_CONFIRMADA USUARIO@HOST
+```
+
+Não há autenticação de usuários: a configuração não abre acesso público.
+Se o docente exigir acesso de rede, isso precisa ser combinado separadamente.
+
+O healthcheck consulta identidade e validade da base. Não há reinício automático;
+uma queda permanece visível. Antes/depois do período exigido, registre UTC,
+commit, imagem, `StartedAt`, `RestartCount`, estado de saúde, logs e operações
+funcionais com dados fictícios. Reinício interrompe a evidência de execução
+contínua; saúde pontual não comprova 24h. Essa contagem ainda não foi iniciada.
+
+Para interromper somente este projeto, use `docker compose -f
+docker/compose.servidor.yaml stop frontend`. Para rollback, preserve o volume e
+use a tag anterior já existente com `up -d --no-build --wait`; confira antes a
+compatibilidade dos dados e a cópia recuperável. Nunca sobrescreva uma tag de
+versão usada como evidência.
+
+Validação local: projeto fictício isolado, cadastro HTTP, volume gravável, raiz
+somente leitura, healthcheck e JSON idêntico após recriar. A implantação real
+aguarda endereço, método de acesso, identificação e localização da entrega anterior.

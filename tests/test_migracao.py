@@ -116,7 +116,7 @@ class TestMigracao(unittest.TestCase):
             gravar(caminho, conteudo)
 
         with patch("migracao._gravar", side_effect=falhar_manifesto):
-            with self.assertRaises(OSError):
+            with self.assertRaisesRegex(OSError, "falha ao confirmar manifesto"):
                 migracao.aplicar_migracao(self.caminho, confirmacao=plano["sha256_original"])
         depois = self.caminho.read_bytes()
         with contextlib.redirect_stdout(io.StringIO()):

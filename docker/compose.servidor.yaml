@@ -1,0 +1,27 @@
+name: ${UFU_PROJETO:?informe o identificador exigido pelo docente}
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ${UFU_IMAGEM:?informe uma tag de versao fixa}
+    command: ["python", "-B", "iniciar_web.py"]
+    environment:
+      INVENTARIO_ARQUIVO: /dados/inventario.json
+      INVENTARIO_HOST: 0.0.0.0
+      INVENTARIO_DEMONSTRACAO: "1"
+    ports:
+      - "127.0.0.1:${UFU_PORTA:?informe a porta atribuida pelo docente}:8000"
+    user: "65534:65534"
+    read_only: true
+    restart: "no"
+    volumes:
+      - inventario:/dados
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:8000/metadados', timeout=3)); assert d.get('aplicacao') == 'inventario-ti' and d.get('protocolo') == 1 and d.get('inventario_disponivel') is True"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+volumes:
+  inventario:
