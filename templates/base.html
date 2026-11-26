@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{% block titulo %}Inventário{% endblock %} | Inventário UFU</title><link rel="icon" href="data:,"><link rel="stylesheet" href="{{ url_for('static', filename='inventario.css') }}"></head>
+<body><div class="aplicativo">
+<a class="pular" href="#conteudo">Ir para o conteúdo</a>
+<header class="topo">
+<a class="marca" href="{{ url_for('inventario') }}" aria-label="Inventário de TI, página inicial"><span class="simbolo" aria-hidden="true">I</span><span>Inventário de TI<small>UFU</small></span></a>
+{% if not session.get('encerrada') %}
+<nav class="navegacao" aria-label="Navegação principal">
+<a href="{{ url_for('inventario') }}"{% if request.endpoint == 'inventario' %} aria-current="page"{% endif %}>Visão geral</a>
+<a href="{{ url_for('ativos_web.listar') }}"{% if request.blueprint == 'ativos_web' %} aria-current="page"{% endif %}>Ativos</a>
+{% if permitir_cadastro %}<a href="{{ url_for('cadastrar_ativo') }}"{% if request.endpoint == 'cadastrar_ativo' %} aria-current="page"{% endif %}>Cadastrar ativo</a>{% endif %}
+<a href="{{ url_for('vulnerabilidades_web.listar') }}"{% if request.blueprint == 'vulnerabilidades_web' %} aria-current="page"{% endif %}>Vulnerabilidades</a>
+<a href="{{ url_for('analise_web.dependencias') }}"{% if request.endpoint and 'dependencia' in request.endpoint %} aria-current="page"{% endif %}>Dependências</a>
+<a href="{{ url_for('analise_web.riscos') }}"{% if request.endpoint == 'analise_web.riscos' %} aria-current="page"{% endif %}>Riscos</a>
+{% if permitir_cadastro %}<a href="{{ url_for('transferencias_web.importar') }}"{% if request.endpoint == 'transferencias_web.importar' %} aria-current="page"{% endif %}>Importar JSON</a>{% endif %}
+<a href="{{ url_for('transferencias_web.exportar') }}">Exportar CSV</a>
+</nav>
+<form method="post" action="{{ url_for('sair_web') }}" class="saida"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="botao" type="submit">Sair</button></form>
+{% endif %}
+</header><main id="conteudo">
+{% for mensagem in get_flashed_messages() %}<div class="aviso sucesso" role="status">{{ mensagem }}</div>{% endfor %}
+{% block conteudo %}{% endblock %}
+</main><footer>Inventário de ativos de TI <span>Gestão de ativos · UFU</span></footer></div></body></html>

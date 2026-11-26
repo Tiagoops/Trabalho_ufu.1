@@ -76,3 +76,31 @@ class AvaliacaoDependencia:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+METRICAS_CVSS4 = (
+    ("AV", "Vetor de ataque: por onde a falha pode ser explorada", {
+        "N": "rede remota", "A": "rede adjacente (ex.: mesma rede local)",
+        "L": "acesso local ao ambiente", "P": "contato físico com o equipamento"}),
+    ("AC", "Complexidade: necessidade de contornar proteções contra o ataque", {
+        "L": "baixa, sem contornar essas proteções", "H": "alta, exige contorná-las"}),
+    ("AT", "Pré-condições: condições específicas de execução ou implantação", {
+        "N": "nenhuma condição especial", "P": "depende dessas condições"}),
+    ("PR", "Privilégios: permissões que o atacante precisa ter antes do ataque", {
+        "N": "nenhuma", "L": "permissões básicas", "H": "permissões elevadas/administrativas"}),
+    ("UI", "Interação: participação de outra pessoa para explorar a falha", {
+        "N": "dispensa interação", "P": "passiva, interação limitada/involuntária",
+        "A": "ativa, ação específica consciente ou quebra de proteção"}),
+    ("VC", "Confidencialidade do sistema vulnerável: exposição de informações", {
+        "N": "sem exposição", "L": "exposição limitada", "H": "exposição total ou de dados críticos"}),
+    ("VI", "Integridade do sistema vulnerável: alteração indevida de dados", {
+        "N": "sem alteração", "L": "alteração limitada", "H": "alteração total ou com efeito grave"}),
+    ("VA", "Disponibilidade do sistema vulnerável: interrupção do funcionamento", {
+        "N": "sem interrupção", "L": "redução/interrupção parcial", "H": "interrupção total ou grave"}),
+    ("SC", "Confidencialidade de outros sistemas: exposição fora do sistema vulnerável", {
+        "N": "sem exposição", "L": "exposição limitada", "H": "exposição total ou de dados críticos"}),
+    ("SI", "Integridade de outros sistemas: alteração fora do sistema vulnerável", {
+        "N": "sem alteração", "L": "alteração limitada", "H": "alteração total ou com efeito grave"}),
+    ("SA", "Disponibilidade de outros sistemas: interrupção fora do sistema vulnerável", {
+        "N": "sem interrupção", "L": "redução/interrupção parcial", "H": "interrupção total ou grave"}),
+)

@@ -1,31 +1,13 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ativos e riscos | Inventário UFU</title>
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="{{ url_for('static', filename='inventario.css') }}">
-</head>
-<body>
-  <div class="aplicativo">
-  <a class="pular" href="#conteudo">Ir para o conteúdo</a>
-  <header class="topo">
-    <a class="marca" href="{{ url_for('inventario') }}" aria-label="Inventário de TI, página inicial"><span class="simbolo" aria-hidden="true">I</span><span>Inventário de TI<small>UFU</small></span></a>
-    <nav class="navegacao" aria-label="Navegação principal">
-      <a href="{{ url_for('inventario') }}"{% if request.endpoint == 'inventario' %} aria-current="page"{% endif %}>Visão geral</a>
-      {% if permitir_cadastro %}<a href="{{ url_for('cadastrar_ativo') }}"{% if request.endpoint == 'cadastrar_ativo' %} aria-current="page"{% endif %}>Cadastrar ativo</a>{% endif %}
-    </nav>
-    <span class="etiqueta"><span aria-hidden="true" class="ponto-local"></span>Ambiente local</span>
-  </header>
-  <main id="conteudo">
+{% extends "base.html" %}
+{% block titulo %}Ativos e riscos{% endblock %}
+{% block conteudo %}
+
     <div class="abertura">
       <div><p class="sobretitulo">Visão do inventário</p><h1>Ativos e riscos<span>.</span></h1>
         <p>Equipamentos, vulnerabilidades e o risco transmitido entre ativos.</p></div>
       <div class="acoes"><a class="botao" href="{{ url_for('inventario') }}">Atualizar consulta <span aria-hidden="true">↻</span></a>
         {% if permitir_cadastro %}<a class="botao principal" href="{{ url_for('cadastrar_ativo') }}">Cadastrar ativo</a>{% endif %}</div>
     </div>
-    {% for mensagem in get_flashed_messages() %}<div class="aviso sucesso" role="status">{{ mensagem }}</div>{% endfor %}
     {% if demonstracao %}<p class="demonstracao">Demonstração com dados fictícios. Use apenas exemplos fictícios neste ambiente.</p>{% endif %}
     {% if ativos is none %}
       <section class="aviso erro" role="alert"><h2>Inventário indisponível</h2>
@@ -69,7 +51,7 @@
           {% for ativo in ativos|sort(attribute='id_ativo') %}
             <details id="detalhes-{{ ativo.id_ativo }}">
               <summary>{{ ativo.hostname }} <span>ID {{ ativo.id_ativo }} · {{ ativo.vulnerabilidades|length }} {{ 'vulnerabilidade' if ativo.vulnerabilidades|length == 1 else 'vulnerabilidades' }}</span></summary>
-              <div class="conteudo-detalhe"><h3>Vulnerabilidades associadas</h3>
+              <div class="conteudo-detalhe"><p class="links-acoes"><a href="{{ url_for('ativos_web.detalhes',aid=ativo.id_ativo) }}">Abrir ativo e orientações</a>{% if permitir_cadastro %}<a href="{{ url_for('ativos_web.editar',aid=ativo.id_ativo) }}">Editar</a><a href="{{ url_for('vulnerabilidades_web.nova',aid=ativo.id_ativo) }}">Cadastrar vulnerabilidade</a>{% endif %}</p><h3>Vulnerabilidades associadas</h3>
                 {% for v in ativo.vulnerabilidades %}
                   <article class="ocorrencia"><h4>{{ v.descricao }}</h4><p>{{ v.categoria }} · Severidade: {{ v.severidade|numero }}</p>
                     <p>ID da ocorrência: {{ v.id_vulnerabilidade }}{% if v.cve %} · {{ v.cve }}{% endif %}</p>
@@ -85,8 +67,4 @@
         </section>
       {% endif %}
     {% endif %}
-  </main>
-  <footer>Inventário de ativos de TI <span>Consulta de ativos e riscos · UFU</span></footer>
-  </div>
-</body>
-</html>
+{% endblock %}

@@ -21,7 +21,7 @@ def create_app(caminho=None, *, permitir_cadastro=None):
     app.config.update(
         INVENTARIO_ARQUIVO=str(caminho) if caminho is not None else os.environ.get(
             "INVENTARIO_ARQUIVO", str(EXEMPLO)),
-        MAX_CONTENT_LENGTH=16 * 1024,
+        MAX_CONTENT_LENGTH=2 * 1024 * 1024,
         SESSION_COOKIE_SAMESITE="Strict",
         SESSION_COOKIE_HTTPONLY=True,
         TRUSTED_HOSTS=["localhost", "127.0.0.1", "[::1]"],
@@ -105,6 +105,10 @@ def create_app(caminho=None, *, permitir_cadastro=None):
                                     valores["responsavel"], valores["setor"], tipo)
                 # A abertura estrita impede backup ou recuperação durante o cadastro web.
                 db = BancoDeDados(app.config["INVENTARIO_ARQUIVO"], recuperar=False)
+                if request.form.get('incluir_vulnerabilidades') == 'sim':
+                    db._validar_unicidade(db.listar_todos() + [ativo])
+                    from interface_web.vulnerabilidades import mostrar_rascunho
+                    return mostrar_rascunho({'ativo':ativo.to_dict(), 'revisao':db.revisao})
                 db.adicionar(ativo)
                 flash(f"Ativo '{ativo.hostname}' cadastrado com sucesso.")
                 return redirect(url_for("inventario"), code=303)
@@ -124,4 +128,6 @@ def create_app(caminho=None, *, permitir_cadastro=None):
     def numero(valor):
         return f"{valor:.2f}".replace(".", ",")
 
+    from interface_web import registrar_rotas
+    registrar_rotas(app)
     return app

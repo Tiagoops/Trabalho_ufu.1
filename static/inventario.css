@@ -125,3 +125,31 @@ footer { display: flex; align-items: center; justify-content: space-between; gap
   .campos { grid-template-columns: 1fr; gap: 20px; }
   footer { flex-direction: column; align-items: flex-start; padding: 20px; }
 }
+.painel { padding:24px; margin:20px 0; background:white; border:1px solid var(--linha); border-radius:var(--raio); }
+.painel h2 { margin-bottom:16px; }
+.busca { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:20px 0; }
+.busca input,.busca select { min-height:42px; max-width:100%; padding:8px 12px; font:inherit; border:1px solid #888; border-radius:8px; }
+.links-acoes { display:flex; flex-wrap:wrap; gap:12px; }
+.perigo { color:#8e3027; border-color:#c18c85; }
+.confirmacao { display:block; margin:20px 0; }
+.confirmacao input { margin-right:8px; }
+.saida { justify-self:end; margin:0; }
+input[readonly] { background:#f5f5f5; color:#666; }
+@media(max-width:650px) { .saida { justify-self:start; } .busca { align-items:stretch; flex-direction:column; } }
+textarea { width:100%; min-height:100px; padding:10px 14px; border:1px solid #888; border-radius:10px; font:inherit; resize:vertical; }
+.formulario-acoes { margin-top:24px; }
+.criterios dd { font-size:13px; font-weight:400; margin:8px 0 20px; line-height:1.5; letter-spacing:normal; }
+code,.vetor { overflow-wrap:anywhere; }
+.navegacao { flex-wrap:wrap; border-radius:18px; }
+.topo { grid-template-columns:1fr auto; }
+.navegacao { grid-column:1/-1; grid-row:2; width:100%; }
+.saida { grid-column:2; grid-row:1; }
+@media(max-width:1000px) { .topo { grid-template-columns:1fr auto; } .navegacao { grid-column:1/-1; grid-row:2; width:fit-content; } }
+@media(max-width:650px) { .topo { grid-template-columns:1fr; } .navegacao { grid-column:auto; grid-row:auto; } }
+
+fieldset{border:1px solid var(--linha,#ddd);border-radius:14px;padding:20px;margin:24px 0}legend{font-weight:700;padding:0 6px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem;background:#f5f5f5;padding:16px;border-radius:12px}.matriz{margin:12px 0}.resumo dd{overflow-wrap:anywhere}
+
+.formulario > label, .formulario fieldset > label { display:block; margin:16px 0 8px; font-size:12px; font-weight:500; }
+.formulario > input:not([type="hidden"]):not([type="checkbox"]), .formulario > select, .formulario fieldset > input { width:100%; min-height:46px; padding:10px 14px; border:1px solid #888; border-radius:10px; color:var(--tinta); background:white; font:inherit; }
+textarea:focus-visible { outline:3px solid var(--foco); outline-offset:4px; }
+@media(max-width:650px) { .topo{grid-template-columns:1fr auto}.navegacao{grid-column:1/-1;grid-row:2;width:100%}.marca{font-size:13px}.marca small{font-size:10px}.saida{grid-column:2;grid-row:1} }

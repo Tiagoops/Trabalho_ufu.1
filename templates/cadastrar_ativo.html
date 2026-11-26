@@ -1,40 +1,22 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cadastrar ativo | Inventário UFU</title>
-  <link rel="icon" href="data:,"><link rel="stylesheet" href="{{ url_for('static', filename='inventario.css') }}">
-</head>
-<body>
-  <div class="aplicativo">
-  <a class="pular" href="#conteudo">Ir para o conteúdo</a>
-  <header class="topo">
-    <a class="marca" href="{{ url_for('inventario') }}" aria-label="Inventário de TI, página inicial"><span class="simbolo" aria-hidden="true">I</span><span>Inventário de TI<small>UFU</small></span></a>
-    <nav class="navegacao" aria-label="Navegação principal">
-      <a href="{{ url_for('inventario') }}"{% if request.endpoint == 'inventario' %} aria-current="page"{% endif %}>Visão geral</a>
-      {% if permitir_cadastro %}<a href="{{ url_for('cadastrar_ativo') }}"{% if request.endpoint == 'cadastrar_ativo' %} aria-current="page"{% endif %}>Cadastrar ativo</a>{% endif %}
-    </nav>
-    <span class="etiqueta"><span aria-hidden="true" class="ponto-local"></span>Ambiente local</span>
-  </header>
-  <main id="conteudo">
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar ativo' if editar else 'Cadastrar ativo' }}{% endblock %}
+{% block conteudo %}
+
     <a class="voltar" href="{{ url_for('inventario') }}">← Voltar ao inventário</a>
-    <div class="abertura"><div><p class="sobretitulo">Novo registro</p><h1>Cadastrar ativo<span>.</span></h1><p>Adicione um equipamento ao seu inventário.</p></div></div>
+    <div class="abertura"><div><p class="sobretitulo">Novo registro</p><h1>{{ 'Editar ativo' if editar else 'Cadastrar ativo' }}<span>.</span></h1><p>Adicione um equipamento ao seu inventário.</p></div></div>
     {% if erro %}<div class="aviso erro" role="alert" id="erro-cadastro">{{ erro }}</div>{% endif %}
-    <form class="formulario" method="post" action="{{ url_for('cadastrar_ativo') }}"{% if erro %} aria-describedby="erro-cadastro"{% endif %}>
+    <form class="formulario" method="post" action="{{ acao_form|default(url_for('cadastrar_ativo')) }}"{% if erro %} aria-describedby="erro-cadastro"{% endif %}>
       <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+      {% if revisao %}<input type="hidden" name="revisao" value="{{ revisao }}">{% endif %}
       <div class="titulo-formulario"><h2>Informações do ativo</h2><span>Todos os campos são obrigatórios</span></div>
       <div class="campos">
-        <div class="campo"><label for="id_ativo">ID do ativo</label><input id="id_ativo" name="id_ativo" type="text" inputmode="numeric" pattern="[0-9]+" value="{{ valores.id_ativo }}" required aria-describedby="ajuda-id"><small id="ajuda-id">Número inteiro positivo e único no inventário.</small></div>
+        <div class="campo"><label for="id_ativo">ID do ativo</label><input id="id_ativo" name="id_ativo" type="text" inputmode="numeric" pattern="[0-9]+"{% if editar %} readonly{% endif %} value="{{ valores.id_ativo }}" required aria-describedby="ajuda-id"><small id="ajuda-id">Número inteiro positivo e único no inventário.</small></div>
         <div class="campo"><label for="hostname">Hostname</label><input id="hostname" name="hostname" value="{{ valores.hostname }}" maxlength="200" required aria-describedby="ajuda-hostname"><small id="ajuda-hostname">Nome único do equipamento, por exemplo: demo-notebook-01.</small></div>
         <div class="campo"><label for="responsavel">Responsável</label><input id="responsavel" name="responsavel" value="{{ valores.responsavel }}" maxlength="200" required></div>
         <div class="campo"><label for="setor">Setor / localização</label><input id="setor" name="setor" value="{{ valores.setor }}" maxlength="200" required></div>
         <div class="campo"><label for="tipo">Tipo de ativo</label><select id="tipo" name="tipo" required><option value="">Selecione um tipo</option>{% for tipo in tipos %}<option value="{{ tipo.name }}"{% if valores.tipo == tipo.name %} selected{% endif %}>{{ tipo.name|replace('_', ' ')|capitalize }}</option>{% endfor %}</select></div>
       </div>
-      <p class="nota">O ativo será salvo sem vulnerabilidades e sem dependências. Nesta etapa, esses vínculos continuam sendo gerenciados pela CLI.</p>
-      <div class="acoes"><button class="botao principal" type="submit"{% if indisponivel %} disabled{% endif %}>Salvar ativo</button><a class="botao" href="{{ url_for('inventario') }}">Cancelar</a></div>
+      {% if not editar %}<label class="confirmacao"><input type="checkbox" name="incluir_vulnerabilidades" value="sim"{% if request.form.get('incluir_vulnerabilidades') %} checked{% endif %}>Adicionar vulnerabilidades iniciais antes de salvar o ativo.</label><p class="nota">Com essa opção, você revisará as ocorrências antes da gravação conjunta. Cancelar descarta o rascunho.</p>{% else %}<p class="nota">ID, ocorrências, dependências e metadados serão preservados.</p>{% endif %}
+      <div class="acoes"><button class="botao principal" type="submit"{% if indisponivel %} disabled{% endif %}>{{ 'Salvar alterações' if editar else 'Salvar ativo' }}</button><a class="botao" href="{{ url_for('inventario') }}">Cancelar</a></div>
     </form>
-  </main>
-  <footer>Inventário de ativos de TI <span>Cadastro de ativos · UFU</span></footer>
-  </div>
-</body>
-</html>
+{% endblock %}

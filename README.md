@@ -1,6 +1,6 @@
 # Inventário UFU — análise matemática de risco
 
-Aplicação acadêmica de terminal para cadastrar ativos, ocorrências de vulnerabilidades e dependências direcionadas. Calcula risco direto e propagado, com persistência JSON e recuperação após falhas de gravação.
+Aplicação acadêmica com terminal e interface web para cadastrar ativos, ocorrências de vulnerabilidades e dependências direcionadas. Calcula risco direto e propagado, com persistência JSON e recuperação após falhas de gravação.
 
 A implementação com CVSS, catálogo CVE local e análise matemática de riscos foi publicada na branch `main`, commit `0ef166b`, em 22/11/2026. Esta versão inclui a correção do empacotamento Docker e as instruções de execução local, demonstração e Compose. Não há interface das formigas nesta versão.
 
@@ -49,8 +49,8 @@ no terminal. A opção 2 segue para o menu completo existente.
 
 Para pular a escolha, use `python main.py --terminal`. O comando
 `python main.py --demo` mantém a demonstração temporária diretamente no terminal,
-como antes. A prévia web continua oferecendo consulta e cadastro de ativos;
-as outras operações ainda estão na CLI.
+como antes. A interface web oferece as operações do menu por botões e formulários,
+incluindo vulnerabilidades, dependências, riscos, importação, CSV e saída da sessão.
 
 O modo `--demo` usa uma base temporária e descarta suas alterações ao sair. Ativos, dependências e medições são fictícios; os três CVEs e seus vetores têm fontes públicas verificadas. Não instala versões vulneráveis nem realiza varredura ou exploração.
 
@@ -413,7 +413,7 @@ São recusadas CVEs malformadas e fontes NVD que não correspondam ao identifica
 O formato do CSV permanece o mesmo. Não há varredura nem sincronização online;
 a confirmação humana da aplicabilidade ao ativo continua necessária.
 
-### Frontend de consulta e cadastro de ativos
+### Interface gráfica do inventário
 
 O frontend reutiliza `BancoDeDados.consultar_ativos` e `analisar_ativos`, com
 HTML renderizado pelo Flask e servido pelo Waitress. O cadastro usa a mesma
@@ -456,15 +456,48 @@ A consulta não instancia o banco pelo construtor de recuperação e não chama
 salvar, trava ou criação de temporários. O botão **Cadastrar ativo** abre um
 formulário com ID, hostname, responsável, setor e tipo. Somente um envio válido
 salva um novo ativo; IDs e hostnames repetidos são recusados. Cancelar apenas
-volta à listagem. O cadastro começa sem vulnerabilidades e dependências.
+volta à listagem. É possível adicionar vulnerabilidades iniciais em um rascunho;
+o ativo e suas ocorrências só são gravados na confirmação final. Dependências
+são cadastradas na tela própria, após a existência dos dois ativos.
 
 Os formulários usam token de proteção contra envios de outras páginas. Dados
 inválidos preservam os campos para correção; falhas de gravação não anunciam
 sucesso. A abertura estrita recusa base ausente/inválida ou migração pendente
 sem criar backup. A CLI conserva sua recuperação padrão.
 
-A ampliação para as demais opções do menu será incremental. Edição e remoção,
-avaliação de vulnerabilidades, importação e demais ações ainda usam a CLI.
+As opções 0–14 do terminal estão disponíveis no navegador:
+
+| Menu CLI | Na interface gráfica |
+|---|---|
+| 1 · Cadastrar ativo | Cadastrar ativo, com rascunho opcional de vulnerabilidades iniciais |
+| 2 · Consultar | Ativos: ID, hostname exato ou trecho |
+| 3 e 4 · Atualizar / remover ativo | Ativos → abrir registro → Editar / Remover com confirmação |
+| 5 e 6 · Cadastrar / visualizar vulnerabilidades | Vulnerabilidades e página do ativo |
+| 7 · Listar ativos | Visão geral e Ativos |
+| 8 e 9 · Atualizar / remover vulnerabilidade | Ações por ocorrência, mantendo seu ID estável |
+| 10 · Relatório CSV | Exportar CSV: download ordenado por severidade, sem arquivo no servidor |
+| 11 · Dependências | Cadastro, edição e remoção; serviços e indisponibilidade observada |
+| 12 · Matrizes, riscos e ranking | Riscos: M, v, A, b, x, ranking, consulta individual e diagnóstico |
+| 13 · Importação JSON | Importar JSON: arquivo até 1 MiB, prévia validada e confirmação |
+| 14 · Orientações por tipo | Ativos → abrir registro → Orientações (polimorfismo real) |
+| 0 · Sair | Sair: encerra a sessão do navegador e invalida seus formulários |
+
+A avaliação web reutiliza os critérios Base CVSS 4.0, vetores Base 3.1/4.0,
+catálogo local e consulta online ao NVD por ID de CVE. As referências de catálogo
+ou NVD exigem confirmação explícita de aplicabilidade antes da associação.
+Editar somente descrição/categoria pode manter a avaliação anterior.
+
+Prévias e rascunhos são assinados, vinculados à sessão e válidos por até 15
+minutos. A revisão SHA-256 corresponde à mesma leitura da base: uma alteração
+posterior exige reabrir o formulário (HTTP 409). A proteção de concorrência
+existente na persistência continua ativa. Nenhuma consulta GET cria backup,
+trava ou temporário. A importação usa o mesmo validador e a mesma gravação atômica
+da CLI, sem sobrescrever IDs ou hostnames existentes. O CSV compartilha a
+validação contra fórmulas e controles de linha.
+
+**Sair** não apaga registros nem desliga o servidor; mostra **Sessão encerrada**
+e permite **Entrar novamente**. Para parar o processo local, use Ctrl+C no
+terminal; no Compose, use `stop frontend`.
 
 A interface não tem autenticação e a publicação padrão é apenas em loopback.
 Não exponha essa configuração em uma rede. A implantação na faculdade, os
@@ -478,6 +511,8 @@ e [Waitress no Windows e Linux](https://flask.palletsprojects.com/en/stable/depl
 Resultados e limites desta entrega: [VALIDACAO_FRONTEND.md](validacao/VALIDACAO_FRONTEND.md).
 
 Cadastro, persistência e testes: [VALIDACAO_CADASTRO_WEB.md](validacao/VALIDACAO_CADASTRO_WEB.md).
+
+Paridade, evidências e limites: [VALIDACAO_GESTAO_WEB.md](validacao/VALIDACAO_GESTAO_WEB.md).
 
 ### Escolha de interface dentro do Docker
 

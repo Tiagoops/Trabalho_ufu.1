@@ -13,6 +13,13 @@ def preparar_importacao(db: BancoDeDados, caminho: str | Path) -> list[Ativo]:
     if db.gravacao_bloqueada:
         raise ValueError("base bloqueada; resolva a leitura ou migração antes de importar")
     dados = json.loads(Path(caminho).read_text(encoding="utf-8-sig"))
+    return preparar_importacao_dados(db, dados)
+
+
+def preparar_importacao_dados(db: BancoDeDados, dados) -> list[Ativo]:
+    """Valida o lote já decodificado, sem criar arquivo intermediário."""
+    if db.gravacao_bloqueada:
+        raise ValueError("base bloqueada; resolva a leitura ou migração antes de importar")
     if not isinstance(dados, list):
         raise ValueError("biblioteca deve ser uma lista JSON de ativos")
     ativos = []

@@ -350,6 +350,7 @@ class TestExecucaoIsolada(unittest.TestCase):
             "avaliacao.py",
             "biblioteca.py",
             "catalogo_cvss.py",
+            "relatorio.py",
         )
 
         for nome in arquivos:

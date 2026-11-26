@@ -115,7 +115,7 @@ sistema operacional. O catálogo auxilia a avaliação humana de aplicabilidade.
 Backup, operação em servidor, atualização automática e prazos de suporte
 dependem do ambiente e do acordo de entrega.
 
-## Consulta e cadastro web local
+## Gestão web local
 
 Na raiz do projeto:
 
@@ -126,8 +126,10 @@ docker compose -f docker/compose.yaml up -d --build frontend
 Abra <http://127.0.0.1:8000>, clique **Cadastrar ativo**, preencha os cinco campos
 e clique **Salvar ativo**. Use apenas dados fictícios nesta demonstração. O ID
 precisa ser inteiro positivo e único; hostname também deve ser único. O novo
-ativo começa sem vulnerabilidades e dependências e aparece na listagem após a
-gravação. Cancelar volta ao inventário sem alterar a base.
+ativo pode receber vulnerabilidades iniciais ao marcar a opção de rascunho.
+Nesse caso, confirme o ativo ao concluir as ocorrências. Sem essa opção, ele
+começa sem vulnerabilidades. Dependências são cadastradas depois, na tela
+própria. Cancelar volta ao inventário sem alterar a base.
 
 O volume `frontend_dados` guarda `/dados/inventario.json` e a trava de escrita.
 A primeira inicialização copia o exemplo fictício versionado; reinícios e
@@ -181,5 +183,30 @@ Verificações com arquivos temporários fictícios:
 docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -q
 ```
 
-A edição e remoção, o cadastro de vulnerabilidades, o NVD e as demais ações
-continuam na CLI até os próximos incrementos da interface.
+A navegação reúne **Ativos**, **Vulnerabilidades**, **Dependências**, **Riscos**,
+**Importar JSON**, **Exportar CSV** e **Sair**. Os detalhes do ativo trazem suas
+orientações por tipo. As ações de remoção exigem confirmação e mostram os efeitos.
+Use a busca de Ativos para ID, hostname exato ou trecho do nome.
+
+Na avaliação de vulnerabilidade, escolha o modo e clique **Usar modo** para
+mostrar seus campos. Depois, use **Avaliar e revisar**, confira a prévia e
+confirme a associação. Catálogo e NVD exigem marcar a aplicabilidade ao ativo.
+O NVD recebe somente o ID público da CVE. A consulta não faz varredura.
+
+Na importação, selecione uma lista JSON UTF-8 de até 1 MiB. **Validar e revisar
+lote** não grava nada. A confirmação adiciona o lote em uma única gravação;
+IDs e hostnames repetidos são recusados. O upload não é salvo como arquivo.
+A prévia é assinada e vale por até 15 minutos. Se a base mudar, reabra a operação.
+
+**Exportar CSV** baixa o relatório no navegador. O servidor não cria uma cópia
+local. Campos com fórmulas ou controles de linha são recusados antes do download.
+
+**Sair** encerra a sessão do navegador, invalida seus formulários e mostra
+**Entrar novamente**. O servidor permanece disponível. Para encerrá-lo, use
+Ctrl+C no terminal ou `docker compose -f docker/compose.yaml stop frontend`.
+
+As bases da CLI, do iniciador local e do serviço frontend são separadas por
+padrão. A interface opera exclusivamente em `INVENTARIO_ARQUIVO`; não migra nem
+mescla bases automaticamente. Para compartilhar uma base, o operador precisa
+configurar explicitamente o mesmo caminho/volume e respeitar os bloqueios da
+persistência. Use dados fictícios nesta demonstração.

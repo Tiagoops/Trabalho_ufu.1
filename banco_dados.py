@@ -110,16 +110,26 @@ class BancoDeDados:
         for ativo in ativos:
             self._indexar(ativo)
 
+    @property
+    def revisao(self) -> str | None:
+        """Identifica o retrato aberto para recusar formulários desatualizados."""
+        return self._assinatura.hex() if self._assinatura is not None else None
+
     @classmethod
     def consultar_ativos(cls, caminho: str | Path = CAMINHO_ARQUIVO_PADRAO) -> list[Ativo]:
         """Lê um retrato do inventário sem criar backup, trava ou temporários."""
-        from migracao import verificar_pendente
+        return cls.consultar_retrato(caminho)[0]
 
+    @classmethod
+    def consultar_retrato(cls, caminho: str | Path = CAMINHO_ARQUIVO_PADRAO) -> tuple[list[Ativo], str]:
+        """Ativos e revisão dos mesmos bytes, sem efeitos de escrita."""
+        from migracao import verificar_pendente
         try:
             caminho = Path(caminho).resolve()
             if verificar_pendente(caminho):
                 raise InventarioIndisponivel("migração pendente")
-            return cls._decodificar_ativos(caminho.read_bytes())
+            original = caminho.read_bytes()
+            return cls._decodificar_ativos(original), sha256(original).hexdigest()
         except InventarioIndisponivel:
             raise
         except (OSError, ValueError, KeyError, TypeError, AttributeError, RecursionError) as erro:

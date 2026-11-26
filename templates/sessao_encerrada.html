@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% from '_formularios.html' import protecao %}{% block titulo %}Sessão encerrada{% endblock %}
+{% block conteudo %}<div class="vazio"><h1>Sessão encerrada</h1><p>Seus dados foram preservados. O servidor continua disponível; esta saída encerra a navegação desta sessão.</p><form method="post" action="{{ url_for('entrar_web') }}">{{ protecao() }}<button class="botao principal" type="submit">Entrar novamente</button></form></div>{% endblock %}

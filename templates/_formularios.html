@@ -1,0 +1,5 @@
+{% macro protecao(revisao=none) -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% if revisao %}<input type="hidden" name="revisao" value="{{ revisao }}">{% endif %}
+{%- endmacro %}
+{% macro erro_form(erro) -%}{% if erro %}<div class="aviso erro" role="alert">{{ erro }}</div>{% endif %}{%- endmacro %}
