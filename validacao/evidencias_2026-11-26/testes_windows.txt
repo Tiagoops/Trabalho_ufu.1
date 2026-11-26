@@ -1,0 +1,7 @@
+test_token_alterado_e_previa_antiga_nao_gravam (tests.test_vulnerabilidades_web.TestVulnerabilidadesWeb.test_token_alterado_e_previa_antiga_nao_gravam) ... ok
+test_vetor_tem_previa_sem_gravar_e_so_salva_apos_confirmar (tests.test_vulnerabilidades_web.TestVulnerabilidadesWeb.test_vetor_tem_previa_sem_gravar_e_so_salva_apos_confirmar) ... ok
+
+----------------------------------------------------------------------
+Ran 238 tests in 14.199s
+
+OK (skipped=1)

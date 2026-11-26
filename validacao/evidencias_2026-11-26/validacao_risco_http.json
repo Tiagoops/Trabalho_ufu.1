@@ -1,0 +1,13 @@
+[
+  {
+    "estado": "risco valido apos NVD real",
+    "status": 200,
+    "direto": 10,
+    "propagado": 10
+  },
+  {
+    "estado": "calculo falha com base valida",
+    "status": 200,
+    "ativos_preservados_na_tela": true
+  }
+]

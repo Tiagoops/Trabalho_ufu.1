@@ -366,7 +366,7 @@ não acompanham a substituição. Se a gravação falhar, o objeto anterior é r
 
 A implantação no servidor e a comprovação de 24 horas estão adiadas por decisão
 do autor até a conclusão e revisão do frontend. Isso não equivale ao atendimento
-do requisito de hospedagem do enunciado. Há demonstração pela CLI e consulta web com dados fictícios.
+do requisito de hospedagem do enunciado. Há demonstração pela CLI e gestão web com dados fictícios.
 As falhas intermitentes Windows em `os.replace` seguem sem causa identificada;
 não há retry automático nem garantia de que uma execução local vá completá-las.
 
@@ -513,6 +513,10 @@ Resultados e limites desta entrega: [VALIDACAO_FRONTEND.md](validacao/VALIDACAO_
 Cadastro, persistência e testes: [VALIDACAO_CADASTRO_WEB.md](validacao/VALIDACAO_CADASTRO_WEB.md).
 
 Paridade, evidências e limites: [VALIDACAO_GESTAO_WEB.md](validacao/VALIDACAO_GESTAO_WEB.md).
+
+Revisão de 26/11/2026: [matriz de evidências](validacao/MATRIZ_EVIDENCIAS.md),
+[diagnóstico Windows](validacao/DIAGNOSTICO_WINDOWS.md) e
+[guia de apresentação](validacao/GUIA_APRESENTACAO.md).
 
 ### Escolha de interface dentro do Docker
 

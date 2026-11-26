@@ -72,3 +72,27 @@ Referências: [Flask Blueprints](https://flask.palletsprojects.com/en/stable/blu
 [segurança Flask](https://flask.palletsprojects.com/en/stable/web-security/),
 [uploads Flask](https://flask.palletsprojects.com/en/stable/patterns/fileuploads/),
 [assinaturas com prazo](https://itsdangerous.palletsprojects.com/en/stable/timed/).
+
+## Revisão de 26/11/2026
+
+O diagnóstico avançou: substituições mínimas fora da aplicação reproduziram
+WinError 5 / STATUS_ACCESS_DENIED em TEMP e no workspace. Um handle de leitura
+do destino sem FILE_SHARE_DELETE reproduziu o mesmo erro; fechá-lo permitiu
+a substituição. Esse controle demonstra uma condição, mas não identifica o
+processo das recusas espontâneas. Não houve alteração em salvar nem retry.
+Veja [DIAGNOSTICO_WINDOWS.md](DIAGNOSTICO_WINDOWS.md).
+
+A suíte Windows atual passou em TEMP padrão: 238 executados, 237 aprovados e
+1 symlink ignorado. A falha intermitente não foi considerada resolvida por isso.
+Importação com prévia, download CSV, sessão, quatro estados de inventário/risco
+e consulta NVD real pela rota web foram verificados por HTTP em contêiner
+fictício separado. CVE-2021-44228 resultou em 10,0, com vetor NIST e confirmação
+antes da associação. O seletor de arquivos da automação voltou a travar;
+inspeção visual final e telas pequenas continuam parciais.
+
+Foram preparados seis slides com notas, roteiro de 300 segundos, perguntas
+para treino e gravação real de terminal Docker sem rede (44,27 s, 66 eventos,
+saída 0). O ensaio oral do aluno e a revisão por colega continuam pendentes.
+A matriz atual está em [MATRIZ_EVIDENCIAS.md](MATRIZ_EVIDENCIAS.md).
+A revisão automática bloqueou o push por exigir autorização específica;
+nenhuma publicação nova foi confirmada nesta revisão. Servidor e 24h seguem adiados.

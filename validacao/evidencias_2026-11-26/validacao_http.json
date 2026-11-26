@@ -1,0 +1,111 @@
+{
+  "tipo": "HTTP real; não substitui inspeção visual",
+  "porta": 8001,
+  "importacao_com_previa": true,
+  "nvd_real": {
+    "status_http": 200,
+    "duracao_s": 0.875,
+    "cve": "CVE-2021-44228",
+    "confirmacao_exigida": true,
+    "associada": true,
+    "ocorrencia": {
+      "descricao": "CVE pública em componente fictício Log4j 2.14.1",
+      "categoria": "Vulnerabilidade de software",
+      "severidade": 10.0,
+      "id_vulnerabilidade": "3edc1a52-3206-45de-afca-16b014e87a62",
+      "vetor_cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+      "fonte_severidade": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+      "cve": "CVE-2021-44228"
+    }
+  },
+  "csv_download": true,
+  "csv_linhas": 4,
+  "estados": [
+    {
+      "estado": "invalida",
+      "status": 503,
+      "sem_novos_arquivos": true
+    },
+    {
+      "estado": "vazia",
+      "status": 200,
+      "sem_novos_arquivos": true
+    }
+  ],
+  "sair_e_entrar": true,
+  "requisicoes": [
+    {
+      "rota": "/importar",
+      "metodo": "GET",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/importar"
+    },
+    {
+      "rota": "/importar",
+      "metodo": "POST",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/importar"
+    },
+    {
+      "rota": "/importar",
+      "metodo": "POST",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/ativos"
+    },
+    {
+      "rota": "/ativos/9903/vulnerabilidades/nova",
+      "metodo": "GET",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/ativos/9903/vulnerabilidades/nova"
+    },
+    {
+      "rota": "/ativos/9903/vulnerabilidades/nova",
+      "metodo": "POST",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/ativos/9903/vulnerabilidades/nova"
+    },
+    {
+      "rota": "/ativos/9903/vulnerabilidades/nova",
+      "metodo": "POST",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/ativos/9903"
+    },
+    {
+      "rota": "/relatorio.csv",
+      "metodo": "GET",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/relatorio.csv"
+    },
+    {
+      "rota": "/",
+      "metodo": "GET",
+      "status": 503,
+      "url_final": "http://127.0.0.1:8001/"
+    },
+    {
+      "rota": "/",
+      "metodo": "GET",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/"
+    },
+    {
+      "rota": "/",
+      "metodo": "GET",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/"
+    },
+    {
+      "rota": "/sair",
+      "metodo": "POST",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/sessao-encerrada"
+    },
+    {
+      "rota": "/entrar",
+      "metodo": "POST",
+      "status": 200,
+      "url_final": "http://127.0.0.1:8001/"
+    }
+  ],
+  "dados_ficticios": true
+}
