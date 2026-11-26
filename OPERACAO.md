@@ -255,3 +255,23 @@ Esse protocolo evita confusão entre instâncias; não é um mecanismo de autent
 
 A verificação de saúde é pontual. Ela não comprova execução contínua por 24 horas
 nem substitui a implantação no servidor disponibilizado pelo docente.
+
+## Validação do documento e códigos de saída
+
+O inventário aceita somente documentos regraváveis como JSON com números finitos
+e texto UTF-8 válido, incluindo campos extras e suas chaves. NaN, Infinity e
+sequências Unicode isoladas são recusados na validação compartilhada dos ativos.
+Acentos, emojis e campos extras válidos são preservados. Consultar uma base inválida
+retorna inventário indisponível (HTTP 503), sem backup, trava ou temporário; uma
+importação inválida retorna HTTP 400 antes da prévia e mantém a base anterior.
+A recuperação explícita da CLI conserva a política anterior de backup e bloqueio.
+
+`iniciar_web.py` retorna 1 quando não consegue iniciar o servidor, por exemplo
+por falha de bind ou permissão. Uma instância incompatível também retorna 1.
+Encerramento normal, Ctrl+C tratado e reuso de uma instância identificada retornam 0.
+O seletor de `main.py` propaga esses códigos. No PowerShell, confira `$LASTEXITCODE`
+após o processo terminar. O mesmo status é devolvido ao Docker e aos scripts.
+
+A rodada de 271 testes está em `validacao/evidencias_json_status_2026-11-26/`.
+Ela registra uma falha inicial intermitente de um teste antigo de retomada de
+migração Windows, as verificações posteriores e o limite de causa não confirmada.

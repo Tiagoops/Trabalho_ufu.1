@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, field, fields
+import json
 import math
 from typing import Dict, List, Optional
 from uuid import NAMESPACE_URL, uuid4, uuid5
@@ -184,6 +185,10 @@ class Ativo:
     @staticmethod
     def from_dict(d: dict) -> Ativo:
         _validar_textos(d, ("hostname", "responsavel", "setor", "tipo"))
+        try:
+            json.dumps(d, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        except (ValueError, TypeError, OverflowError, RecursionError) as erro:
+            raise ValueError("O documento deve conter JSON válido, números finitos e texto UTF-8 válido.") from erro
         if type(d["id_ativo"]) is not int or d["id_ativo"] < 1:
             raise ValueError("id_ativo deve ser um inteiro positivo")
         if not isinstance(d.get("vulnerabilidades", []), list):

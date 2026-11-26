@@ -106,7 +106,7 @@ def _abrir_no_navegador():
     print(f"Abra manualmente no navegador: {URL_PREVIA}", flush=True)
 
 
-def main(*, abrir_navegador=False):
+def main(*, abrir_navegador=False) -> int:
     from waitress import create_server
 
     estado = _estado_previa()
@@ -114,15 +114,15 @@ def main(*, abrir_navegador=False):
         print(f"A prévia já está em execução: {URL_PREVIA}", flush=True)
         if abrir_navegador:
             _abrir_no_navegador()
-        return
+        return 0
     if estado == "diferente":
         print("A interface na porta 8000 usa outra base. Ela não será reutilizada.")
         print("Encerre essa instância ou use a base correspondente antes de abrir a interface.")
-        return
+        return 1
     if estado == "ocupada":
         print("Não foi possível validar a instância na porta 8000. Encerre o serviço antigo ou indisponível.")
         print("Encerre o outro serviço ou escolha continuar no terminal.")
-        return
+        return 1
     padrao = caminho_inventario()
     if "INVENTARIO_ARQUIVO" not in os.environ:
         os.environ["INVENTARIO_ARQUIVO"] = str(padrao)
@@ -137,10 +137,13 @@ def main(*, abrir_navegador=False):
         if abrir_navegador:
             Thread(target=_abrir_no_navegador, daemon=True).start()
         servidor.run()
+        return 0
     except KeyboardInterrupt:
         print("\nPrévia encerrada.")
+        return 0
     except OSError as erro:
         print(f"Não foi possível iniciar a prévia: {erro}")
+        return 1
     finally:
         if servidor is not None:
             servidor.close()
@@ -148,4 +151,4 @@ def main(*, abrir_navegador=False):
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

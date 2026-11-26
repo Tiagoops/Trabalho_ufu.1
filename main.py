@@ -859,7 +859,7 @@ def _iniciar_terminal() -> int:
         return 1
 
 
-def escolher_interface() -> None:
+def escolher_interface() -> int:
     """Escolhe a interface antes de abrir ou modificar qualquer base."""
     print("\nComo deseja iniciar?")
     print("1 - Acessar interface gráfica (navegador)")
@@ -869,14 +869,12 @@ def escolher_interface() -> None:
             escolha = input("Escolha 1 ou 2: ").strip()
         except (KeyboardInterrupt, EOFError):
             print("\nInicialização cancelada.")
-            return
+            return 0
         if escolha == "1":
             from iniciar_web import main as abrir_previa
-            abrir_previa(abrir_navegador=True)
-            return
+            return abrir_previa(abrir_navegador=True)
         if escolha == "2":
-            _iniciar_terminal()
-            return
+            return _iniciar_terminal()
         print("Opção inválida. Escolha 1 ou 2.")
 
 
@@ -890,4 +888,4 @@ if __name__ == "__main__":
     elif argumentos.terminal:
         raise SystemExit(_iniciar_terminal())
     else:
-        escolher_interface()
+        raise SystemExit(escolher_interface())

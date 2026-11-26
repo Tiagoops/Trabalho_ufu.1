@@ -1,0 +1,1 @@
+Não foi possível iniciar a prévia: [Errno 13] Permission denied: '/dados/ficticio.json'

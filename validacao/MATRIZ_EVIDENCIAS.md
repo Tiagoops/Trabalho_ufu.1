@@ -1,9 +1,9 @@
 # Matriz de evidências — revisão de 26/11/2026
 
 Checkout oficial: C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT
-Código validado: base 9e91138, honeypot e correção de identidade (26/11/2026); o commit que contém esta matriz identifica a entrega. VALIDACAO_BASE_UNICA.md preserva a rodada anterior.
+Código validado: correções de JSON e status de inicialização sobre c392576 (26/11/2026); o commit que contém esta matriz identifica a entrega. Os relatórios anteriores preservam suas respectivas rodadas.
 Repositório: https://github.com/Tiagoops/Trabalho_ufu.1
-Última conferência remota: main em 030cd59; frontend e correções estão em commits locais. Não houve push nesta correção. A tentativa anterior foi bloqueada pela revisão automática por exigir autorização específica do autor.
+Referência remota conferida no início desta etapa: c392576, publicada com autorização do autor. A publicação foi retomada após a autorização específica; o SHA do commit que contém esta revisão deve ser conferido no GitHub ao concluir o push.
 
 Fonte acadêmica: Trabalho_2.pdf, Tabela 1 e seção 5. Pesos 20/20/45/15 são do
 atendimento aos requisitos, não percentuais diretos da nota final. O enunciado
@@ -14,7 +14,7 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 |---|---|---|---|
 | POO e objetos individuais — 20% | Implementado e testado | modelos.py: fábrica, subclasses, orientacoes_tratamento e recarga; tests/test_modelagem_oo.py; tests/test_integracao_poo_integridade.py | Ensaio oral do aluno ainda necessário |
 | Lista JSON de objetos — 20% | Implementado e testado | banco_dados.py: consultar_retrato e salvar; to_dict/from_dict; testes de rollback, identidade e concorrência | Retentativas limitadas, conflito e rollback validados; permissão permanente continua sendo erro |
-| Contêiner e 24h no servidor — 45% | Parte local comprovada; requisito integral aberto | docker/Dockerfile, docker/compose.yaml; 262 testes em Windows e Linux independente nesta correção; Compose habitual validado por HTTP; evidencias_identidade_2026-11-26/ | Implantação docente e 24h não executadas; permanecem adiadas |
+| Contêiner e 24h no servidor — 45% | Parte local comprovada; requisito integral aberto | docker/Dockerfile, docker/compose.yaml; 271 testes em Windows e Linux independente nesta correção; Docker HTTP e código de saída real conferidos; evidencias_json_status_2026-11-26/ | Implantação docente e 24h não executadas; permanecem adiadas |
 | Risco próprio/efetivo — 15% | Implementado e testado | servico_risco.py e matematica/risco.py; M, v, A, b=Mv, solve, rho, condição e resíduo; oráculo manual | Índice não é probabilidade nem percentual; não inventar fatores para demonstrar POO |
 | Frontend, opções 0–14 | Implementado | interface_web/, templates/, app_web.py; CRUD, CVSS, dependências, riscos, JSON, CSV e Sair | Inspeção visual final e telas pequenas continuam parciais devido à automação do navegador |
 | Importação JSON | HTTP real aprovado | validacao_http.json: prévia não grava; confirmação adiciona lote fictício; cancelamento/duplicidade também cobertos pela suíte | Upload visual não concluído; não confundir HTTP aprovado com inspeção do seletor |
@@ -40,9 +40,11 @@ e dependências pode ter risco zero, sem comprovar segurança do equipamento.
 
 ## Verificações e rastreabilidade
 
-- Suítes atuais desta correção: 262 executados, 261 aprovados e 1 ignorado por
-  plataforma em Windows e Linux independente; 0 erros/falhas. Logs e HTTP real
-  em evidencias_identidade_2026-11-26/. A rodada anterior de 250 casos em Compose
+- Suítes finais desta correção: 271 executados, 270 aprovados e 1 ignorado por
+  plataforma em Windows e Linux independente; 0 erros/falhas finais. Logs e HTTP
+  real em evidencias_json_status_2026-11-26/. A primeira execução Windows teve
+  uma falha em teste antigo de retomada de migração; passou nas 15 repetições
+  isoladas e na suíte final. Causa exata não capturada; testes não enfraquecidos. A rodada anterior de 250 casos em Compose
   isolado permanece identificada em VALIDACAO_BASE_UNICA.md.
 - Stress Windows: 4.000 gravações, 18 bloqueios recuperados, 0 falhas finais.
   Bind Linux/Windows: 500 gravações, 0 falhas finais. Não são garantias futuras.
@@ -80,3 +82,11 @@ obrigatória antes do reuso. Comprovada a mesma base Windows/Docker por publica�
 e bind; rejeitada outra base com JSON idêntico. Honeypot da etapa anterior incluído.
 O item 1 da auditoria foi corrigido; os itens 2–4 permanecem pendentes. Não há
 comprovação de 24 horas nem implantação docente concluída nesta etapa.
+
+26/11/2026, itens 2 e 4 da auditoria: validação JSON integral no modelo compartilhado,
+incluindo campos extras, números finitos e UTF-8; erros de inicialização propagados
+com código 1 nas duas entradas. HTTP real recusou cinco lotes inválidos sem gravar,
+exibiu 503 para bases inválidas e preservou acentos/emojis no lote válido. Teste
+Docker sem permissão terminou com status 1. A intermitência de migração Windows foi
+registrada sem alegar causa confirmada ou solução por repetição. O item 3 continua
+pendente. Implantação docente e 24 horas permanecem sem comprovação.

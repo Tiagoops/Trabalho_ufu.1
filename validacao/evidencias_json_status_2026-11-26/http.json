@@ -1,0 +1,9 @@
+{
+  "http_real": true,
+  "casos_invalidos": 5,
+  "importacao_invalida": 400,
+  "base_invalida": 503,
+  "sem_escrita_nos_erros": true,
+  "importacao_valida_acentos_emoji": "aprovada",
+  "sha256_base_operacional_preservada": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763"
+}

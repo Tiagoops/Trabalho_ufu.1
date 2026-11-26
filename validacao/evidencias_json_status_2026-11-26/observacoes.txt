@@ -1,0 +1,14 @@
+Correções dos itens 2 e 4 da auditoria, sobre c392576.
+Windows final: 271 executados, 270 aprovados, 1 ignorado, zero falhas/erros.
+Linux independente: 271 executados, 270 aprovados, 1 ignorado, zero falhas/erros.
+A primeira execução Windows falhou uma vez em test_falha_entre_base_e_manifesto_bloqueia_app_ate_retomada.
+O arquivo desse teste permaneceu no formato original em vez do documento migrado.
+A migração não foi alterada. O teste passou em 15 execuções isoladas posteriores e na suíte final.
+Nenhuma recusa de os.replace foi observada na instrumentação das 15 repetições.
+A causa exata da primeira falha não foi capturada; não atribuí-la ao antivírus ou ao OneDrive.
+A reexecução não prova que a intermitência da migração Windows desapareceu.
+O teste e suas asserções foram preservados. Registros são somente de dados fictícios.
+Docker real sem permissão em /dados: iniciar_web.py terminou com código 1.
+A inversão de allow_nan e a troca do retorno de erro por zero foram detectadas pelos testes.
+Item 3 (IDs importados incompatíveis com URLs) não foi alterado.
+Não foram executadas 24 horas nem implantação no servidor do docente.
