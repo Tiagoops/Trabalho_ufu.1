@@ -1,0 +1,8 @@
+{
+  "http_real": true,
+  "windows_docker_mesma_base": "inventario",
+  "outra_base_json_identico": "diferente",
+  "bloqueio_sem_abrir_navegador_ou_inicializar": true,
+  "base_invalida_identificada_sem_backup": true,
+  "base_operacional_preservada_sha256": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763"
+}

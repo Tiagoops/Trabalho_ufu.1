@@ -64,7 +64,13 @@ class TestInicializacaoPrevia(unittest.TestCase):
     def test_estado_distingue_conexao_recusada_previa_e_outro_http(self):
         for marcador, esperado in (('inventario-ti', 'inventario'), (None, 'ocupada')):
             with self.subTest(marcador=marcador), patch('iniciar_web.HTTPConnection') as conexao:
-                conexao.return_value.getresponse.return_value.getheader.return_value = marcador
+                resposta = conexao.return_value.getresponse.return_value
+                resposta.getheader.return_value = marcador
+                resposta.status = 200
+                import json
+                from configuracao import caminho_inventario, identidade_base
+                resposta.read.return_value = json.dumps({'aplicacao':'inventario-ti', 'protocolo':1,
+                    'base_id':identidade_base(caminho_inventario())}).encode()
                 self.assertEqual(iniciar_web._estado_previa(), esperado)
                 conexao.return_value.close.assert_called_once_with()
         with patch('iniciar_web.HTTPConnection') as conexao:

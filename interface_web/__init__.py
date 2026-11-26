@@ -18,7 +18,7 @@ def registrar_rotas(app):
 
     @app.before_request
     def verificar_sessao():
-        livres = {'static','sessao_encerrada','entrar_web','sair_web'}
+        livres = {'static','metadados','sessao_encerrada','entrar_web','sair_web'}
         if session.get('encerrada') and request.endpoint not in livres:
             return redirect(url_for('sessao_encerrada'), code=303 if request.method == 'POST' else 302)
 

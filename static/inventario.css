@@ -153,3 +153,5 @@ fieldset{border:1px solid var(--linha,#ddd);border-radius:14px;padding:20px;marg
 .formulario > input:not([type="hidden"]):not([type="checkbox"]), .formulario > select, .formulario fieldset > input { width:100%; min-height:46px; padding:10px 14px; border:1px solid #888; border-radius:10px; color:var(--tinta); background:white; font:inherit; }
 textarea:focus-visible { outline:3px solid var(--foco); outline-offset:4px; }
 @media(max-width:650px) { .topo{grid-template-columns:1fr auto}.navegacao{grid-column:1/-1;grid-row:2;width:100%}.marca{font-size:13px}.marca small{font-size:10px}.saida{grid-column:2;grid-row:1} }
+
+.honeypot { display: none; }

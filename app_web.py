@@ -3,13 +3,13 @@ import os
 import secrets
 from pathlib import Path
 
-from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, jsonify, redirect, render_template, request, session, url_for
 
 from banco_dados import BancoDeDados, InventarioIndisponivel
 from servico_risco import analisar_ativos
 from modelos import Ativo
 from tipos import TipoAtivo
-from configuracao import caminho_inventario
+from configuracao import caminho_inventario, identidade_base
 
 
 EXEMPLO = Path(__file__).resolve().parent / "exemplos/inventario_web.json"
@@ -49,6 +49,17 @@ def create_app(caminho=None, *, permitir_cadastro=None):
         )
         return resposta
 
+    @app.get("/metadados")
+    def metadados():
+        caminho = app.config["INVENTARIO_ARQUIVO"]
+        disponivel = True
+        try:
+            BancoDeDados.consultar_ativos(caminho)
+        except InventarioIndisponivel:
+            disponivel = False
+        return jsonify(aplicacao="inventario-ti", protocolo=1,
+                       base_id=identidade_base(caminho), inventario_disponivel=disponivel), 200 if disponivel else 503
+
     @app.get("/")
     def inventario():
         ativos = None
@@ -86,6 +97,8 @@ def create_app(caminho=None, *, permitir_cadastro=None):
         status = 200
         try:
             if request.method == "POST":
+                if any(request.form.getlist("website")):
+                    raise ValueError("Não foi possível processar o formulário.")
                 token = request.form.get("csrf_token", "")
                 if (not token or not token.isascii()
                         or not secrets.compare_digest(token, session["csrf_token"])):

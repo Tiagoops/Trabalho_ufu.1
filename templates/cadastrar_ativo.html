@@ -8,6 +8,12 @@
     <form class="formulario" method="post" action="{{ acao_form|default(url_for('cadastrar_ativo')) }}"{% if erro %} aria-describedby="erro-cadastro"{% endif %}>
       <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
       {% if revisao %}<input type="hidden" name="revisao" value="{{ revisao }}">{% endif %}
+      {% if not editar %}
+      <div class="honeypot" aria-hidden="true">
+        <label for="website">Website</label>
+        <input id="website" name="website" type="text" value="" tabindex="-1" autocomplete="off">
+      </div>
+      {% endif %}
       <div class="titulo-formulario"><h2>Informações do ativo</h2><span>Todos os campos são obrigatórios</span></div>
       <div class="campos">
         <div class="campo"><label for="id_ativo">ID do ativo</label><input id="id_ativo" name="id_ativo" type="text" inputmode="numeric" pattern="[0-9]+"{% if editar %} readonly{% endif %} value="{{ valores.id_ativo }}" required aria-describedby="ajuda-id"><small id="ajuda-id">Número inteiro positivo e único no inventário.</small></div>

@@ -32,8 +32,10 @@ Na pasta do projeto, execute:
 
 Antes de abrir a base, escolha **1 - Acessar interface gráfica** ou
 **2 - Continuar no terminal**. A interface gráfica abre o navegador padrão
-quando possível. Uma prévia do inventário que já esteja na porta 8000 é
-reutilizada. Se for necessário iniciar um servidor novo, o terminal informa
+quando possível. Uma prévia já aberta só é reutilizada depois da conferência de sua base pelo
+endpoint `/metadados`. Bases diferentes, mesmo contendo JSON idêntico, são
+recusadas. Uma instância antiga sem metadados também deve ser encerrada antes
+de iniciar esta versão. Se for necessário iniciar um servidor novo, o terminal informa
 o endereço; mantenha-o aberto e use Ctrl+C para encerrar esse servidor.
 Fechar apenas a aba do navegador não encerra o processo.
 
@@ -176,6 +178,15 @@ de proteção usa uma sessão assinada com chave temporária do processo. Não h
 autenticação; mantenha a porta em `127.0.0.1`. A implantação na faculdade e o
 controle de acesso em rede ficam para outra etapa.
 
+O formulário **Cadastrar ativo** tem um campo de texto `website`, oculto por
+CSS, fora da navegação por teclado e com autocomplete desativado. Qualquer valor
+recebido nesse campo, inclusive espaços ou uma ocorrência repetida preenchida,
+retorna HTTP 400 com mensagem genérica antes de abrir o banco ou criar rascunho.
+Campo vazio ou ausente mantém o fluxo normal. O valor nunca é persistido.
+É uma proteção complementar para bots que preenchem campos indiscriminadamente;
+não substitui CSRF e não detecta bots que deixam o campo vazio. Outros formulários
+não receberam esse campo.
+
 Verificações com arquivos temporários fictícios:
 
 ```powershell
@@ -227,3 +238,20 @@ uma alteração externa exige reabrir o inventário. Se a permissão continuar
 negada, a operação termina com erro e rollback. O arquivo anterior não é
 removido previamente. Isso trata bloqueios transitórios; não concede permissões
 a quem não as possui e não identifica o processo externo responsável.
+
+## Identidade e saúde da interface
+
+`GET /metadados` responde JSON com `aplicacao`, `protocolo` (1), `base_id` e
+`inventario_disponivel`. O ID é a assinatura do caminho canônico, não dos dados;
+não muda ao cadastrar ativos e não expõe o caminho no HTTP. O endpoint só lê e
+valida a base: HTTP 200 quando disponível, HTTP 503 quando ausente/inválida. Não
+cria arquivo, backup ou trava, e continua acessível após Sair. Não calcula risco.
+
+O iniciador exige protocolo e identidade compatíveis. Para reconhecer o mesmo
+arquivo Windows/Docker, confere a publicação loopback na porta usada e a montagem
+bind informadas pelo Docker. Não presume que quaisquer arquivos em `/dados` sejam
+a mesma base. Docker indisponível ou montagem não comprovada impede essa equivalência.
+Esse protocolo evita confusão entre instâncias; não é um mecanismo de autenticação.
+
+A verificação de saúde é pontual. Ela não comprova execução contínua por 24 horas
+nem substitui a implantação no servidor disponibilizado pelo docente.

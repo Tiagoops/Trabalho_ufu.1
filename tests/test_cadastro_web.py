@@ -52,12 +52,51 @@ class TestCadastroWeb(unittest.TestCase):
         pagina = cliente.get('/ativos/novo').get_data(as_text=True)
         token = re.search(r'name="csrf_token" value="([^"]+)"', pagina).group(1)
         dados = {'csrf_token': token, 'id_ativo': '51', 'hostname': 'demo-notebook-novo',
-                 'responsavel': 'Pessoa fictícia', 'setor': 'Laboratório fictício', 'tipo': 'NOTEBOOK'}
+                 'responsavel': 'Pessoa fictícia', 'setor': 'Laboratório fictício', 'tipo': 'NOTEBOOK',
+                 'website': ''}
         dados.update(alteracoes)
         return dados
 
     def retrato(self):
         return {p.name: p.read_bytes() for p in self.raiz.iterdir() if p.is_file()}
+
+    def test_honeypot_preenchido_recusa_sem_abrir_base_ou_criar_rascunho(self):
+        from unittest.mock import patch
+        cliente = self.cliente()
+        for valor in ('https://spam.example', ' ', '0', ['', 'spam']):
+            for rascunho in ('', 'sim'):
+                with self.subTest(valor=valor, rascunho=rascunho):
+                    dados = self.formulario(cliente, website=valor, incluir_vulnerabilidades=rascunho)
+                    antes = self.retrato()
+                    with patch.object(BancoDeDados, '__init__', side_effect=AssertionError('abriu banco')) as abrir:
+                        resposta = cliente.post('/ativos/novo', data=dados)
+                    self.assertEqual(resposta.status_code, 400)
+                    abrir.assert_not_called()
+                    self.assertNotIn('cadastrado com sucesso', resposta.get_data(as_text=True))
+                    self.assertEqual(self.retrato(), antes)
+
+    def test_honeypot_vazio_permite_cadastro_sem_persistir_campo(self):
+        cliente = self.cliente()
+        resposta = cliente.post('/ativos/novo', data=self.formulario(cliente, website=''))
+        self.assertEqual(resposta.status_code, 303)
+        self.assertEqual(len(BancoDeDados.consultar_ativos(self.caminho)), 1)
+        self.assertNotIn('website', self.caminho.read_text(encoding='utf-8'))
+
+    def test_honeypot_e_texto_oculto_por_css_sem_foco_ou_autopreenchimento(self):
+        cliente = self.cliente()
+        html = cliente.get('/ativos/novo').get_data(as_text=True)
+        self.assertRegex(html, r'<div class="honeypot" aria-hidden="true">')
+        campo = re.search(r'<input[^>]+name="website"[^>]*>', html)
+        self.assertIsNotNone(campo)
+        for atributo in ('type="text"', 'tabindex="-1"', 'autocomplete="off"', 'value=""'):
+            self.assertIn(atributo, campo.group())
+        self.assertNotIn('required', campo.group())
+        with cliente.get('/static/inventario.css') as resposta_css:
+            css = resposta_css.get_data(as_text=True)
+        self.assertRegex(css, r'\.honeypot\s*\{\s*display:\s*none;?\s*\}')
+        self.assertEqual(cliente.post('/ativos/novo', data=self.formulario(cliente)).status_code, 303)
+        edicao = cliente.get('/ativos/51/editar').get_data(as_text=True)
+        self.assertNotIn('name="website"', edicao)
 
     def test_campos_invalidos_nao_gravam_e_preservam_respostas(self):
         casos = ({'id_ativo': '0'}, {'id_ativo': '1.5'}, {'id_ativo': '-1'},

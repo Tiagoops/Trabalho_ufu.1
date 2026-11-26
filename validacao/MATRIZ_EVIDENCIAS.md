@@ -1,7 +1,7 @@
 # Matriz de evidências — revisão de 26/11/2026
 
 Checkout oficial: C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT
-Código validado: correção de gravação/base única sobre ee855b7 (26/11/2026); veja VALIDACAO_BASE_UNICA.md e o commit que contém esta revisão.
+Código validado: base 9e91138, honeypot e correção de identidade (26/11/2026); o commit que contém esta matriz identifica a entrega. VALIDACAO_BASE_UNICA.md preserva a rodada anterior.
 Repositório: https://github.com/Tiagoops/Trabalho_ufu.1
 Última conferência remota: main em 030cd59; frontend e correções estão em commits locais. Não houve push nesta correção. A tentativa anterior foi bloqueada pela revisão automática por exigir autorização específica do autor.
 
@@ -14,7 +14,7 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 |---|---|---|---|
 | POO e objetos individuais — 20% | Implementado e testado | modelos.py: fábrica, subclasses, orientacoes_tratamento e recarga; tests/test_modelagem_oo.py; tests/test_integracao_poo_integridade.py | Ensaio oral do aluno ainda necessário |
 | Lista JSON de objetos — 20% | Implementado e testado | banco_dados.py: consultar_retrato e salvar; to_dict/from_dict; testes de rollback, identidade e concorrência | Retentativas limitadas, conflito e rollback validados; permissão permanente continua sendo erro |
-| Contêiner e 24h no servidor — 45% | Parte local comprovada; requisito integral aberto | docker/Dockerfile, docker/compose.yaml; 250 testes em cada ambiente Linux e Compose isolado; VALIDACAO_BASE_UNICA.md | Implantação docente e 24h não executadas; permanecem adiadas |
+| Contêiner e 24h no servidor — 45% | Parte local comprovada; requisito integral aberto | docker/Dockerfile, docker/compose.yaml; 262 testes em Windows e Linux independente nesta correção; Compose habitual validado por HTTP; evidencias_identidade_2026-11-26/ | Implantação docente e 24h não executadas; permanecem adiadas |
 | Risco próprio/efetivo — 15% | Implementado e testado | servico_risco.py e matematica/risco.py; M, v, A, b=Mv, solve, rho, condição e resíduo; oráculo manual | Índice não é probabilidade nem percentual; não inventar fatores para demonstrar POO |
 | Frontend, opções 0–14 | Implementado | interface_web/, templates/, app_web.py; CRUD, CVSS, dependências, riscos, JSON, CSV e Sair | Inspeção visual final e telas pequenas continuam parciais devido à automação do navegador |
 | Importação JSON | HTTP real aprovado | validacao_http.json: prévia não grava; confirmação adiciona lote fictício; cancelamento/duplicidade também cobertos pela suíte | Upload visual não concluído; não confundir HTTP aprovado com inspeção do seletor |
@@ -23,6 +23,8 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 | Estados da base e sessão | Aprovados por HTTP / testes | JSON inválido → 503 sem novos arquivos; [] → 200 com mensagem vazia; falha só no risco preserva ativos em HTTP 200 (validacao_risco_http.json); Sair e Entrar novamente aprovados | Sair encerra sessão, não o servidor; não apaga dados |
 | Windows WinError 5 | Recuperação transitória implementada e validada | 4.000 gravações fictícias, 18 bloqueios recuperados e 0 falhas finais; teste com handle nativo; rollback persistente e conflito cobertos | Processo externo ainda não identificado; erros permanentes não são mascarados |
 | Bases CLI/web | Unificadas e conferidas | dados/inventario.json; dois serviços usam /dados; seletor encaminha CLI ao frontend ativo; sete registros idênticos ao backup | Volume antigo preservado; não há mesclagem automática nem garantia entre escritores Windows/Linux simultâneos |
+| Identidade antes do reuso web | Corrigida e validada | GET /metadados, protocolo 1; caminho canônico identificado sem expô-lo; porta e montagem Docker conferidas; bases distintas com bytes iguais recusadas por HTTP real | Instância antiga sem metadados precisa ser reiniciada; protocolo não é autenticação |
+| Honeypot no cadastro | Implementado e validado | Campo website oculto por CSS; preenchimento retorna 400 antes de abrir a base; vazio/ausente mantém cadastro; tests/test_cadastro_web.py | Proteção complementar: não detecta bots que deixam o campo vazio |
 | S3_09 — relatório original | Não localizado nas fontes consultadas | Página Notion e duas exportações Trello descrevem relatório e checklist concluído; o cartão não possui anexos nas duas exportações; busca dirigida por nomes em Downloads/Documentos sem resultado | Localizar arquivo original/recibo com o aluno. Não recriar retroativamente como evidência histórica |
 | Branches / merges | Conferência concluída; comprovação acadêmica não localizada | Na auditoria anterior: histórico completo (não shallow), 20 commits, 0 merges; API GitHub: 1 branch main e 0 PRs | Branches apagadas ou atividades externas não podem ser descartadas; não inventar histórico |
 | S5_19 — apresentação | Material produzido nesta revisão | 6 slides PowerPoint com notas e roteiro de 300s; perguntas/respostas; gravação real de terminal Docker offline (44.27s) | Ensaio oral e revisão por colega dependem do aluno. A gravação não é sua apresentação oral |
@@ -38,8 +40,10 @@ e dependências pode ter risco zero, sem comprovar segurança do equipamento.
 
 ## Verificações e rastreabilidade
 
-- Suítes atuais: 250 executados, 249 aprovados e 1 ignorado por plataforma em
-  cada execução Windows, Linux independente e Compose isolado; 0 erros/falhas.
+- Suítes atuais desta correção: 262 executados, 261 aprovados e 1 ignorado por
+  plataforma em Windows e Linux independente; 0 erros/falhas. Logs e HTTP real
+  em evidencias_identidade_2026-11-26/. A rodada anterior de 250 casos em Compose
+  isolado permanece identificada em VALIDACAO_BASE_UNICA.md.
 - Stress Windows: 4.000 gravações, 18 bloqueios recuperados, 0 falhas finais.
   Bind Linux/Windows: 500 gravações, 0 falhas finais. Não são garantias futuras.
 - HTTP nativo Windows: cadastro, edição, CVSS, dependência, risco, remoção, CSV e
@@ -70,3 +74,9 @@ implantação/24h como feitas.
 26/11/2026, correção posterior: base única compartilhada, tratamento limitado
 para bloqueios Windows e operação somente em loopback. Matriz atualizada com
 250 casos por ambiente, incidentes e limites, preservando os registros históricos.
+
+26/11/2026, correção de identidade: endpoint de metadados sem escrita e validação
+obrigatória antes do reuso. Comprovada a mesma base Windows/Docker por publicação
+e bind; rejeitada outra base com JSON idêntico. Honeypot da etapa anterior incluído.
+O item 1 da auditoria foi corrigido; os itens 2–4 permanecem pendentes. Não há
+comprovação de 24 horas nem implantação docente concluída nesta etapa.

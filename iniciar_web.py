@@ -1,12 +1,15 @@
 """Inicia o cadastro demonstrativo sem sobrescrever uma base existente."""
 import os
-from pathlib import Path
+import json
+import subprocess
+from hashlib import sha256
+from pathlib import Path, PurePosixPath
 from http.client import HTTPConnection, HTTPException
 from threading import Thread
 import webbrowser
 
 from app_web import EXEMPLO, create_app
-from configuracao import caminho_inventario
+from configuracao import caminho_inventario, identidade_base
 
 
 def preparar_base(caminho):
@@ -28,18 +31,64 @@ def preparar_base(caminho):
 URL_PREVIA = "http://127.0.0.1:8000/"
 
 
+def _identidades_docker(caminho, porta):
+    """Reconhece o mesmo arquivo através de uma montagem, sem presumir /dados."""
+    identidades = set()
+    try:
+        lista = subprocess.run(['docker', 'ps', '-q'],
+                               capture_output=True, text=True, timeout=2)
+        containers = lista.stdout.split()
+        if lista.returncode or not containers:
+            return identidades
+        formato = '{"NetworkSettings":{"Ports":{{json .NetworkSettings.Ports}}},"Mounts":{{json .Mounts}}}'
+        inspecao = subprocess.run(['docker', 'inspect', '--format', formato, *containers],
+                                  capture_output=True, text=True, timeout=2)
+        if inspecao.returncode:
+            return identidades
+        for linha in inspecao.stdout.splitlines():
+            container = json.loads(linha)
+            publicadas = container.get('NetworkSettings', {}).get('Ports', {}).get('8000/tcp') or []
+            if not any(p.get('HostIp') == '127.0.0.1' and p.get('HostPort') == str(porta) for p in publicadas):
+                continue
+            for montagem in container.get('Mounts', []):
+                if montagem.get('Type') != 'bind':
+                    continue
+                try:
+                    relativo = caminho.resolve().relative_to(Path(montagem['Source']).resolve())
+                except ValueError:
+                    continue
+                interno = str(PurePosixPath(montagem['Destination'], *relativo.parts))
+                identidades.add(sha256(interno.encode('utf-8')).hexdigest())
+    except (OSError, subprocess.TimeoutExpired, ValueError, KeyError, TypeError, AttributeError):
+        return set()
+    return identidades
+
+
 def _estado_previa(porta=8000):
     conexao = HTTPConnection("127.0.0.1", porta, timeout=1)
     try:
-        conexao.request("GET", "/")
+        conexao.request("GET", "/metadados")
         resposta = conexao.getresponse()
         try:
-            return "inventario" if resposta.getheader("X-Inventario-App") == "inventario-ti" else "ocupada"
+            if resposta.status not in (200, 503) or resposta.getheader("X-Inventario-App") != "inventario-ti":
+                return "ocupada"
+            corpo = resposta.read(4097)
+            if len(corpo) > 4096:
+                return "ocupada"
+            dados = json.loads(corpo)
+            if (not isinstance(dados, dict) or dados.get('aplicacao') != 'inventario-ti'
+                    or type(dados.get('protocolo')) is not int or dados['protocolo'] != 1
+                    or not isinstance(dados.get('base_id'), str)):
+                return "ocupada"
+            caminho = caminho_inventario()
+            if dados['base_id'] == identidade_base(caminho):
+                return "inventario"
+            return "inventario" if dados['base_id'] in _identidades_docker(caminho, porta) else "diferente"
         finally:
             resposta.close()
     except ConnectionRefusedError:
         return "livre"
-    except (OSError, HTTPException):
+    except (OSError, HTTPException, ValueError, TypeError):
         return "ocupada"
     finally:
         conexao.close()
@@ -66,8 +115,12 @@ def main(*, abrir_navegador=False):
         if abrir_navegador:
             _abrir_no_navegador()
         return
+    if estado == "diferente":
+        print("A interface na porta 8000 usa outra base. Ela não será reutilizada.")
+        print("Encerre essa instância ou use a base correspondente antes de abrir a interface.")
+        return
     if estado == "ocupada":
-        print("Não foi possível iniciar a prévia: a porta 8000 está ocupada ou indisponível.")
+        print("Não foi possível validar a instância na porta 8000. Encerre o serviço antigo ou indisponível.")
         print("Encerre o outro serviço ou escolha continuar no terminal.")
         return
     padrao = caminho_inventario()
