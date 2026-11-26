@@ -21,6 +21,41 @@ pasta do computador, junto aos backups e ao eventual manifesto de migração.
 Restrinja o acesso a essa pasta e use um escritor por base. Feche a aplicação
 antes de alternar entre Windows e Docker sobre a mesma pasta.
 
+## Escolha da interface ao iniciar
+
+Na pasta do projeto, execute:
+
+```powershell
+.\.venv\Scripts\python.exe -B main.py
+```
+
+Antes de abrir a base, escolha **1 - Acessar interface gráfica** ou
+**2 - Continuar no terminal**. A interface gráfica abre o navegador padrão
+quando possível. Uma prévia do inventário que já esteja na porta 8000 é
+reutilizada. Se for necessário iniciar um servidor novo, o terminal informa
+o endereço; mantenha-o aberto e use Ctrl+C para encerrar esse servidor.
+Fechar apenas a aba do navegador não encerra o processo.
+
+Use `main.py --terminal` para entrar diretamente na CLI. `main.py --demo`
+continua abrindo diretamente a demonstração temporária da CLI.
+
+Dentro de um contêiner, o navegador fica no computador anfitrião. Para o
+seletor iniciar a prévia acessível pelo computador, publique a porta:
+
+```powershell
+docker compose -f docker/compose.yaml run --rm -p 127.0.0.1:8000:8000 inventario
+```
+
+Escolha 1 e abra <http://127.0.0.1:8000>. Não execute esse comando com a porta
+já publicada pelo serviço frontend. Para manter o serviço frontend aberto,
+use o seletor Python local, que o reconhece e reaproveita. Para operar apenas
+pela CLI, o comando habitual sem `-p` continua válido: escolha 2.
+
+A prévia nova usa `dados_web/inventario.json` com dados fictícios, sem tocar
+em `ativos_db.txt`. No Compose, essa pasta persiste na montagem do projeto.
+O frontend dedicado conserva o volume separado `frontend_dados`. Reutilizar
+um servidor já aberto conserva a base que aquele servidor já utiliza.
+
 ## Backup e restauração
 
 1. Encerre a CLI, os contêineres do projeto e qualquer migração. Copie

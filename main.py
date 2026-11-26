@@ -864,7 +864,33 @@ def main(*, demonstracao: bool = False) -> None:
         executar_menu(db)
 
 
+def escolher_interface() -> None:
+    """Escolhe a interface antes de abrir ou modificar qualquer base."""
+    print("\nComo deseja iniciar?")
+    print("1 - Acessar interface gráfica (navegador)")
+    print("2 - Continuar no terminal")
+    while True:
+        try:
+            escolha = input("Escolha 1 ou 2: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nInicialização cancelada.")
+            return
+        if escolha == "1":
+            from iniciar_web import main as abrir_previa
+            abrir_previa(abrir_navegador=True)
+            return
+        if escolha == "2":
+            main()
+            return
+        print("Opção inválida. Escolha 1 ou 2.")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--demo", action="store_true", help="Abre ativos fictícios em base temporária.")
-    main(demonstracao=parser.parse_args().demo)
+    parser.add_argument("--terminal", action="store_true", help="Abre diretamente o menu do terminal.")
+    argumentos = parser.parse_args()
+    if argumentos.terminal or argumentos.demo:
+        main(demonstracao=argumentos.demo)
+    else:
+        escolher_interface()

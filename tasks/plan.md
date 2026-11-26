@@ -40,3 +40,16 @@ não fazer push sem autorização específica.
    versionado preservado, suíte Windows/Linux e um commit após as três etapas.
 
 As demais opções do menu seguem pendentes para incrementos seguintes.
+
+## Incremento: escolha da interface na inicialização
+
+Escopo: opção 1 abre/reaproveita a prévia web; opção 2 mantém o menu completo.
+Não abrir a base antes da escolha. Preservar --demo e acrescentar --terminal
+para scripts e execução direta. Identificar o servidor por cabeçalho próprio,
+reservar a porta antes de inicializar a base e abrir a aba após a reserva.
+
+Arquivos: main.py, iniciar_web.py, app_web.py, tests/test_inicio.py,
+tests/test_aplicacao.py, docker/compose.yaml, README.md e OPERACAO.md.
+Validação: testes do seletor/cancelamento, porta livre/ocupada, reaproveitamento,
+falhas de abertura, comandos reais e suíte completa Windows/Linux.
+As mudanças visuais anteriores, já autorizadas, devem ser preservadas.

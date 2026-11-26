@@ -6,6 +6,8 @@ services:
     image: trabalho-ufu:local
     stdin_open: true
     tty: true
+    environment:
+      INVENTARIO_HOST: 0.0.0.0
     volumes:
       - type: bind
         source: ..

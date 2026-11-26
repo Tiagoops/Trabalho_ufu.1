@@ -8,10 +8,15 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='inventario.css') }}">
 </head>
 <body>
+  <div class="aplicativo">
   <a class="pular" href="#conteudo">Ir para o conteúdo</a>
   <header class="topo">
-    <div class="marca"><span class="simbolo" aria-hidden="true">I</span><div>Inventário de TI<small>UFU / Trabalho 2</small></div></div>
-    <span class="etiqueta">{{ "Cadastro de ativos" if permitir_cadastro else "Somente leitura" }}</span>
+    <a class="marca" href="{{ url_for('inventario') }}" aria-label="Inventário de TI, página inicial"><span class="simbolo" aria-hidden="true">I</span><span>Inventário de TI<small>UFU</small></span></a>
+    <nav class="navegacao" aria-label="Navegação principal">
+      <a href="{{ url_for('inventario') }}"{% if request.endpoint == 'inventario' %} aria-current="page"{% endif %}>Visão geral</a>
+      {% if permitir_cadastro %}<a href="{{ url_for('cadastrar_ativo') }}"{% if request.endpoint == 'cadastrar_ativo' %} aria-current="page"{% endif %}>Cadastrar ativo</a>{% endif %}
+    </nav>
+    <span class="etiqueta"><span aria-hidden="true" class="ponto-local"></span>Ambiente local</span>
   </header>
   <main id="conteudo">
     <div class="abertura">
@@ -81,6 +86,7 @@
       {% endif %}
     {% endif %}
   </main>
-  <footer>Inventário de ativos de TI <span>Consulta de ativos e riscos · Trabalho 2 / UFU</span></footer>
+  <footer>Inventário de ativos de TI <span>Consulta de ativos e riscos · UFU</span></footer>
+  </div>
 </body>
 </html>

@@ -38,6 +38,7 @@ def create_app(caminho=None, *, permitir_cadastro=None):
 
     @app.after_request
     def proteger_resposta(resposta):
+        resposta.headers["X-Inventario-App"] = "inventario-ti"
         resposta.headers["Cache-Control"] = "no-store"
         resposta.headers["X-Content-Type-Options"] = "nosniff"
         resposta.headers["X-Frame-Options"] = "DENY"

@@ -414,17 +414,17 @@ class TestExecucaoIsolada(unittest.TestCase):
     def test_base_padrao_independe_da_pasta_e_nao_move_base_legada(self):
         legada = self.outra / "ativos_db.txt"
         legada.write_text("base legada não mover", encoding="utf-8")
-        resultado = self.executar([str(self.projeto / "main.py")],
+        resultado = self.executar([str(self.projeto / "main.py"), "--terminal"],
                                  "1\n1\nHost\nJoão\nTI\n2\nn\n0\n")
         self.assertIn("cadastrado com sucesso", resultado.stdout)
         self.assertTrue((self.projeto / "ativos_db.txt").exists())
         self.assertEqual(legada.read_text(encoding="utf-8"), "base legada não mover")
-        consulta = self.executar([str(self.projeto / "main.py")], "2\n1\n1\n0\n")
+        consulta = self.executar([str(self.projeto / "main.py"), "--terminal"], "2\n1\n1\n0\n")
         self.assertIn("Host", consulta.stdout)
 
     def test_csv_padrao_fica_no_diretorio_de_execucao(self):
         entrada = "1\n1\nHost\nJoão\nTI\n2\ns\nExposição, versão antiga\nSoftware\n2\n" + VETOR_ALTO + "\nn\n10\n\n0\n"
-        self.executar([str(self.projeto / "main.py")], entrada)
+        self.executar([str(self.projeto / "main.py"), "--terminal"], entrada)
         csv_path = self.outra / "relatorio_vulnerabilidades.csv"
         self.assertTrue(csv_path.exists())
         self.assertFalse((self.projeto / csv_path.name).exists())
@@ -443,7 +443,7 @@ class TestExecucaoIsolada(unittest.TestCase):
     def test_inicializacao_com_base_inacessivel_nao_encerra_com_traceback(self):
         # Diretório no lugar do arquivo é uma falha de acesso real e portátil.
         (self.projeto / "ativos_db.txt").mkdir()
-        resultado = self.executar([str(self.projeto / "main.py")],
+        resultado = self.executar([str(self.projeto / "main.py"), "--terminal"],
                                  "1\n1\nHost\nJoão\nTI\n2\nn\n0\n")
         self.assertIn("Gravações bloqueadas", resultado.stdout)
         self.assertIn("[Erro]", resultado.stdout)

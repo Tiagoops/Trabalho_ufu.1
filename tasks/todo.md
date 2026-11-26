@@ -17,3 +17,11 @@ Push depende de autorização específica. Implantação na faculdade e teste de
 - [x] Testes de validação, duplicidade, proteção, concorrência e erros.
 - [x] Docker/Compose, navegador, persistência após recriação e documentação.
 - [x] Revisão final concluída; entrega preparada para o commit das três etapas, sem push.
+
+## Incremento: escolher navegador ou terminal
+
+- [x] Escolha inicial sem leitura da base; --terminal e --demo diretos.
+- [x] Prévia reaproveita servidor identificado; porta ocupada não cria base.
+- [x] Nova prévia reserva a porta antes da inicialização e da abertura da aba.
+- [x] Suíte completa Windows/Linux e comandos reais da imagem/Compose.
+- [x] Registro em validacao/VALIDACAO_INICIO.md; entrega preparada para o commit das três últimas etapas.

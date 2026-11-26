@@ -32,6 +32,26 @@ Para abrir quatro ativos de teste sem usar sua base real:
 
 No Linux/macOS, use `.venv/bin/python main.py --demo`.
 
+Ao executar `python main.py` sem opções, aparece primeiro:
+
+```text
+Como deseja iniciar?
+1 - Acessar interface gráfica (navegador)
+2 - Continuar no terminal
+```
+
+A opção 1 abre a prévia em <http://127.0.0.1:8000>. Se a aplicação já estiver
+nessa porta, ela é reutilizada, sem criar outra base ou outro servidor. Se a
+porta estiver livre, a prévia começa no próprio processo; mantenha o terminal
+aberto e use Ctrl+C para encerrá-la. A porta é reservada antes de solicitar a
+abertura do navegador. Se não houver navegador disponível, o endereço aparece
+no terminal. A opção 2 segue para o menu completo existente.
+
+Para pular a escolha, use `python main.py --terminal`. O comando
+`python main.py --demo` mantém a demonstração temporária diretamente no terminal,
+como antes. A prévia web continua oferecendo consulta e cadastro de ativos;
+as outras operações ainda estão na CLI.
+
 O modo `--demo` usa uma base temporária e descarta suas alterações ao sair. Ativos, dependências e medições são fictícios; os três CVEs e seus vetores têm fontes públicas verificadas. Não instala versões vulneráveis nem realiza varredura ou exploração.
 
 A base padrão é `ativos_db.txt`, ao lado de `banco_dados.py`, independentemente do diretório usado para executar o programa. Importar módulos ou abrir e sair do menu não cria a base. A API `BancoDeDados(caminho)` aceita outro arquivo. O CSV usa o diretório de execução ou o caminho escolhido.
@@ -458,3 +478,27 @@ e [Waitress no Windows e Linux](https://flask.palletsprojects.com/en/stable/depl
 Resultados e limites desta entrega: [VALIDACAO_FRONTEND.md](validacao/VALIDACAO_FRONTEND.md).
 
 Cadastro, persistência e testes: [VALIDACAO_CADASTRO_WEB.md](validacao/VALIDACAO_CADASTRO_WEB.md).
+
+### Escolha de interface dentro do Docker
+
+A imagem também inicia pela escolha de interface. Para usar a prévia a partir
+do seletor dentro do Compose, publique a porta explicitamente:
+
+```powershell
+docker compose -f docker/compose.yaml run --rm -p 127.0.0.1:8000:8000 inventario
+```
+
+Escolha 1 e abra <http://127.0.0.1:8000> no navegador do computador. O contêiner
+não tenta abrir um navegador interno. Se o serviço `frontend` já estiver usando
+a porta 8000, mantenha-o e use a opção 1 do Python local para reaproveitá-lo,
+ou pare apenas esse serviço antes de iniciar o seletor com a porta publicada.
+Para a CLI sem publicar portas, use o comando habitual e escolha 2, ou acrescente
+`python main.py --terminal` ao `docker compose run`.
+
+A prévia criada pelo seletor usa `dados_web/inventario.json` por padrão, separada
+da base real da CLI. No Compose, essa pasta fica na montagem do projeto.
+O serviço dedicado `frontend` conserva sua base no volume `frontend_dados`.
+Não há cópia nem sincronização automática entre essas bases. Os caminhos já
+configurados por `INVENTARIO_ARQUIVO` continuam sendo respeitados.
+
+Validação da escolha inicial: [VALIDACAO_INICIO.md](validacao/VALIDACAO_INICIO.md).
