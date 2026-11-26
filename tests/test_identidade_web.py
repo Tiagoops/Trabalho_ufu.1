@@ -106,13 +106,13 @@ class TestIdentidadeWeb(unittest.TestCase):
         dados = {'aplicacao':'inventario-ti','protocolo':1,
                  'base_id':sha256(b'/dados/inventario.json').hexdigest(),
                  'inventario_disponivel':True}
-        inspecao = {'NetworkSettings':{'Ports':{'8000/tcp':[{'HostIp':'127.0.0.1','HostPort':'8000'}]}},
+        inspecao = {'NetworkSettings':{'Ports':{'2229/tcp':[{'HostIp':'127.0.0.1','HostPort':'2229'}]}},
                     'Mounts':[{'Type':'bind','Source':str(self.pasta),'Destination':'/dados'}]}
-        for fonte,porta,esperado in ((str(self.pasta),'8000','inventario'),
-                                     (str(self.pasta/'diferente'),'8000','diferente'),
+        for fonte,porta,esperado in ((str(self.pasta),'2229','inventario'),
+                                     (str(self.pasta/'diferente'),'2229','diferente'),
                                      (str(self.pasta),'8001','diferente')):
             inspecao['Mounts'][0]['Source'] = fonte
-            inspecao['NetworkSettings']['Ports']['8000/tcp'][0]['HostPort'] = porta
+            inspecao['NetworkSettings']['Ports']['2229/tcp'][0]['HostPort'] = porta
             retornos = [Mock(returncode=0,stdout='container-ficticio\n'),
                         Mock(returncode=0,stdout=json.dumps(inspecao))]
             with patch('iniciar_web.subprocess.run',side_effect=retornos):

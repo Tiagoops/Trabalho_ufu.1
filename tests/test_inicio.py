@@ -59,7 +59,7 @@ class TestInicializacaoPrevia(unittest.TestCase):
             iniciar_web.main(abrir_navegador=True)
         preparar.assert_not_called()
         abrir.assert_not_called()
-        self.assertIn('porta 8000', saida.getvalue())
+        self.assertIn('porta 2229', saida.getvalue())
 
     def test_estado_distingue_conexao_recusada_previa_e_outro_http(self):
         for marcador, esperado in (('inventario-ti', 'inventario'), (None, 'ocupada')):
@@ -128,7 +128,7 @@ class TestInicializacaoPrevia(unittest.TestCase):
                 else:
                     abrir.return_value=resultado
                 iniciar_web._abrir_no_navegador()
-                abrir.assert_called_once_with('http://127.0.0.1:8000/', new=2)
+                abrir.assert_called_once_with('http://127.0.0.1:2229/', new=2)
                 self.assertIn('Abra manualmente', saida.getvalue())
 
     def test_container_mostra_link_sem_tentar_abrir_navegador_interno(self):
@@ -148,3 +148,20 @@ class TestInicializacaoPrevia(unittest.TestCase):
             self.assertEqual(resposta.status_code, 503)
             self.assertEqual(resposta.headers['X-Inventario-App'], 'inventario-ti')
             self.assertEqual(list(Path(pasta).iterdir()), [])
+
+class TestPortaApresentacao(unittest.TestCase):
+    def test_sondagem_da_interface_usa_porta_2229(self):
+        with patch('iniciar_web.HTTPConnection') as conexao:
+            conexao.return_value.request.side_effect = ConnectionRefusedError
+            self.assertEqual(iniciar_web._estado_previa(), 'livre')
+        conexao.assert_called_once_with('127.0.0.1', 2229, timeout=1)
+
+    def test_servidor_da_interface_escuta_porta_2229(self):
+        with patch.dict('os.environ', {'INVENTARIO_ARQUIVO':'base-ficticia.json'}), \
+             patch('iniciar_web._estado_previa', return_value='livre'), \
+             patch('iniciar_web.create_app'), patch('iniciar_web.preparar_base'), \
+             patch('waitress.create_server') as criar, \
+             contextlib.redirect_stdout(io.StringIO()):
+            criar.return_value.run.side_effect = KeyboardInterrupt
+            self.assertEqual(iniciar_web.main(), 0)
+        self.assertEqual(criar.call_args.kwargs['port'], 2229)

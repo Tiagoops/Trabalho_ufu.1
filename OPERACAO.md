@@ -46,10 +46,10 @@ Dentro de um contêiner, o navegador fica no computador anfitrião. Para o
 seletor iniciar a prévia acessível pelo computador, publique a porta:
 
 ```powershell
-docker compose -f docker/compose.yaml run --rm -p 127.0.0.1:8000:8000 inventario
+docker compose -f docker/compose.yaml run --rm -p 127.0.0.1:2229:2229 inventario
 ```
 
-Escolha 1 e abra <http://127.0.0.1:8000>. Não execute esse comando com a porta
+Escolha 1 e abra <http://127.0.0.1:2229>. Não execute esse comando com a porta
 já publicada pelo serviço frontend. Para manter o serviço frontend aberto,
 use o seletor Python local, que o reconhece e reaproveita. Para operar apenas
 pela CLI, o comando habitual sem `-p` continua válido: escolha 2.
@@ -126,7 +126,7 @@ Na raiz do projeto:
 docker compose -f docker/compose.yaml up -d --build frontend
 ```
 
-Abra <http://127.0.0.1:8000>, clique **Cadastrar ativo**, preencha os cinco campos
+Abra <http://127.0.0.1:2229>, clique **Cadastrar ativo**, preencha os cinco campos
 e clique **Salvar ativo**. Use apenas dados fictícios nesta demonstração. O ID
 precisa ser inteiro positivo e único; hostname também deve ser único. O novo
 ativo pode receber vulnerabilidades iniciais ao marcar a opção de rascunho.
@@ -154,7 +154,7 @@ python -m venv .venv
 Sem variáveis, usa `dados/inventario.json`, a mesma base da CLI e do Compose.
 Se não existir, o iniciador web cria uma lista vazia. A pasta fica fora do Git
 e do contexto de construção Docker; os dados não entram na imagem.
-O servidor local continua usando Waitress, na porta 8000 em loopback. Encerre
+O servidor local continua usando Waitress, na porta 2229 em loopback. Encerre
 com Ctrl+C. Não execute junto com outro servidor na mesma porta.
 
 `INVENTARIO_ARQUIVO` define o caminho no servidor. `iniciar_web.py` habilita o
@@ -164,7 +164,7 @@ nem habilitar o cadastro, mantenha o comando anterior:
 
 ```powershell
 $env:PYTHONDONTWRITEBYTECODE = '1'
-.\.venv\Scripts\waitress-serve.exe --listen=127.0.0.1:8000 --call app_web:create_app
+.\.venv\Scripts\waitress-serve.exe --listen=127.0.0.1:2229 --call app_web:create_app
 ```
 
 A fábrica usa `INVENTARIO_CADASTRO=1` para habilitar cadastro em uma base
@@ -318,10 +318,10 @@ importado automaticamente. Para copiar dados, valide uma cópia e combine a
 origem/destino antes de alterar o volume. Não execute `down -v`.
 
 A porta é publicada somente no loopback do servidor. Para apresentação remota,
-um túnel SSH permite abrir `http://127.0.0.1:8000` no computador local:
+um túnel SSH permite abrir `http://127.0.0.1:2229` no computador local:
 
 ```bash
-ssh -N -L 8000:127.0.0.1:PORTA_CONFIRMADA USUARIO@HOST
+ssh -N -L 2229:127.0.0.1:PORTA_CONFIRMADA USUARIO@HOST
 ```
 
 Não há autenticação de usuários: a configuração não abre acesso público.
@@ -342,3 +342,40 @@ versão usada como evidência.
 Validação local: projeto fictício isolado, cadastro HTTP, volume gravável, raiz
 somente leitura, healthcheck e JSON idêntico após recriar. A implantação real
 aguarda endereço, método de acesso, identificação e localização da entrega anterior.
+
+## Inicialização Docker e porta 2229 — revisão de 26/11/2026
+
+A imagem passa a iniciar `python -B iniciar_web.py` por padrão, sem stdin/TTY.
+`INVENTARIO_HOST=0.0.0.0` vale dentro do contêiner; o Compose publica somente
+`127.0.0.1:2229:2229`. O iniciador nativo também usa 2229 e valida a identidade
+da base antes de reutilizar a instância. Healthcheck e descoberta Docker foram
+alinhados à mesma porta. Não há publicação na rede por esta configuração.
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT'
+docker compose -f docker/compose.yaml up -d --build frontend
+docker compose -f docker/compose.yaml ps
+Start-Process 'http://127.0.0.1:2229'
+```
+
+`docker compose run --rm inventario` continua sendo o serviço interativo, com
+comando explícito para `main.py`. Para usar o terminal do frontend já ativo:
+
+```powershell
+docker compose -f docker/compose.yaml exec frontend python -B main.py --terminal
+```
+
+“Como deseja iniciar?” seguido de “Inicialização cancelada” ocorria ao executar
+o CMD antigo `python main.py` sem uma entrada de terminal. Não era uma falha de
+leitura do JSON nem prova de que o serviço frontend ativo havia parado.
+
+No Docker Desktop, crie novamente os contêineres antigos, que guardam o comando
+da imagem anterior. Para conservar os sete registros habituais, prefira o Compose
+acima ou aponte a montagem para a mesma pasta `dados`. A imagem não contém a
+base real; sem montagem persistente, o cadastro fica apenas no contêiner.
+
+No Compose de servidor, `UFU_PORTA` continua explícita. A porta informada pelo
+autor nesta revisão é 2229; endereço, acesso e identificação do servidor ainda
+precisam ser confirmados. Túnel SSH exige porta local livre: se já houver uma
+interface local na 2229, encerre essa interface antes de usar o mesmo endereço
+para um túnel. Esta revisão não comprova implantação docente nem 24 horas.

@@ -1,0 +1,19 @@
+======================================================================
+FAIL: test_sondagem_da_interface_usa_porta_2229 (tests.test_inicio.TestPortaApresentacao.test_sondagem_da_interface_usa_porta_2229)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT\tests\test_inicio.py", line 157, in test_sondagem_da_interface_usa_porta_2229
+    conexao.assert_called_once_with('127.0.0.1', 2229, timeout=1)
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 951, in assert_called_once_with
+    return self.assert_called_with(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\unittest\mock.py", line 939, in assert_called_with
+    raise AssertionError(_error_message()) from cause
+AssertionError: expected call not found.
+Expected: HTTPConnection('127.0.0.1', 2229, timeout=1)
+  Actual: HTTPConnection('127.0.0.1', 8000, timeout=1)
+
+----------------------------------------------------------------------
+Ran 1 test in 0.003s
+
+FAILED (failures=1)

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "C:\Users\Nitro\OneDrive\Documentos\ChatGPT\trabalho ufu\outputs\inicio_docker_2229_2026-11-26\validar_imagem.py", line 72, in <module>
+    aguardar()
+  File "C:\Users\Nitro\OneDrive\Documentos\ChatGPT\trabalho ufu\outputs\inicio_docker_2229_2026-11-26\validar_imagem.py", line 53, in aguardar
+    raise AssertionError("servidor n�o ficou pronto: " + docker("logs", nome))
+AssertionError: servidor n�o ficou pronto: Pr�via web: http://127.0.0.1:2229/
+Mantenha este terminal aberto. Ctrl+C encerra esta pr�via.
+Pr�via web: http://127.0.0.1:2229/
+Mantenha este terminal aberto. Ctrl+C encerra esta pr�via.

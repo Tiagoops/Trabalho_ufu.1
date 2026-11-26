@@ -1,0 +1,17 @@
+{
+  "porta_host_disponivel": 2229,
+  "compose_cli": [
+    "python",
+    "-B",
+    "main.py"
+  ],
+  "compose_frontend_porta": {
+    "mode": "ingress",
+    "host_ip": "127.0.0.1",
+    "target": 2229,
+    "published": "2229",
+    "protocol": "tcp"
+  },
+  "servidor_porta_interna": 2229,
+  "healthcheck_alinhado": true
+}

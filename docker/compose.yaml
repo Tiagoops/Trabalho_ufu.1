@@ -4,6 +4,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     image: trabalho-ufu:local
+    command: ["python", "-B", "main.py"]
     stdin_open: true
     tty: true
     environment:
@@ -28,7 +29,7 @@ services:
       INVENTARIO_HOST: 0.0.0.0
       INVENTARIO_DEMONSTRACAO: "1"
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:2229:2229"
     user: "65534:65534"
     read_only: true
     volumes:

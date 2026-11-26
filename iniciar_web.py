@@ -28,7 +28,7 @@ def preparar_base(caminho):
         pass
 
 
-URL_PREVIA = "http://127.0.0.1:8000/"
+URL_PREVIA = "http://127.0.0.1:2229/"
 
 
 def _identidades_docker(caminho, porta):
@@ -47,7 +47,7 @@ def _identidades_docker(caminho, porta):
             return identidades
         for linha in inspecao.stdout.splitlines():
             container = json.loads(linha)
-            publicadas = container.get('NetworkSettings', {}).get('Ports', {}).get('8000/tcp') or []
+            publicadas = container.get('NetworkSettings', {}).get('Ports', {}).get('2229/tcp') or []
             if not any(p.get('HostIp') == '127.0.0.1' and p.get('HostPort') == str(porta) for p in publicadas):
                 continue
             for montagem in container.get('Mounts', []):
@@ -64,7 +64,7 @@ def _identidades_docker(caminho, porta):
     return identidades
 
 
-def _estado_previa(porta=8000):
+def _estado_previa(porta=2229):
     conexao = HTTPConnection("127.0.0.1", porta, timeout=1)
     try:
         conexao.request("GET", "/metadados")
@@ -116,11 +116,11 @@ def main(*, abrir_navegador=False) -> int:
             _abrir_no_navegador()
         return 0
     if estado == "diferente":
-        print("A interface na porta 8000 usa outra base. Ela não será reutilizada.")
+        print("A interface na porta 2229 usa outra base. Ela não será reutilizada.")
         print("Encerre essa instância ou use a base correspondente antes de abrir a interface.")
         return 1
     if estado == "ocupada":
-        print("Não foi possível validar a instância na porta 8000. Encerre o serviço antigo ou indisponível.")
+        print("Não foi possível validar a instância na porta 2229. Encerre o serviço antigo ou indisponível.")
         print("Encerre o outro serviço ou escolha continuar no terminal.")
         return 1
     padrao = caminho_inventario()
@@ -130,7 +130,7 @@ def main(*, abrir_navegador=False) -> int:
     servidor = None
     try:
         # A porta é reservada antes da cópia inicial e da abertura do navegador.
-        servidor = create_server(create_app(), host=os.environ.get("INVENTARIO_HOST", "127.0.0.1"), port=8000)
+        servidor = create_server(create_app(), host=os.environ.get("INVENTARIO_HOST", "127.0.0.1"), port=2229)
         preparar_base(os.environ["INVENTARIO_ARQUIVO"])
         print(f"Prévia web: {URL_PREVIA}", flush=True)
         print("Mantenha este terminal aberto. Ctrl+C encerra esta prévia.", flush=True)

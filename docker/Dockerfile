@@ -14,6 +14,8 @@ COPY static/ ./static/
 
 RUN mkdir -p /dados && chown 65534:65534 /dados
 
-EXPOSE 8000
+ENV INVENTARIO_HOST=0.0.0.0 INVENTARIO_ARQUIVO=/dados/inventario.json
 
-CMD ["python", "main.py"]
+EXPOSE 2229
+
+CMD ["python", "-B", "iniciar_web.py"]

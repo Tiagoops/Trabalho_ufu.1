@@ -1,0 +1,41 @@
+Traceback (most recent call last):
+  File "C:\Users\Nitro\OneDrive\Documentos\ChatGPT\trabalho ufu\outputs\inicio_docker_2229_2026-11-26\validar_imagem.py", line 45, in aguardar
+    with cliente.open(url + "/metadados", timeout=2) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\urllib\request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\http\client.py", line 1415, in getresponse
+    response.begin()
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\http\client.py", line 330, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nitro\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\http\client.py", line 299, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Nitro\OneDrive\Documentos\ChatGPT\trabalho ufu\outputs\inicio_docker_2229_2026-11-26\validar_imagem.py", line 55, in <module>
+    aguardar()
+  File "C:\Users\Nitro\OneDrive\Documentos\ChatGPT\trabalho ufu\outputs\inicio_docker_2229_2026-11-26\validar_imagem.py", line 51, in aguardar
+    assert estado["Running"], "CMD encerrou: " + docker("logs", nome)
+           ~~~~~~^^^^^^^^^^^
+AssertionError: CMD encerrou: Como deseja iniciar?
+1 - Acessar interface gr�fica (navegador)
+2 - Continuar no terminal
+Escolha 1 ou 2:
+Inicializa��o cancelada.

@@ -1,7 +1,7 @@
 # Matriz de evidências — revisão de 26/11/2026
 
 Checkout oficial: C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT
-Código validado: correções de IDs/migração e quebra de títulos em telas pequenas; 280 testes por ambiente. O commit que contém esta matriz identifica a entrega; rodadas anteriores preservadas no histórico.
+Código validado: início web não interativo da imagem e porta 2229, além das correções anteriores; 282 testes por ambiente. O commit que contém esta matriz identifica a entrega; rodadas anteriores preservadas no histórico.
 Repositório: https://github.com/Tiagoops/Trabalho_ufu.1
 Referência remota conferida antes desta etapa: bd1eacd, publicado com autorização específica. As novas alterações exigem novo push autorizado; não presumir que já estão no GitHub.
 
@@ -14,7 +14,7 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 |---|---|---|---|
 | POO e objetos individuais — 20% | Implementado e testado | modelos.py: fábrica, subclasses, orientacoes_tratamento e recarga; tests/test_modelagem_oo.py; tests/test_integracao_poo_integridade.py | Ensaio oral do aluno ainda necessário |
 | Lista JSON de objetos — 20% | Implementado e testado | banco_dados.py: consultar_retrato e salvar; to_dict/from_dict; testes de rollback, identidade e concorrência | Retentativas limitadas, conflito e rollback validados; permissão permanente continua sendo erro |
-| Contêiner e 24h no servidor — 45% | Configuração local comprovada; implantação e 24h abertas | docker/compose.servidor.yaml, healthcheck, volume nomeado e persistência após recriar; 280 testes por ambiente; VALIDACAO_ETAPAS_1_4.md | Aguardando endereço, acesso e identificação docente; teste local não comprova servidor nem 24h |
+| Contêiner e 24h no servidor — 45% | Web Docker inicia sem stdin; execução local comprovada | CMD web, porta 2229, smoke sem terminal, cadastro/reinício fictícios e 282 testes por ambiente; VALIDACAO_INICIO_DOCKER_2229.md | Implantação docente e 24h ainda não comprovadas |
 | Risco próprio/efetivo — 15% | Implementado e testado | servico_risco.py e matematica/risco.py; M, v, A, b=Mv, solve, rho, condição e resíduo; oráculo manual | Índice não é probabilidade nem percentual; não inventar fatores para demonstrar POO |
 | Frontend, opções 0–14 | Layout validado no Chrome em 320/768 px nos casos registrados | 16 rotas nas duas larguras; cadastro fictício, critérios/prévia CVSS, expansão e rolagem de tabelas, Sair/Entrar; VALIDACAO_TELAS_PEQUENAS.md | Upload nativo ainda não concluído; dispositivos físicos e outros navegadores não testados |
 | Importação JSON | HTTP/testes e layout 320/768 px aprovados; upload nativo pendente | Prévia sem escrita e rejeições cobertas; página de importação medida no navegador | A validação de layout não certifica a seleção e envio pelo diálogo nativo |
@@ -23,7 +23,7 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 | Estados da base e sessão | Aprovados por HTTP / testes | JSON inválido → 503 sem novos arquivos; [] → 200 com mensagem vazia; falha só no risco preserva ativos em HTTP 200 (validacao_risco_http.json); Sair e Entrar novamente aprovados | Sair encerra sessão, não o servidor; não apaga dados |
 | Windows WinError 5 | Recuperação do inventário e migração validada | Retry compartilhado; teste antigo distingue fase da falha; controles transitório, permanente, conflito e handle nativo; tests/test_migracao_windows.py | Processo externo histórico não identificado; permissão permanente segue sendo erro |
 | Bases CLI/web | Unificadas e conferidas | dados/inventario.json; dois serviços usam /dados; seletor encaminha CLI ao frontend ativo; sete registros idênticos ao backup | Volume antigo preservado; não há mesclagem automática nem garantia entre escritores Windows/Linux simultâneos |
-| Identidade antes do reuso web | Corrigida e validada | GET /metadados, protocolo 1; caminho canônico identificado sem expô-lo; porta e montagem Docker conferidas; bases distintas com bytes iguais recusadas por HTTP real | Instância antiga sem metadados precisa ser reiniciada; protocolo não é autenticação |
+| Identidade antes do reuso web | Corrigida e reconferida na 2229 | Metadados protocolo 1, publicação 127.0.0.1:2229 e bind; iniciador reconheceu a mesma base sem criar outro servidor | Instâncias antigas mantêm CMD e porta até serem recriadas; protocolo não é autenticação |
 | Honeypot no cadastro | Implementado e validado | Campo website oculto por CSS; preenchimento retorna 400 antes de abrir a base; vazio/ausente mantém cadastro; tests/test_cadastro_web.py | Proteção complementar: não detecta bots que deixam o campo vazio |
 | IDs de ocorrência em links | Corrigido | Validação compartilhada recusa segmentos de caminho/controles antes de importar; IDs válidos preservados; tests/test_ids_ocorrencias_web.py | Não renomeia dados automaticamente; base incompatível exige correção explícita |
 | S3_09 — material de estudo | Localização esclarecida pelo autor; não é documento exigido na apresentação | Autor informou material no caderno; PDF, página 3, seção 5.B dispensa documento adicional; VALIDACAO_ETAPAS_5_6.md | Caderno não inspecionado; não certifica exercícios nem avaliação diária |
@@ -113,3 +113,9 @@ o vazamento; 16 rotas passaram em 320/768 px, com tabelas rolando dentro de
 seus contêineres. Suítes de 280 testes Windows/Linux aprovadas com omissões
 de plataforma. Registro em VALIDACAO_TELAS_PEQUENAS.md. Upload nativo,
 implantação docente, 24h e ensaio oral permanecem pendentes.
+
+26/11/2026, início Docker e porta 2229: CMD antigo interativo recebia EOF e
+encerrava. Imagem passa a iniciar a web; serviço CLI mantém menu explícito.
+Porta, iniciador, publicação e healthcheck alinhados a 2229. Smoke sem stdin
+com cadastro/CLI/reinício aprovado; 282 testes por ambiente aprovados com
+omissões de plataforma. Sete ativos preservados. Não comprova servidor ou 24h.

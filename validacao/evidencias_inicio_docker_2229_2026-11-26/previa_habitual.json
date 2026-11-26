@@ -1,0 +1,31 @@
+{
+  "url": "http://127.0.0.1:2229",
+  "http": {
+    "/": 200,
+    "/metadados": 200,
+    "/ativos/70": 200,
+    "/riscos?ativo_id=70": 200
+  },
+  "portas": {
+    "2229/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "2229"
+      }
+    ]
+  },
+  "imagem": "sha256:5e8c3b402d1520c7704528bf0eff21433661db23ddc307dc75e715e8f1e1ecb1",
+  "cmd": [
+    "python",
+    "-B",
+    "iniciar_web.py"
+  ],
+  "launcher_reutilizou_mesma_base": true,
+  "sha256_base_inalterada": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763",
+  "ativos_preservados": 7,
+  "risco70": {
+    "b": 0.0,
+    "x": 7.3500000000000005
+  },
+  "rollback": "trabalho-ufu:antes-inicio-2229-402f859"
+}

@@ -1,0 +1,18 @@
+{
+  "imagem": "trabalho-ufu:inicio-2229-candidato",
+  "id": "sha256:5e8c3b402d1520c7704528bf0eff21433661db23ddc307dc75e715e8f1e1ecb1",
+  "cmd": [
+    "python",
+    "-B",
+    "iniciar_web.py"
+  ],
+  "stdin_fechado": true,
+  "porta_interna": 2229,
+  "porta_externa_ficticia": 57457,
+  "porta_ficticia_apos_reinicio": 57496,
+  "http_metadados": 200,
+  "cadastro_ficticio": 9907,
+  "cli_explicita": true,
+  "persistencia_apos_reiniciar": true,
+  "sha256_base_ficticia": "6f7242da5dec89b263976265e166f2cada8c90bdba7bba30bd8e8151988868db"
+}

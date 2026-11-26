@@ -40,7 +40,7 @@ Como deseja iniciar?
 2 - Continuar no terminal
 ```
 
-A opção 1 abre a prévia em <http://127.0.0.1:8000>. Se a aplicação já estiver
+A opção 1 abre a prévia em <http://127.0.0.1:2229>. Se a aplicação já estiver
 nessa porta, ela é reutilizada, sem criar outra base ou outro servidor. Se a
 porta estiver livre, a prévia começa no próprio processo; mantenha o terminal
 aberto e use Ctrl+C para encerrá-la. A porta é reservada antes de solicitar a
@@ -58,6 +58,27 @@ A base padrão é `dados/inventario.json`, na raiz do projeto, compartilhada pel
 
 ### Docker
 
+O comando padrão da imagem inicia a interface web diretamente, sem perguntar
+qual interface usar. Para abrir a base habitual na porta **2229**:
+
+```powershell
+docker compose -f docker/compose.yaml up -d --build frontend
+Start-Process 'http://127.0.0.1:2229'
+```
+
+O menu de escolha permanece em `python main.py` e no serviço `inventario`
+do Compose. Para o terminal direto, use `python main.py --terminal` ou
+`docker compose -f docker/compose.yaml exec frontend python -B main.py --terminal`.
+
+No Docker Desktop, ao criar um contêiner da imagem, use porta do host **2229**
+e porta do contêiner **2229**, além de montagem em `/dados` para persistir.
+O Compose acima mantém o acesso somente em 127.0.0.1 e usa a base habitual;
+um contêiner independente sem a montagem não abre automaticamente essa base.
+
+Contêineres criados com a imagem anterior conservam seu comando antigo.
+Atualizar a tag não os modifica: recrie o serviço pela imagem atualizada.
+
+
 É necessário ter o engine Docker em execução. Na raiz do projeto, construa e execute a imagem independente, sem bind mount ou volume:
 
 ```bash
@@ -65,7 +86,7 @@ docker build -f docker/Dockerfile -t trabalho-ufu:demo-check .
 docker run --rm -it trabalho-ufu:demo-check python main.py --demo
 ```
 
-O menu aparece no terminal; `0` encerra. A imagem instala as dependências fixadas, inclui `catalogo_cvss.py`, `matematica/` e `exemplos/`, e não inclui a base real. A base de `--demo` é temporária. Sem `--demo`, a base padrão fica em `/app/dados/inventario.json`; sem volume, os dados do contêiner são perdidos quando ele é removido por `--rm`.
+O menu aparece no terminal; `0` encerra. A imagem instala as dependências fixadas, inclui `catalogo_cvss.py`, `matematica/` e `exemplos/`, e não inclui a base real. A base de `--demo` é temporária. Na imagem Docker, sem `--demo`, a base padrão fica em `/dados/inventario.json`; sem volume, os dados do contêiner são perdidos quando ele é removido por `--rm`.
 
 Valide o Compose separadamente, também com dados fictícios:
 
@@ -436,7 +457,7 @@ os cadastros. Não há NVD automático.
 docker compose -f docker/compose.yaml up -d --build frontend
 ```
 
-Abra <http://127.0.0.1:8000>. O serviço `frontend` usa a imagem construída,
+Abra <http://127.0.0.1:2229>. O serviço `frontend` usa a imagem construída,
 sem montar o código do computador, com usuário sem privilégios e filesystem
 somente leitura, exceto a montagem de `dados/` em `/dados`. Os cadastros ficam
 no computador e são preservados ao recriar o contêiner. O serviço `inventario`
@@ -531,12 +552,12 @@ A imagem também inicia pela escolha de interface. Para usar a prévia a partir
 do seletor dentro do Compose, publique a porta explicitamente:
 
 ```powershell
-docker compose -f docker/compose.yaml run --rm -p 127.0.0.1:8000:8000 inventario
+docker compose -f docker/compose.yaml run --rm -p 127.0.0.1:2229:2229 inventario
 ```
 
-Escolha 1 e abra <http://127.0.0.1:8000> no navegador do computador. O contêiner
+Escolha 1 e abra <http://127.0.0.1:2229> no navegador do computador. O contêiner
 não tenta abrir um navegador interno. Se o serviço `frontend` já estiver usando
-a porta 8000, mantenha-o e use a opção 1 do Python local para reaproveitá-lo,
+a porta 2229, mantenha-o e use a opção 1 do Python local para reaproveitá-lo,
 ou pare apenas esse serviço antes de iniciar o seletor com a porta publicada.
 Para a CLI sem publicar portas, use o comando habitual e escolha 2, ou acrescente
 `python main.py --terminal` ao `docker compose run`.
