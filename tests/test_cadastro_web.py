@@ -205,7 +205,7 @@ class TestCadastroWeb(unittest.TestCase):
         from iniciar_web import preparar_base
         destino = self.raiz / 'dados/inventario.json'
         preparar_base(destino)
-        self.assertEqual(len(BancoDeDados.consultar_ativos(destino)), 4)
+        self.assertEqual(BancoDeDados.consultar_ativos(destino), [])
         destino.write_bytes(b'{nao-sobrescrever')
         preparar_base(destino)
         self.assertEqual(destino.read_bytes(), b'{nao-sobrescrever')

@@ -6,6 +6,8 @@ desatualizados. Não há garantia de durabilidade contra queda de energia.
 from __future__ import annotations
 
 import json
+import logging
+import time
 import os
 import tempfile
 from datetime import datetime
@@ -16,8 +18,12 @@ from typing import Dict, List, Optional
 from dataclasses import fields, is_dataclass
 
 from modelos import Ativo, Vulnerabilidade, validar_numero
+from configuracao import caminho_inventario
 
-CAMINHO_ARQUIVO_PADRAO = str(Path(__file__).resolve().parent / "ativos_db.txt")
+CAMINHO_ARQUIVO_PADRAO = str(caminho_inventario())
+
+
+_WINDOWS = os.name == "nt"
 
 
 class InventarioIndisponivel(ValueError):
@@ -57,9 +63,9 @@ def bloquear_escrita(caminho):
 
 
 class BancoDeDados:
-    def __init__(self, caminho: str = CAMINHO_ARQUIVO_PADRAO, *, recuperar: bool = True):
+    def __init__(self, caminho: str | Path | None = None, *, recuperar: bool = True):
         """recuperar=False exige uma base válida e não tenta isolar erros em backup."""
-        self.caminho = str(Path(caminho).resolve())
+        self.caminho = str(Path(caminho).resolve() if caminho is not None else caminho_inventario())
         self.ativos_por_id: Dict[int, Ativo] = {}
         self.ativos_por_hostname: Dict[str, Ativo] = {}
         self._gravacao_bloqueada = False
@@ -116,16 +122,16 @@ class BancoDeDados:
         return self._assinatura.hex() if self._assinatura is not None else None
 
     @classmethod
-    def consultar_ativos(cls, caminho: str | Path = CAMINHO_ARQUIVO_PADRAO) -> list[Ativo]:
+    def consultar_ativos(cls, caminho: str | Path | None = None) -> list[Ativo]:
         """Lê um retrato do inventário sem criar backup, trava ou temporários."""
         return cls.consultar_retrato(caminho)[0]
 
     @classmethod
-    def consultar_retrato(cls, caminho: str | Path = CAMINHO_ARQUIVO_PADRAO) -> tuple[list[Ativo], str]:
+    def consultar_retrato(cls, caminho: str | Path | None = None) -> tuple[list[Ativo], str]:
         """Ativos e revisão dos mesmos bytes, sem efeitos de escrita."""
         from migracao import verificar_pendente
         try:
-            caminho = Path(caminho).resolve()
+            caminho = Path(caminho).resolve() if caminho is not None else caminho_inventario()
             if verificar_pendente(caminho):
                 raise InventarioIndisponivel("migração pendente")
             original = caminho.read_bytes()
@@ -249,6 +255,31 @@ class BancoDeDados:
         except OSError as erro:
             print(f"[Aviso] Não foi possível remover o temporário '{caminho}': {erro}")
 
+    def _conferir_revisao_disco(self):
+        try:
+            atual = sha256(Path(self.caminho).read_bytes()).digest()
+        except FileNotFoundError:
+            atual = None
+        if atual != self._assinatura:
+            raise RuntimeError("a base mudou em outra instância; reabra o inventário antes de gravar")
+
+    def _substituir_arquivo(self, temporario):
+        # Leitores externos podem bloquear brevemente o rename no Windows.
+        atrasos = (0.01, 0.03, 0.08, 0.2, 0.5)
+        for tentativa in range(len(atrasos) + 1):
+            try:
+                os.replace(temporario, self.caminho)
+                return
+            except PermissionError as erro:
+                if (not _WINDOWS or getattr(erro, "winerror", None) not in (5, 32, 33)
+                        or tentativa == len(atrasos)):
+                    raise
+                logging.getLogger(__name__).warning(
+                    "Windows bloqueou a substituição (erro %s); nova tentativa %s/6.",
+                    erro.winerror, tentativa + 2)
+                time.sleep(atrasos[tentativa])
+                self._conferir_revisao_disco()
+
     def salvar(self) -> None:
         temporario = None
         confirmado = False
@@ -256,12 +287,7 @@ class BancoDeDados:
             if self.gravacao_bloqueada:
                 raise RuntimeError("gravação bloqueada: a base não pôde ser lida ou protegida")
             with bloquear_escrita(self.caminho):
-                try:
-                    atual = sha256(Path(self.caminho).read_bytes()).digest()
-                except FileNotFoundError:
-                    atual = None
-                if atual != self._assinatura:
-                    raise RuntimeError("a base mudou em outra instância; reabra o inventário antes de gravar")
+                self._conferir_revisao_disco()
                 self._validar_ids_estaveis(self._estado_salvo)
                 ativos = list(self.ativos_por_id.values())
                 self._validar_unicidade(ativos)
@@ -280,7 +306,7 @@ class BancoDeDados:
                     json.dump(dados, arquivo, ensure_ascii=False, indent=2, allow_nan=False)
                     arquivo.flush()
                     os.fsync(arquivo.fileno())
-                os.replace(temporario, self.caminho)
+                self._substituir_arquivo(temporario)
                 confirmado = True
                 self._assinatura = assinatura_nova
                 self._estado_salvo = estado

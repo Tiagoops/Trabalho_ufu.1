@@ -1,0 +1,11 @@
+{
+  "gravacoes": 2000,
+  "tentativas_replace": 2006,
+  "bloqueios_recuperados": 6,
+  "falhas_finais": 0,
+  "duracao_s": 50.34399999998277,
+  "area": "C:\\Users\\Nitro\\AppData\\Local\\Temp",
+  "dados_ficticios": true,
+  "releitura_validada": true,
+  "temporarios_restantes": 0
+}

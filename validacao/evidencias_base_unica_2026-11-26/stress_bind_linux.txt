@@ -1,0 +1,1 @@
+{"gravacoes": 500, "falhas_finais": 0, "bind_windows": true, "dados_ficticios": true}

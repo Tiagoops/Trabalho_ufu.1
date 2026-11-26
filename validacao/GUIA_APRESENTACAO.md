@@ -1,11 +1,16 @@
 GUIA DE APRESENTAÇÃO — REVISÃO 26/11/2026
-Código: 2e1195e. Slides: apresentacao/Inventario_UFU.pptx.
+Código atual: correção de base única sobre ee855b7 (26/11/2026). Slides históricos: apresentacao/Inventario_UFU.pptx.
 Materiais locais no workspace: outputs/revisao_final_2026-11-26/.
 O PowerPoint e o replay foram entregues localmente; não fazem parte do código-fonte versionado.
 Este material prepara o aluno; não comprova ensaio oral nem revisão por pares.
 O tutor pede programa em execução. Slides são apoio; use dados fictícios.
 
 PREPARAÇÃO
+Interface para apresentação: http://127.0.0.1:8000 (somente neste computador).
+CLI e web compartilham dados/inventario.json. Os sete registros existentes
+foram preservados; para cadastrar/remover durante ensaio, use uma cópia fictícia.
+Validação atual: 250 testes em Windows, Linux e Compose, um caso ignorado por
+plataforma em cada execução. Detalhes: validacao/VALIDACAO_BASE_UNICA.md.
 Set-Location -LiteralPath 'C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT'
 docker run --rm -it trabalho-ufu:local python -B main.py --demo
 Deixe modelos.py, banco_dados.py, matematica/risco.py e docker/Dockerfile abertos.
@@ -39,7 +44,10 @@ IDs, ocorrências e vínculos. to_dict/from_dict fazem a tradução e reconstru�
 4. Por que temporário e os.replace?
 Para preparar o documento completo antes de substituir a base. flush/fsync
 precedem a troca. Falha não é sucesso; existe rollback. Queda de energia não foi certificada.
-5. O que causa o WinError 5?
+5. Como o WinError 5 é tratado e o que continua em aberto?
+Bloqueios transitórios têm até seis tentativas registradas, com nova checagem
+da revisão antes de repetir. O ensaio de 4.000 gravações recuperou 18 bloqueios;
+permissão permanente continua sendo erro. O JSON anterior e o rollback são preservados.
 A recusa de acesso na substituição foi reproduzida fora da aplicação. Um handle
 do destino sem FILE_SHARE_DELETE reproduz exatamente o erro. O responsável
 pelas recusas espontâneas ainda depende de captura de I/O; não culpar um processo sem evidência.

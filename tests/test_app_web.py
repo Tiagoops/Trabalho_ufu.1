@@ -170,9 +170,9 @@ class TestAppWeb(unittest.TestCase):
         self.caminho.write_text("[]", encoding="utf-8")
         self.assertIn("Nenhum ativo cadastrado", self.consultar()[1])
 
-    def test_padrao_ficticio_e_caminho_configuravel_no_servidor(self):
+    def test_exemplo_explicito_e_caminho_configuravel_no_servidor(self):
         with patch.dict("os.environ", {}, clear=True):
-            resposta = create_app().test_client().get("/")
+            resposta = create_app(self.exemplo).test_client().get("/")
         self.assertEqual(resposta.status_code, 200)
         self.assertIn("Demonstração com dados fictícios", resposta.get_data(as_text=True))
         self.caminho.write_text("[]", encoding="utf-8")

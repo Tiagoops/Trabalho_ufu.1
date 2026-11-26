@@ -9,18 +9,18 @@ from banco_dados import BancoDeDados, InventarioIndisponivel
 from servico_risco import analisar_ativos
 from modelos import Ativo
 from tipos import TipoAtivo
+from configuracao import caminho_inventario
 
 
 EXEMPLO = Path(__file__).resolve().parent / "exemplos/inventario_web.json"
 
 
 def create_app(caminho=None, *, permitir_cadastro=None):
-    """Usa o exemplo fictício por padrão; o caminho é definido no servidor."""
+    """Usa a base compartilhada; somente o servidor configura seu caminho."""
     app = Flask(__name__)
     app.secret_key = secrets.token_hex(32)
     app.config.update(
-        INVENTARIO_ARQUIVO=str(caminho) if caminho is not None else os.environ.get(
-            "INVENTARIO_ARQUIVO", str(EXEMPLO)),
+        INVENTARIO_ARQUIVO=str(caminho) if caminho is not None else str(caminho_inventario()),
         MAX_CONTENT_LENGTH=2 * 1024 * 1024,
         SESSION_COOKIE_SAMESITE="Strict",
         SESSION_COOKIE_HTTPONLY=True,

@@ -9,3 +9,5 @@ __pycache__/
 /ativos_db.txt.migracao.json
 /ativos_db.txt.lock
 /dados_web/
+
+/dados/

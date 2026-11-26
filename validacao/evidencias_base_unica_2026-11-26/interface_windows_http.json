@@ -1,0 +1,12 @@
+{
+  "loopback": true,
+  "dados_ficticios": true,
+  "etapas": [
+    "cadastro de dois ativos pelo formulário",
+    "CVSS 9.8 e 7.5; dependência 0.25; risco efetivo 11.675",
+    "edição web refletida no terminal, mesma base Windows",
+    "remoção confirmada, limpeza de vínculos e download CSV",
+    "Sair e Entrar novamente preservam cadastros"
+  ],
+  "sucesso": true
+}

@@ -6,6 +6,7 @@ from threading import Thread
 import webbrowser
 
 from app_web import EXEMPLO, create_app
+from configuracao import caminho_inventario
 
 
 def preparar_base(caminho):
@@ -13,7 +14,7 @@ def preparar_base(caminho):
     caminho = Path(caminho).resolve()
     if caminho == EXEMPLO:
         raise ValueError("o exemplo versionado não pode ser a base de gravação")
-    original = EXEMPLO.read_bytes()
+    original = b'[]\n'
     caminho.parent.mkdir(parents=True, exist_ok=True)
     try:
         with caminho.open("xb") as arquivo:
@@ -69,10 +70,9 @@ def main(*, abrir_navegador=False):
         print("Não foi possível iniciar a prévia: a porta 8000 está ocupada ou indisponível.")
         print("Encerre o outro serviço ou escolha continuar no terminal.")
         return
-    padrao = Path(__file__).resolve().parent / "dados_web/inventario.json"
+    padrao = caminho_inventario()
     if "INVENTARIO_ARQUIVO" not in os.environ:
         os.environ["INVENTARIO_ARQUIVO"] = str(padrao)
-        os.environ["INVENTARIO_DEMONSTRACAO"] = "1"
     os.environ["INVENTARIO_CADASTRO"] = "1"
     servidor = None
     try:

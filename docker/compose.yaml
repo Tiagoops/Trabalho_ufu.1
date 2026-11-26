@@ -8,10 +8,15 @@ services:
     tty: true
     environment:
       INVENTARIO_HOST: 0.0.0.0
+      INVENTARIO_ARQUIVO: /dados/inventario.json
+    user: "65534:65534"
     volumes:
       - type: bind
         source: ..
         target: /app
+      - type: bind
+        source: ../dados
+        target: /dados
   frontend:
     build:
       context: ..
@@ -27,6 +32,6 @@ services:
     user: "65534:65534"
     read_only: true
     volumes:
-      - frontend_dados:/dados
-volumes:
-  frontend_dados:
+      - type: bind
+        source: ../dados
+        target: /dados

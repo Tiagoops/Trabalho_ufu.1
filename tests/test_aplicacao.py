@@ -341,6 +341,7 @@ class TestExecucaoIsolada(unittest.TestCase):
 
         arquivos = (
             "main.py",
+            "configuracao.py",
             "banco_dados.py",
             "modelos.py",
             "tipos.py",
@@ -373,6 +374,8 @@ class TestExecucaoIsolada(unittest.TestCase):
             PYTHONIOENCODING="utf-8",
             PYTHONDONTWRITEBYTECODE="1",
         )
+        # O subprocesso isolado não herda a base operacional do Compose.
+        self.env.pop("INVENTARIO_ARQUIVO", None)
 
 
     def executar(self, argumentos, entrada=""):
@@ -418,7 +421,7 @@ class TestExecucaoIsolada(unittest.TestCase):
         resultado = self.executar([str(self.projeto / "main.py"), "--terminal"],
                                  "1\n1\nHost\nJoão\nTI\n2\nn\n0\n")
         self.assertIn("cadastrado com sucesso", resultado.stdout)
-        self.assertTrue((self.projeto / "ativos_db.txt").exists())
+        self.assertTrue((self.projeto / "dados/inventario.json").exists())
         self.assertEqual(legada.read_text(encoding="utf-8"), "base legada não mover")
         consulta = self.executar([str(self.projeto / "main.py"), "--terminal"], "2\n1\n1\n0\n")
         self.assertIn("Host", consulta.stdout)
@@ -443,13 +446,13 @@ class TestExecucaoIsolada(unittest.TestCase):
 
     def test_inicializacao_com_base_inacessivel_nao_encerra_com_traceback(self):
         # Diretório no lugar do arquivo é uma falha de acesso real e portátil.
-        (self.projeto / "ativos_db.txt").mkdir()
+        (self.projeto / "dados/inventario.json").mkdir(parents=True)
         resultado = self.executar([str(self.projeto / "main.py"), "--terminal"],
                                  "1\n1\nHost\nJoão\nTI\n2\nn\n0\n")
         self.assertIn("Gravações bloqueadas", resultado.stdout)
         self.assertIn("[Erro]", resultado.stdout)
         self.assertNotIn("cadastrado com sucesso", resultado.stdout)
-        self.assertTrue((self.projeto / "ativos_db.txt").is_dir())
+        self.assertTrue((self.projeto / "dados/inventario.json").is_dir())
 
 
 if __name__ == "__main__":

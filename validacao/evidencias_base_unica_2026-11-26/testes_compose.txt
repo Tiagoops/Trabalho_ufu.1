@@ -1,0 +1,6 @@
+ Container docker-inventario-run-1483ad51b27d Creating
+ Container docker-inventario-run-1483ad51b27d Created
+----------------------------------------------------------------------
+Ran 250 tests in 19.242s
+
+OK (skipped=1)

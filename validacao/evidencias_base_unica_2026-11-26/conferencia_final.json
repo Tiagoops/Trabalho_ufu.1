@@ -1,0 +1,30 @@
+{
+  "ids_preservados": [
+    10,
+    20,
+    30,
+    40,
+    70,
+    88,
+    9001
+  ],
+  "sha256": "8fb968248a95733c06dfe5c938901cac25790ec5454f51ff7c9830a33b736763",
+  "identico_ao_backup": true,
+  "risco_70": {
+    "proprio": 0.0,
+    "efetivo": 7.3500000000000005
+  },
+  "rotas_http": {
+    "/": 200,
+    "/ativos": 200,
+    "/ativos/70": 200,
+    "/ativos/88": 200,
+    "/riscos?ativo_id=70": 200,
+    "/ativos/novo": 200,
+    "/vulnerabilidades": 200,
+    "/dependencias": 200,
+    "/importar": 200
+  },
+  "consultas_sem_alterar_diretorio_ou_json": true,
+  "publicacao": "127.0.0.1:8000"
+}

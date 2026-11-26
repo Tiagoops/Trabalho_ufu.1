@@ -54,7 +54,7 @@ incluindo vulnerabilidades, dependências, riscos, importação, CSV e saída da
 
 O modo `--demo` usa uma base temporária e descarta suas alterações ao sair. Ativos, dependências e medições são fictícios; os três CVEs e seus vetores têm fontes públicas verificadas. Não instala versões vulneráveis nem realiza varredura ou exploração.
 
-A base padrão é `ativos_db.txt`, ao lado de `banco_dados.py`, independentemente do diretório usado para executar o programa. Importar módulos ou abrir e sair do menu não cria a base. A API `BancoDeDados(caminho)` aceita outro arquivo. O CSV usa o diretório de execução ou o caminho escolhido.
+A base padrão é `dados/inventario.json`, na raiz do projeto, compartilhada pelo terminal e pelo navegador e independente do diretório de execução. `INVENTARIO_ARQUIVO` permite escolher explicitamente outro caminho no servidor. Importar módulos ou consultar não cria a base. O iniciador web cria uma lista vazia somente se o arquivo não existir. O CSV usa o diretório de execução ou o download no navegador.
 
 ### Docker
 
@@ -65,7 +65,7 @@ docker build -f docker/Dockerfile -t trabalho-ufu:demo-check .
 docker run --rm -it trabalho-ufu:demo-check python main.py --demo
 ```
 
-O menu aparece no terminal; `0` encerra. A imagem instala as dependências fixadas, inclui `catalogo_cvss.py`, `matematica/` e `exemplos/`, e não inclui a base real. A base de `--demo` é temporária. Sem `--demo`, a base padrão fica em `/app/ativos_db.txt`; sem volume, os dados do contêiner são perdidos quando ele é removido por `--rm`.
+O menu aparece no terminal; `0` encerra. A imagem instala as dependências fixadas, inclui `catalogo_cvss.py`, `matematica/` e `exemplos/`, e não inclui a base real. A base de `--demo` é temporária. Sem `--demo`, a base padrão fica em `/app/dados/inventario.json`; sem volume, os dados do contêiner são perdidos quando ele é removido por `--rm`.
 
 Valide o Compose separadamente, também com dados fictícios:
 
@@ -81,7 +81,7 @@ Para usar a base persistente pelo Compose:
 docker compose -f docker/compose.yaml run --build --rm inventario
 ```
 
-Nesse modo, `/app/ativos_db.txt`, seus backups e os CSV exportados para `/app` ficam na pasta do projeto no computador. Use **um escritor por base**, incluindo execuções locais e contêineres. Não foram alterados os volumes nem o modo de operação do Compose.
+No Compose, os dois serviços montam `dados/` em `/dados` e usam `/dados/inventario.json`. Com o frontend Docker ativo, o seletor local e `main.py --terminal` abrem a CLI no mesmo contêiner. Isso mantém os escritores no mesmo sistema operacional. Sem frontend Docker ativo, o Python nativo usa o mesmo arquivo no computador. Não force escritores nativos Windows e Linux simultaneamente com configurações manuais.
 
 Repositório: https://github.com/Tiagoops/Trabalho_ufu.1. Clonar a branch `main` obtém a versão publicada; alterações locais posteriores só estarão disponíveis após publicação autorizada. Estes comandos são instruções de execução, não evidência de build, implantação ou funcionamento por 24 horas.
 
@@ -331,12 +331,17 @@ No PowerShell:
 .\.venv\Scripts\python.exe -B -m unittest discover -v
 ```
 
-Linux ou contêiner com os testes montados pelo Compose (a imagem independente não inclui a suíte):
+No Compose, substitua a montagem operacional por uma pasta fictícia exclusiva e
+monte o código somente para leitura (a imagem independente não inclui a suíte):
 
-```bash
-python -B -m unittest discover -v
-docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -v
+```powershell
+$ensaioUfu = Join-Path $env:TEMP ("ufu_validacao_" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $ensaioUfu | Out-Null
+docker compose -f docker/compose.yaml run --rm -T --volume "${PWD}:/app:ro" --volume "${ensaioUfu}:/dados" inventario python -B -m unittest discover -q
 ```
+
+A pasta exclusiva recebe somente dados fictícios; não use a base da apresentação
+para executar a suíte. Em Linux nativo, use `python -B -m unittest discover -v`.
 
 A suíte usa arquivos temporários e dados fictícios. Os 65 testes anteriores foram mantidos e adaptados às mudanças intencionais: severidade numérica, retirada de status, coluna CSV e Python mínimo. Os testes adicionais cobrem validação matemática, ciclos, mapeamento de IDs, CRUD de dependências, rollback, confirmação, backups e retomada da migração. [VALIDACAO_RISCO.md](validacao/VALIDACAO_RISCO.md) preserva os resultados de 16/11. [VALIDACAO_AUTOMATIZACAO.md](validacao/VALIDACAO_AUTOMATIZACAO.md) também contém registros históricos e exemplos CVE; esses documentos não substituem uma nova execução da suíte nem validam a imagem atual.
 
@@ -367,8 +372,10 @@ não acompanham a substituição. Se a gravação falhar, o objeto anterior é r
 A implantação no servidor e a comprovação de 24 horas estão adiadas por decisão
 do autor até a conclusão e revisão do frontend. Isso não equivale ao atendimento
 do requisito de hospedagem do enunciado. Há demonstração pela CLI e gestão web com dados fictícios.
-As falhas intermitentes Windows em `os.replace` seguem sem causa identificada;
-não há retry automático nem garantia de que uma execução local vá completá-las.
+Bloqueios transitórios Windows em `os.replace` agora têm retentativas limitadas
+e registradas, preservando rollback e detecção de conflito. O processo externo
+responsável pelas recusas espontâneas continua sem identificação. Veja os ensaios
+e limites em [VALIDACAO_BASE_UNICA.md](validacao/VALIDACAO_BASE_UNICA.md).
 
 
 Para instalar, manter o catálogo e recuperar o inventário, consulte o
@@ -420,10 +427,10 @@ HTML renderizado pelo Flask e servido pelo Waitress. O cadastro usa a mesma
 persistência JSON da CLI, com abertura estrita `BancoDeDados(caminho, recuperar=False)`.
 Essa combinação mantém o
 Python e funciona em Windows e Linux sem um projeto JavaScript separado.
-A demonstração é iniciada a partir de [inventario_web.json](exemplos/inventario_web.json),
-um retrato do cenário fictício de `ativos_teste.json`, cuja equivalência é testada.
-O iniciador copia o exemplo apenas quando a base demonstrativa ainda não existe.
-O arquivo versionado e a base da CLI não são alterados. Não há NVD automático.
+A interface e a CLI usam `dados/inventario.json`. Uma instalação nova começa com
+lista vazia; uma base existente é preservada. Os exemplos fictícios versionados
+continuam disponíveis para `--demo`, importação explícita e testes, sem substituir
+os cadastros. Não há NVD automático.
 
 ```powershell
 docker compose -f docker/compose.yaml up -d --build frontend
@@ -431,9 +438,9 @@ docker compose -f docker/compose.yaml up -d --build frontend
 
 Abra <http://127.0.0.1:8000>. O serviço `frontend` usa a imagem construída,
 sem montar o código do computador, com usuário sem privilégios e filesystem
-somente leitura, exceto o volume `frontend_dados` em `/dados`. Esse volume guarda
-os novos cadastros e é preservado ao recriar o contêiner. O serviço `inventario`
-mantém a CLI e sua base habituais.
+somente leitura, exceto a montagem de `dados/` em `/dados`. Os cadastros ficam
+no computador e são preservados ao recriar o contêiner. O serviço `inventario`
+usa exatamente a mesma montagem e o mesmo arquivo.
 Para encerrar apenas a consulta:
 
 ```powershell
@@ -534,10 +541,23 @@ ou pare apenas esse serviço antes de iniciar o seletor com a porta publicada.
 Para a CLI sem publicar portas, use o comando habitual e escolha 2, ou acrescente
 `python main.py --terminal` ao `docker compose run`.
 
-A prévia criada pelo seletor usa `dados_web/inventario.json` por padrão, separada
-da base real da CLI. No Compose, essa pasta fica na montagem do projeto.
-O serviço dedicado `frontend` conserva sua base no volume `frontend_dados`.
-Não há cópia nem sincronização automática entre essas bases. Os caminhos já
-configurados por `INVENTARIO_ARQUIVO` continuam sendo respeitados.
+O seletor, a CLI e o frontend usam `dados/inventario.json` no computador;
+no Compose, esse mesmo diretório aparece em `/dados`. A CLI local reutiliza o
+contêiner quando o frontend está ativo. `INVENTARIO_ARQUIVO` é uma escolha
+explícita de outra base, não uma sincronização. Bases legadas não são apagadas
+nem mescladas automaticamente: preserve backup e revise sua importação antes
+de adotar a nova configuração. O antigo volume `docker_frontend_dados` permanece
+preservado como cópia anterior quando já existente.
 
 Validação da escolha inicial: [VALIDACAO_INICIO.md](validacao/VALIDACAO_INICIO.md).
+
+### Correção local de gravação e base compartilhada — 26/11/2026
+
+A gravação recupera bloqueios temporários de substituição no Windows (códigos
+5, 32 e 33), com até seis tentativas e esperas de 10/30/80/200/500 ms. As
+ocorrências são registradas; a versão do JSON é conferida novamente antes
+de repetir. Permissão permanentemente negada continua sendo erro, com rollback.
+Não há remoção prévia da base nem desativação de proteção do sistema.
+
+A apresentação permanece local: porta publicada apenas em 127.0.0.1. Não é
+necessário disponibilizar a aplicação na rede para usar a interface.

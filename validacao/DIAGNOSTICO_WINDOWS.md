@@ -1,6 +1,18 @@
 # Diagnóstico da substituição de arquivos no Windows — 26/11/2026
 
-## Conclusão comprovada
+## Correção aplicada após este diagnóstico
+
+A aplicação agora repete somente bloqueios transitórios Windows 5/32/33, com
+até seis tentativas registradas e 820 ms de espera programada acumulada. Mantém
+o mesmo temporário, verifica novamente a revisão da base e preserva o rollback.
+Em 4.000 gravações fictícias, 18 bloqueios foram recuperados, sem falhas finais.
+O controle nativo com handle real também passou. Permissão permanentemente
+negada continua sendo erro; não houve alteração de ACL ou de antivírus.
+
+Consulte [VALIDACAO_BASE_UNICA.md](VALIDACAO_BASE_UNICA.md) para resultados atuais.
+As seções abaixo preservam o diagnóstico anterior à correção e seus limites.
+
+## Conclusão comprovada no diagnóstico anterior
 
 O WinError 5 foi reproduzido em um programa mínimo, sem Flask, NumPy ou classes
 do inventário. A sequência é criar temporário exclusivo, escrever JSON fictício,
@@ -11,7 +23,7 @@ substituições com NTSTATUS `0xC0000022` (`STATUS_ACCESS_DENIED`).
 |---|---:|---:|
 | TEMP padrão, Python 3.11.15 | 1200 | 3 |
 | Workspace OneDrive, mesmo Python | 1200 | 54 |
-| Suíte atual, TEMP padrão | 238 testes / 256 substituições | 0 erros e 0 falhas |
+| Suíte anterior, TEMP padrão | 238 testes / 256 substituições | 0 erros e 0 falhas |
 
 A suíte passou com 237 aprovações e 1
 teste de symlink ignorado. Isso não apaga as recusas do experimento mínimo e
@@ -41,7 +53,7 @@ desativação de proteção, alteração de ACL nem inclusão de exceção no an
 Uma captura de I/O/Process Monitor, com privilégio adequado e filtro restrito à
 pasta fictícia exclusiva, é o próximo passo para correlacionar abertura e rename.
 
-## Decisão sobre o código
+## Decisão anterior sobre o código (superada pela correção acima)
 
 O método salvar não foi alterado. Não foi adicionado retry silencioso, remoção
 prévia do JSON nem escrita direta sobre a base. Os testes de rollback e os

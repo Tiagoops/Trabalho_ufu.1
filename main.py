@@ -12,8 +12,11 @@ import csv
 from pathlib import Path
 import tempfile
 import os
+import subprocess
+import sys
 from typing import List, Optional, Tuple
 
+from configuracao import caminho_inventario
 from tipos import TipoAtivo
 from modelos import Ativo, Vulnerabilidade, validar_numero
 from banco_dados import BancoDeDados
@@ -802,7 +805,10 @@ def executar_menu(db: BancoDeDados) -> None:
 
 def main(*, demonstracao: bool = False) -> None:
     if not demonstracao:
-        executar_menu(BancoDeDados())
+        caminho = caminho_inventario()
+        caminho.parent.mkdir(parents=True, exist_ok=True)
+        print(f"Base em uso: {caminho}")
+        executar_menu(BancoDeDados(caminho))
         return
     with tempfile.TemporaryDirectory(prefix="ufu_demo_") as pasta:
         db = BancoDeDados(Path(pasta) / "ativos_demo.json")
@@ -811,6 +817,46 @@ def main(*, demonstracao: bool = False) -> None:
         print("DEMONSTRAÇÃO TEMPORÁRIA: ativos e falhas fictícios; referências CVE reais.")
         print("As alterações nesta demonstração são descartadas ao sair; a base real não é usada.")
         executar_menu(db)
+
+
+_EM_DOCKER = Path("/.dockerenv").exists()
+
+
+def _terminal_mesmo_backend() -> bool:
+    """Com o frontend Docker ativo, mantém os escritores no mesmo SO."""
+    compose = Path(__file__).resolve().parent / "docker/compose.yaml"
+    if _EM_DOCKER or os.environ.get("INVENTARIO_ARQUIVO") or not compose.is_file():
+        return False
+    try:
+        estado = subprocess.run(["docker", "compose", "-f", str(compose), "ps", "-q", "frontend"],
+                                capture_output=True, text=True, timeout=5)
+    except FileNotFoundError:
+        return False
+    except subprocess.TimeoutExpired as erro:
+        raise RuntimeError("Não foi possível verificar o Docker; nenhuma base local foi aberta.") from erro
+    if estado.returncode:
+        raise RuntimeError("Não foi possível verificar o Docker. Para uso nativo, configure INVENTARIO_ARQUIVO explicitamente.")
+    containers = estado.stdout.split()
+    if not containers:
+        return False
+    if len(containers) != 1:
+        raise RuntimeError("Há mais de um frontend Docker; selecione o ambiente antes de abrir o terminal.")
+    print("Terminal conectado à mesma base da interface Docker.", flush=True)
+    modo = "-it" if sys.stdin.isatty() and sys.stdout.isatty() else "-i"
+    resultado = subprocess.run(["docker", "exec", modo, containers[0], "python", "-B", "main.py", "--terminal"])
+    if resultado.returncode:
+        raise RuntimeError("O terminal Docker não concluiu; nenhuma base local alternativa foi aberta.")
+    return True
+
+
+def _iniciar_terminal() -> int:
+    try:
+        if not _terminal_mesmo_backend():
+            main()
+        return 0
+    except (OSError, RuntimeError) as erro:
+        print(f"[Erro] {erro}")
+        return 1
 
 
 def escolher_interface() -> None:
@@ -829,7 +875,7 @@ def escolher_interface() -> None:
             abrir_previa(abrir_navegador=True)
             return
         if escolha == "2":
-            main()
+            _iniciar_terminal()
             return
         print("Opção inválida. Escolha 1 ou 2.")
 
@@ -839,7 +885,9 @@ if __name__ == "__main__":
     parser.add_argument("--demo", action="store_true", help="Abre ativos fictícios em base temporária.")
     parser.add_argument("--terminal", action="store_true", help="Abre diretamente o menu do terminal.")
     argumentos = parser.parse_args()
-    if argumentos.terminal or argumentos.demo:
-        main(demonstracao=argumentos.demo)
+    if argumentos.demo:
+        main(demonstracao=True)
+    elif argumentos.terminal:
+        raise SystemExit(_iniciar_terminal())
     else:
         escolher_interface()

@@ -11,3 +11,5 @@ tests/
 validacao/
 RESULTADO_TESTES*.txt
 dados_web/
+
+dados/

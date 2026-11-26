@@ -9,6 +9,10 @@ import iniciar_web
 
 
 class TestEscolhaInterface(unittest.TestCase):
+    def setUp(self):
+        self.ponte=patch("main._terminal_mesmo_backend",return_value=False)
+        self.ponte.start();self.addCleanup(self.ponte.stop)
+
     def test_terminal_e_escolhido_antes_de_abrir_a_base(self):
         with patch('builtins.input', side_effect=['2']), patch('main.main') as terminal, \
              patch('banco_dados.BancoDeDados.__init__', side_effect=AssertionError('abriu base antes da escolha')), \

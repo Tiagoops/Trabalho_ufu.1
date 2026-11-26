@@ -1,3 +1,7 @@
+> Registro histórico: a configuração de bases deste documento foi substituída
+> em 26/11/2026. CLI e web agora compartilham `dados/inventario.json`.
+> Resultados atuais: [VALIDACAO_BASE_UNICA.md](VALIDACAO_BASE_UNICA.md).
+
 # Validação da escolha inicial de interface - 25/11/2026
 
 Base deste incremento: ea1603f062239846601e96fcccb1fae3ffaaf6ef.

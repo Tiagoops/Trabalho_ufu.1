@@ -1,3 +1,7 @@
+> Registro histórico: a configuração de bases deste documento foi substituída
+> em 26/11/2026. CLI e web agora compartilham `dados/inventario.json`.
+> Resultados atuais: [VALIDACAO_BASE_UNICA.md](VALIDACAO_BASE_UNICA.md).
+
 # Validação do cadastro web - 25/11/2026
 
 ## Entrega

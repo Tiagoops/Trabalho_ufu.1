@@ -16,8 +16,9 @@ a opção 0 para sair. Para operar o inventário, execute da raiz do repositóri
 docker compose -f docker/compose.yaml run --build --rm inventario
 ```
 
-O Compose monta essa pasta em `/app`. Os dados ficam em `ativos_db.txt` na
-pasta do computador, junto aos backups e ao eventual manifesto de migração.
+O Compose monta o código em `/app` no serviço de terminal e monta `dados/`
+em `/dados` nos dois serviços. Ambos usam `dados/inventario.json` do computador,
+junto aos backups e ao eventual manifesto de migração.
 Restrinja o acesso a essa pasta e use um escritor por base. Feche a aplicação
 antes de alternar entre Windows e Docker sobre a mesma pasta.
 
@@ -51,16 +52,16 @@ já publicada pelo serviço frontend. Para manter o serviço frontend aberto,
 use o seletor Python local, que o reconhece e reaproveita. Para operar apenas
 pela CLI, o comando habitual sem `-p` continua válido: escolha 2.
 
-A prévia nova usa `dados_web/inventario.json` com dados fictícios, sem tocar
-em `ativos_db.txt`. No Compose, essa pasta persiste na montagem do projeto.
-O frontend dedicado conserva o volume separado `frontend_dados`. Reutilizar
-um servidor já aberto conserva a base que aquele servidor já utiliza.
+A CLI e a interface usam `dados/inventario.json`. Com o frontend Docker ativo,
+a opção 2 e `main.py --terminal` executam a CLI nesse mesmo contêiner; não
+criam outra base no Windows. Sem o frontend Docker ativo, os dois iniciadores
+nativos usam o mesmo arquivo do computador. O caminho aparece no terminal.
 
 ## Backup e restauração
 
 1. Encerre a CLI, os contêineres do projeto e qualquer migração. Copie
-   `ativos_db.txt`, os arquivos `ativos_db.txt.*.bak` e o eventual
-   `ativos_db.txt.migracao.json` para uma pasta fora do repositório, com data e
+   `dados/inventario.json`, os arquivos `dados/inventario.json.*.bak` e o eventual
+   `dados/inventario.json.migracao.json` para uma pasta fora do repositório, com data e
    acesso restrito. Inclua o commit da versão que gravou os dados.
 2. Antes de substituir uma base ativa, guarde uma cópia dela. Para verificar a
    restauração, use uma segunda cópia do repositório na versão identificada e
@@ -131,11 +132,10 @@ Nesse caso, confirme o ativo ao concluir as ocorrências. Sem essa opção, ele
 começa sem vulnerabilidades. Dependências são cadastradas depois, na tela
 própria. Cancelar volta ao inventário sem alterar a base.
 
-O volume `frontend_dados` guarda `/dados/inventario.json` e a trava de escrita.
-A primeira inicialização copia o exemplo fictício versionado; reinícios e
-recriações do contêiner preservam a base existente, inclusive se estiver
-inválida. O exemplo versionado e `ativos_db.txt` da CLI não são sobrescritos.
-Remover o volume elimina os cadastros da demonstração. Para parar sem removê-lo:
+A montagem de `dados/` guarda `/dados/inventario.json` e a trava de escrita.
+Uma base nova é inicializada com `[]`; reinícios e recriações preservam o
+arquivo existente, inclusive se estiver inválido. Os dois serviços usam a
+mesma base. Não remova `dados/`: ela contém os cadastros. Para parar o servidor:
 
 ```powershell
 docker compose -f docker/compose.yaml stop frontend
@@ -149,13 +149,14 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -B iniciar_web.py
 ```
 
-Sem variáveis, cria uma base demonstrativa em `dados_web/inventario.json` apenas
-na primeira inicialização. Essa pasta fica fora do Git e do contexto Docker.
+Sem variáveis, usa `dados/inventario.json`, a mesma base da CLI e do Compose.
+Se não existir, o iniciador web cria uma lista vazia. A pasta fica fora do Git
+e do contexto de construção Docker; os dados não entram na imagem.
 O servidor local continua usando Waitress, na porta 8000 em loopback. Encerre
 com Ctrl+C. Não execute junto com outro servidor na mesma porta.
 
 `INVENTARIO_ARQUIVO` define o caminho no servidor. `iniciar_web.py` habilita o
-cadastro nesse caminho e inicializa um arquivo ausente com dados fictícios;
+cadastro nesse caminho e inicializa um arquivo ausente com uma lista vazia;
 nunca sobrescreve um arquivo existente. Para apenas consultar, sem inicializar
 nem habilitar o cadastro, mantenha o comando anterior:
 
@@ -180,8 +181,13 @@ Verificações com arquivos temporários fictícios:
 ```powershell
 .\.venv\Scripts\python.exe -B -m unittest tests.test_cadastro_web tests.test_app_web -v
 .\.venv\Scripts\python.exe -B -m unittest discover -q
-docker compose -f docker/compose.yaml run --rm -T inventario python -B -m unittest discover -q
+$ensaioUfu = Join-Path $env:TEMP ("ufu_validacao_" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $ensaioUfu | Out-Null
+docker compose -f docker/compose.yaml run --rm -T --volume "${PWD}:/app:ro" --volume "${ensaioUfu}:/dados" inventario python -B -m unittest discover -q
 ```
+
+O ensaio Compose substitui `/dados` por uma pasta fictícia exclusiva e monta
+`/app` somente para leitura. Nunca execute testes com a base da apresentação.
 
 A navegação reúne **Ativos**, **Vulnerabilidades**, **Dependências**, **Riscos**,
 **Importar JSON**, **Exportar CSV** e **Sair**. Os detalhes do ativo trazem suas
@@ -205,8 +211,19 @@ local. Campos com fórmulas ou controles de linha são recusados antes do downlo
 **Entrar novamente**. O servidor permanece disponível. Para encerrá-lo, use
 Ctrl+C no terminal ou `docker compose -f docker/compose.yaml stop frontend`.
 
-As bases da CLI, do iniciador local e do serviço frontend são separadas por
-padrão. A interface opera exclusivamente em `INVENTARIO_ARQUIVO`; não migra nem
-mescla bases automaticamente. Para compartilhar uma base, o operador precisa
-configurar explicitamente o mesmo caminho/volume e respeitar os bloqueios da
-persistência. Use dados fictícios nesta demonstração.
+As interfaces compartilham `dados/inventario.json`. `INVENTARIO_ARQUIVO`
+continua permitindo uma escolha explícita de caminho. Não use essa variável
+para executar escritores Windows e Linux simultaneamente na mesma base. O
+seletor padrão encaminha o terminal ao contêiner ativo para evitar essa mistura.
+Bases legadas e o volume antigo permanecem preservados; não há mesclagem
+automática. Use `--demo` para um cenário fictício temporário separado.
+
+## Gravação no Windows
+
+Bloqueios temporários na substituição do JSON recebem até seis tentativas,
+com espera total máxima programada de 820 ms. Cada bloqueio recuperável gera
+aviso no log. Antes de tentar novamente, a assinatura da base é conferida;
+uma alteração externa exige reabrir o inventário. Se a permissão continuar
+negada, a operação termina com erro e rollback. O arquivo anterior não é
+removido previamente. Isso trata bloqueios transitórios; não concede permissões
+a quem não as possui e não identifica o processo externo responsável.
