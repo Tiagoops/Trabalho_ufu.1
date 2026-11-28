@@ -1,4 +1,4 @@
-# Matriz de evidências — revisão de 26/11/2026
+# Matriz de evidências — revisão de 27/11/2026
 
 Checkout oficial: C:\Users\Nitro\Downloads\Trabalho_UFU_COMMIT
 Código validado: início web não interativo da imagem e porta 2229, além das correções anteriores; 282 testes por ambiente. O commit que contém esta matriz identifica a entrega; rodadas anteriores preservadas no histórico.
@@ -14,7 +14,7 @@ no cartão S5_19 e pelo autor. IA não substitui o domínio oral do aluno.
 |---|---|---|---|
 | POO e objetos individuais — 20% | Implementado e testado | modelos.py: fábrica, subclasses, orientacoes_tratamento e recarga; tests/test_modelagem_oo.py; tests/test_integracao_poo_integridade.py | Ensaio oral do aluno ainda necessário |
 | Lista JSON de objetos — 20% | Implementado e testado | banco_dados.py: consultar_retrato e salvar; to_dict/from_dict; testes de rollback, identidade e concorrência | Retentativas limitadas, conflito e rollback validados; permissão permanente continua sendo erro |
-| Contêiner e 24h no servidor — 45% | Web Docker inicia sem stdin; execução local comprovada | CMD web, porta 2229, smoke sem terminal, cadastro/reinício fictícios e 282 testes por ambiente; VALIDACAO_INICIO_DOCKER_2229.md | Implantação docente e 24h ainda não comprovadas |
+| Contêiner e 24h no servidor — 45% | Execução superior a 24h registrada no servidor da UFU | Saída SSH do autor: contêiner 7f68bae94287, início 26/11 às 22:13:57 em Brasília; conferência 27/11 às 22:19:02, zero reinícios, healthy e HTTP 200; [VALIDACAO_24H_UFU.md](VALIDACAO_24H_UFU.md) | Disponibilidade HTTP durante todo o intervalo e relatório do monitor não auditados; imagem identificada pela tag exibida |
 | Risco próprio/efetivo — 15% | Implementado e testado | servico_risco.py e matematica/risco.py; M, v, A, b=Mv, solve, rho, condição e resíduo; oráculo manual | Índice não é probabilidade nem percentual; não inventar fatores para demonstrar POO |
 | Frontend, opções 0–14 | Layout validado no Chrome em 320/768 px nos casos registrados | 16 rotas nas duas larguras; cadastro fictício, critérios/prévia CVSS, expansão e rolagem de tabelas, Sair/Entrar; VALIDACAO_TELAS_PEQUENAS.md | Upload nativo ainda não concluído; dispositivos físicos e outros navegadores não testados |
 | Importação JSON | HTTP/testes e layout 320/768 px aprovados; upload nativo pendente | Prévia sem escrita e rejeições cobertas; página de importação medida no navegador | A validação de layout não certifica a seleção e envio pelo diálogo nativo |
@@ -119,3 +119,10 @@ encerrava. Imagem passa a iniciar a web; serviço CLI mantém menu explícito.
 Porta, iniciador, publicação e healthcheck alinhados a 2229. Smoke sem stdin
 com cadastro/CLI/reinício aprovado; 282 testes por ambiente aprovados com
 omissões de plataforma. Sete ativos preservados. Não comprova servidor ou 24h.
+
+27/11/2026, servidor da UFU: registrada a saída SSH fornecida pelo autor,
+com mais de 24 horas de execução, zero reinícios, saúde healthy e HTTP 200
+com inventário disponível na conferência final. README e operação atualizados;
+registros de 26/11 acima preservados como histórico. Não houve rebuild nem
+reinício nesta conferência. Disponibilidade HTTP integral e relatório do monitor
+não auditados. Ver VALIDACAO_24H_UFU.md.

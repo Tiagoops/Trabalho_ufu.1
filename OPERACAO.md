@@ -288,7 +288,13 @@ Windows e verifica se o arquivo mudou antes de repetir. Recusa permanente ou
 conflito continuam sendo erro. A CLI apresenta status 1 sem traceback para esses
 conflitos. Diagnóstico e resultados atuais: validacao/VALIDACAO_ETAPAS_1_4.md.
 
-## Servidor do docente — preparação, ainda sem implantação
+## Servidor do docente — operação e registro de 24 horas
+
+Em 27/11/2026, a saída SSH fornecida pelo autor confirmou mais de 24 horas
+de execução no servidor da UFU, zero reinícios, saúde `healthy` e HTTP 200
+com inventário disponível. Evidências e limites em
+[VALIDACAO_24H_UFU.md](validacao/VALIDACAO_24H_UFU.md). Os comandos abaixo
+são um modelo de implantação; a conferência não executou build nem reinício.
 
 Use `docker/compose.servidor.yaml` em checkout separado e limpo da versão
 publicada e validada. Antes, confira a instalação que já existe, contêineres,
@@ -317,21 +323,29 @@ vazia somente se ausente; `/dados` usa volume nomeado do projeto, com usuário
 importado automaticamente. Para copiar dados, valide uma cópia e combine a
 origem/destino antes de alterar o volume. Não execute `down -v`.
 
-A porta é publicada somente no loopback do servidor. Para apresentação remota,
+O modelo versionado publica a porta somente no loopback do servidor.
+Na instalação da UFU observada em 27/11, a saída do Docker mostra
+`0.0.0.0:2229->2229/tcp`; essa diferença operacional está registrada no relatório.
+Para uma instalação em loopback, na apresentação remota,
 um túnel SSH permite abrir `http://127.0.0.1:2229` no computador local:
 
 ```bash
 ssh -N -L 2229:127.0.0.1:PORTA_CONFIRMADA USUARIO@HOST
 ```
 
-Não há autenticação de usuários: a configuração não abre acesso público.
-Se o docente exigir acesso de rede, isso precisa ser combinado separadamente.
+Não há autenticação de usuários na aplicação. A publicação em loopback
+do modelo versionado não abre acesso público; a instalação observada na UFU
+publica em todas as interfaces IPv4. Firewall e controles de rede não foram
+auditados nesta conferência.
 
-O healthcheck consulta identidade e validade da base. Não há reinício automático;
-uma queda permanece visível. Antes/depois do período exigido, registre UTC,
+No modelo versionado, o healthcheck consulta identidade e validade da base
+e não há reinício automático. A política de reinício da instalação observada
+não foi conferida nesta etapa. Antes/depois do período exigido, registre UTC,
 commit, imagem, `StartedAt`, `RestartCount`, estado de saúde, logs e operações
 funcionais com dados fictícios. Reinício interrompe a evidência de execução
-contínua; saúde pontual não comprova 24h. Essa contagem ainda não foi iniciada.
+contínua; saúde pontual não comprova disponibilidade HTTP durante 24h.
+A conferência de 27/11 registrou mais de 24 horas de execução pelo `StartedAt`
+e pelo relógio do servidor; o relatório do monitor não foi analisado nesta etapa.
 
 Para interromper somente este projeto, use `docker compose -f
 docker/compose.servidor.yaml stop frontend`. Para rollback, preserve o volume e
@@ -341,7 +355,9 @@ versão usada como evidência.
 
 Validação local: projeto fictício isolado, cadastro HTTP, volume gravável, raiz
 somente leitura, healthcheck e JSON idêntico após recriar. A implantação real
-aguarda endereço, método de acesso, identificação e localização da entrega anterior.
+foi observada por saída SSH do autor em `10.0.99.150`, com usuário
+`12621CBS229`, porta 2229 e contêiner `7f68bae94287`. Consulte o relatório
+de 27/11 para os horários e o estado, sem confundir esse registro com os ensaios locais.
 
 ## Inicialização Docker e porta 2229 — revisão de 26/11/2026
 

@@ -342,7 +342,7 @@ A gravação usa temporário exclusivo no mesmo diretório, `flush`, `fsync` e `
 
 Arquivo inválido bloqueia gravações mesmo quando o backup é criado com sucesso. Revise e corrija o arquivo explicitamente e reabra o inventário; não há restauração nem limpeza automática. Se o backup falhar, o original também permanece protegido. Formato antigo e migração pendente continuam bloqueados até o procedimento explícito de migração.
 
-Gravações do inventário e da migração usam trava do sistema operacional no arquivo adjacente `.lock`, liberada ao finalizar a operação ou o processo. O arquivo permanece e não deve ser apagado enquanto houver instâncias abertas. Uma instância desatualizada recusa gravação se os bytes da base mudaram: reabra o inventário para ler a versão atual. A proteção cobre processos cooperantes no mesmo sistema operacional; não foi certificada entre o host Windows e o Linux do Docker sobre a mesma pasta, nem em sistemas de arquivos remotos. Não execute escritores nesses ambientes simultaneamente. Não há garantia contra queda de energia ou serviço de servidor por 24 horas validado. O relatório CSV usa criação exclusiva: não sobrescreve arquivos existentes nem a base, e recusa campos com fórmulas/controles de linha.
+Gravações do inventário e da migração usam trava do sistema operacional no arquivo adjacente `.lock`, liberada ao finalizar a operação ou o processo. O arquivo permanece e não deve ser apagado enquanto houver instâncias abertas. Uma instância desatualizada recusa gravação se os bytes da base mudaram: reabra o inventário para ler a versão atual. A proteção cobre processos cooperantes no mesmo sistema operacional; não foi certificada entre o host Windows e o Linux do Docker sobre a mesma pasta, nem em sistemas de arquivos remotos. Não execute escritores nesses ambientes simultaneamente. Não há garantia contra queda de energia. A execução por mais de 24 horas no servidor da UFU foi conferida em 27/11/2026; veja [evidências e limites](validacao/VALIDACAO_24H_UFU.md). O relatório CSV usa criação exclusiva: não sobrescreve arquivos existentes nem a base, e recusa campos com fórmulas/controles de linha.
 
 ## Testes
 
@@ -388,11 +388,16 @@ ID, ocorrências, dependências, avaliações e campos extras. Quem usa a API de
 consultar novamente `buscar_por_id` após `atualizar_ativo`; referências antigas
 não acompanham a substituição. Se a gravação falhar, o objeto anterior é restaurado.
 
-### Estado da entrega local
+### Estado da entrega — conferência de 27/11/2026
 
-A implantação no servidor e a comprovação de 24 horas estão adiadas por decisão
-do autor até a conclusão e revisão do frontend. Isso não equivale ao atendimento
-do requisito de hospedagem do enunciado. Há demonstração pela CLI e gestão web com dados fictícios.
+A aplicação está implantada no servidor da UFU. A saída SSH fornecida pelo autor
+mostra o mesmo contêiner em execução por mais de 24 horas, com zero reinícios,
+saúde `healthy` e HTTP 200 com inventário disponível na conferência final.
+O intervalo entre `StartedAt` e o relógio do servidor foi de 24h05min04s,
+arredondado para baixo. Veja a transcrição, os horários e os limites em
+[VALIDACAO_24H_UFU.md](validacao/VALIDACAO_24H_UFU.md). A disponibilidade HTTP
+durante todo o intervalo não foi auditada nesta conferência. Há demonstração
+pela CLI e gestão web com dados fictícios.
 Bloqueios transitórios Windows em `os.replace` agora têm retentativas limitadas
 e registradas, preservando rollback e detecção de conflito. O processo externo
 responsável pelas recusas espontâneas continua sem identificação. Veja os ensaios
@@ -528,8 +533,10 @@ e permite **Entrar novamente**. Para parar o processo local, use Ctrl+C no
 terminal; no Compose, use `stop frontend`.
 
 A interface não tem autenticação e a publicação padrão é apenas em loopback.
-Não exponha essa configuração em uma rede. A implantação na faculdade, os
-controles de acesso daquele ambiente e o teste de 24 horas seguem pendentes.
+Não exponha essa configuração em uma rede sem os controles de acesso do ambiente.
+A implantação na faculdade e a execução por mais de 24 horas estão registradas em
+[VALIDACAO_24H_UFU.md](validacao/VALIDACAO_24H_UFU.md). No servidor observado, a
+porta está publicada em `0.0.0.0:2229`; controles de rede não foram auditados.
 Veja execução local e configuração da base em [OPERACAO.md](OPERACAO.md).
 
 Referências de implementação: [templates e escape automático do Flask](https://flask.palletsprojects.com/en/stable/quickstart/#rendering-templates),
